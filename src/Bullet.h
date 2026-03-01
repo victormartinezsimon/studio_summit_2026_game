@@ -1,15 +1,12 @@
 #pragma once
 #include <utility>
+#include "WorldObject.h"
 
-class Bullet
+class Bullet:public WorldObject
 {
 public:
 	Bullet();
 
-public:
-	std::pair<unsigned int, unsigned int> GetPosition() const;
-	void SetPosition(unsigned int x, unsigned int Y);
-	
 public:
 	bool GetTeam() const;
 	void SetTeam(bool playerTeam);
@@ -20,8 +17,6 @@ public:
 
 
 private:
-	unsigned int _X;
-	unsigned int _Y;
 	float _velocityY;
 	bool _playerTeam;
 };

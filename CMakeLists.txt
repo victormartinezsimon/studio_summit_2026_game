@@ -23,6 +23,7 @@ set (HEADERS
     src/TextPainter.h
     src/InputManager.h
     src/GameConfig.h
+    src/WorldObject.h
     )
 
 set(CMAKE_CXX_STANDARD 20)
