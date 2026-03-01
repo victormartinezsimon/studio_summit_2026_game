@@ -4,11 +4,17 @@
 class WorldObject
 {
 public:
-	std::pair<unsigned int, unsigned int> GetPosition() const
+	float GetX() const
 	{
-		return { _X, _Y };
+		return _X;
 	}
-	void SetPosition(unsigned int x, unsigned int y)
+
+	float GetY() const
+	{
+		return _Y;
+	}
+
+	void SetPosition(float x, float y)
 	{
 		_X = x;
 		_Y = y;
@@ -31,18 +37,18 @@ public:
 
 public:
 public:
-	bool GetTeam() const
+	bool GetPlayerTeam() const
 	{
 		return _playerTeam;
 	}
-	void SetTeam(bool playerTeam)
+	void SetPlayerTeam(bool playerTeam)
 	{
 		_playerTeam = playerTeam;
 	}
 
 protected:
-	unsigned int _X = 0;
-	unsigned int _Y = 0;
+	float _X = 0;
+	float _Y = 0;
 	unsigned int _width = 0;
 	unsigned int _height = 0;
 
