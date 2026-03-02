@@ -14,12 +14,24 @@ public:
 
 public:
 	void BeginPaint();
-	void Paint();
 	void EndPaint();
+
+public:
+	void PaintBackground();
+	void PaintPlayer(Plane* player);
+	void PaintEnemy(Plane* enemy);
+
+private:
+	void PaintPlane(Plane* player, raylib::Texture& texture);
 
 public:
 	bool HasEnded();
 
 private:
 	raylib::Window _window;
+
+	raylib::Texture _player;
+	raylib::Texture _enemy;
+	raylib::Texture _background;
+	raylib::Texture _bullet;
 };
