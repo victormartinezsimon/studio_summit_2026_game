@@ -1,6 +1,6 @@
 #include "Plane.h"
 
-void Plane::SetCallbackFire(std::function<void(int)> fun)
+void Plane::SetCallbackFire(std::function<void(int, Plane*)> fun)
 {
 	_callbackFire = fun;
 }
@@ -33,7 +33,7 @@ void Plane::Update(const float deltaTime)
 	{
 		for (int i = 0; i < _bulletsToFire; ++i)
 		{
-			_callbackFire(i);
+			_callbackFire(i, this);
 		}
 		_currentAcumTime = 0;
 	}

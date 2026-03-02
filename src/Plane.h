@@ -8,7 +8,7 @@ public:
 	void Update(const float deltaTime);
 
 public:
-	void SetCallbackFire(std::function<void(int)> fun);
+	void SetCallbackFire(std::function<void(int, Plane*)> fun);
 
 public:
 	void SetFireRate(float fireRate);
@@ -24,7 +24,7 @@ public:
 	bool IsImmune() const;
 
 private:
-	std::function<void(int)> _callbackFire;
+	std::function<void(int, Plane*)> _callbackFire;
 	float _fireRate = 0;
 	float _bulletsToFire = 1;
 	unsigned int _lives = 0;
