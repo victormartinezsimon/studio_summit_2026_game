@@ -8,6 +8,7 @@ class Plane;
 class TextPainter
 {
 public:
+	void BuildScreen();
 	void Paint();
 	void ClearScreen();
 

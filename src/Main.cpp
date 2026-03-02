@@ -9,18 +9,6 @@
 #include "Plane.h"
 #include "TextPainter.h"
 
-#include <windows.h>
-void setConsoleSize(short width, short height) {
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-	// Tamaño del buffer
-	COORD bufferSize = { width, height };
-	SetConsoleScreenBufferSize(hConsole, bufferSize);
-
-	// Tamaño de la ventana
-	SMALL_RECT windowSize = { 0, 0, width - 1, height - 1 };
-	SetConsoleWindowInfo(hConsole, TRUE, &windowSize);
-}
 
 std::vector<Bullet*> InitTestBullets(Pool<Bullet, BULLETS_POOL_SIZE>& bulletPool)
 {
@@ -47,14 +35,13 @@ std::vector<Bullet*> InitTestBullets(Pool<Bullet, BULLETS_POOL_SIZE>& bulletPool
 
 int main()
 {
-	setConsoleSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-
 	Pool<Bullet, BULLETS_POOL_SIZE> bulletPool;
 	Pool<Plane, PLANES_POOL_SIZE> enemiesPool;
 
 	std::vector<Bullet*> currentBullets = InitTestBullets(bulletPool);
 
-	TextPainter painter;
+	TextPainter* painter = new TextPainter();
+	painter->BuildScreen();
 
 	int milliseconds = 1000/30;
 
@@ -89,12 +76,12 @@ int main()
 			}
 		}
 
-		painter.ClearScreen();
+		painter->ClearScreen();
 		for (auto&& b : currentBullets)
 		{
-			painter.PaintBullet(b);
+			painter->PaintBullet(b);
 		}
-		painter.Paint();
+		painter->Paint();
 		std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
 	}
 

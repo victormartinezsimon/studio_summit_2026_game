@@ -2,6 +2,21 @@
 #include "Plane.h"
 #include "Bullet.h"
 #include <iostream>
+#include <windows.h>
+
+void TextPainter::BuildScreen()
+{
+	
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	// Tamaño del buffer
+	COORD bufferSize = { SCREEN_WIDTH, SCREEN_HEIGHT };
+	SetConsoleScreenBufferSize(hConsole, bufferSize);
+
+	// Tamaño de la ventana
+	SMALL_RECT windowSize = { 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1 };
+	SetConsoleWindowInfo(hConsole, TRUE, &windowSize);
+}
 
 void TextPainter::Paint()
 {

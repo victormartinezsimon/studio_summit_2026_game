@@ -49,6 +49,8 @@ public:
 		free_.push_back(obj);
 	}
 
+	
+
 private:
 	std::list<T*> free_;
 	std::list<T*> used_;
