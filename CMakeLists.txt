@@ -30,11 +30,15 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)  
 
+find_path(RAYLIB_CPP_INCLUDE_DIRS "raylib-cpp.hpp")
+
+
 if (WIN32)
 
     source_group("Headers" FILES ${HEADERS} )
     source_group("Sources" FILES ${SOURCES} )
     add_executable(StudioSubmitGame ${SOURCES} ${HEADERS} )
+    target_include_directories(StudioSubmitGame PRIVATE ${RAYLIB_CPP_INCLUDE_DIRS})
 
 elseif (UNIX)
 
@@ -44,12 +48,15 @@ elseif (UNIX)
 
     source_group("Headers" FILES ${HEADERS} )
     source_group("Sources" FILES ${SOURCES} )
+    target_include_directories(StudioSubmitGame PRIVATE ${RAYLIB_CPP_INCLUDE_DIRS})
+
     add_executable(StudioSubmitGame ${SOURCES} ${HEADERS} )
 
     target_link_libraries(StudioSubmitGame ${PLATFORM_LIBS})
 
 endif()
 
+target_link_libraries(StudioSubmitGame PRIVATE raylib)
 target_compile_features(StudioSubmitGame PRIVATE cxx_std_20)
 
 message(STATUS "CMAKE Ended ")
