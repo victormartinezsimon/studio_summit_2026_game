@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 #include "GameConfig.h"
-#include "raylib-cpp.hpp"
+#include "raylib.h"
 
 
 class Bullet;
@@ -11,6 +11,7 @@ class RaylibPainter
 {
 public:
 	RaylibPainter();
+	~RaylibPainter();
 
 public:
 	void BeginPaint();
@@ -24,16 +25,18 @@ public:
 	void PaintBullet(Bullet* bullet);
 
 private:
-	void PaintPlane(Plane* player, raylib::Texture& texture);
+	void PaintPlane(Plane* player, Texture2D& texture);
 
 public:
 	bool HasEnded();
 
 private:
-	raylib::Window _window;
+	
+	//raylib::Window _window;
 
-	raylib::Texture _player;
-	raylib::Texture _enemy;
-	raylib::Texture _background;
-	raylib::Texture _bullet;
+	Texture2D _player;
+	Texture2D _enemy;
+	Texture2D _background;
+	Texture2D _bullet;
+	
 };
