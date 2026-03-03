@@ -1,0 +1,67 @@
+name: CI — Linux Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      BUILD_TYPE: Release
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+
+    steps:
+      # 1. Checkout your repo (with submodules if you have any)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      # 2. Install system dependencies required by vcpkg / your packages
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            curl \
+            zip \
+            unzip \
+            tar \
+            pkg-config \
+            ninja-build
+
+      # 3. Clone vcpkg (skip if it is already a submodule in your repo)
+      - name: Clone vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+          "$VCPKG_ROOT/bootstrap-vcpkg.sh" -disableMetrics
+
+      # 4. Cache the vcpkg binary cache to speed up subsequent runs
+      - name: Cache vcpkg packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/vcpkg
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-
+
+      # 5. Configure with CMake — vcpkg toolchain is injected automatically
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
+            -G Ninja
+
+      # 6. Build
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
+      # 7. (Optional) Run your tests if you have CTest set up
+      - name: Run tests
+        working-directory: build
+        run: ctest --output-on-failure --build-config ${{ env.BUILD_TYPE }}
