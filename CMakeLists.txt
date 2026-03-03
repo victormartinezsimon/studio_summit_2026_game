@@ -48,7 +48,26 @@ if (raylib_FOUND)
 
     target_link_libraries(StudioSummitGame PRIVATE raylib)
 
-    # only need heaers
+    # --- FIX: link GLFW explicitly when using raylib as static lib from vcpkg ---
+    find_package(glfw3 CONFIG QUIET)
+    if (glfw3_FOUND)
+        message(STATUS "glfw3 found via vcpkg config")
+        target_link_libraries(StudioSummitGame PRIVATE glfw)
+    else()
+        find_library(GLFW_LIB glfw PATHS
+            ${CMAKE_SOURCE_DIR}/vcpkg_installed/arm64-linux/debug/lib
+            ${CMAKE_SOURCE_DIR}/vcpkg_installed/arm64-linux/lib
+        )
+        if (GLFW_LIB)
+            message(STATUS "glfw3 found as static lib: ${GLFW_LIB}")
+            target_link_libraries(StudioSummitGame PRIVATE ${GLFW_LIB})
+        else()
+            message(WARNING "glfw3 not found via config or lib search — linker errors may occur")
+        endif()
+    endif()
+    # --------------------------------------------------------------------------
+
+    # only need headers
     find_path(RAYLIB_CPP_INCLUDE_DIR
         NAMES raylib-cpp.hpp
     )
@@ -86,6 +105,10 @@ endif()
 # ==============================
 
 if (UNIX AND NOT APPLE)
+
+    # OpenGL and system libs needed on Linux/Pi
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(StudioSummitGame PRIVATE OpenGL::GL dl m pthread)
 
     # Raspberry Pi / ARM need atomic
     if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm" OR
