@@ -38,6 +38,11 @@ set(HEADERS
 add_executable(StudioSummitGame ${SOURCES} ${HEADERS})
 
 target_compile_features(StudioSummitGame PRIVATE cxx_std_20)
+#target_include_directories(StudioSummitGame PRIVATE ${CMAKE_SOURCE_DIR}/SDK/include)
+
+#target_link_directories(StudioSummitGame PRIVATE ${CMAKE_SOURCE_DIR}/SDK/lib)
+#target_link_libraries(StudioSummitGame PRIVATE sandpiper)
+
 
 # ==============================
 # raylib with vcpkg
