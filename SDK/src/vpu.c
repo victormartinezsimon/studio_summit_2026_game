@@ -1,0 +1,1191 @@
+#include <sys/ioctl.h> // For ioctl
+#include <stdio.h> // For perror
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <fcntl.h>
+
+#include "core.h"
+#include "vpu.h"
+
+#define SP_IOCTL_VIDEO_READ			_IOR('k', 5, void*)
+#define SP_IOCTL_VIDEO_WRITE		_IOW('k', 6, void*)
+#define SP_IOCTL_PALETTE_READ		_IOR('k', 9, void*)
+#define SP_IOCTL_PALETTE_WRITE		_IOW('k', 10, void*)
+
+
+// Video mode control word
+#define MAKEVMODEINFO(_cmode, _vmode, _scanlineDoubleEnable, _scanEnable) ((_scanlineDoubleEnable&0x1)<<3) | ((_cmode&0x1)<<2) | ((_vmode&0x1)<<1) | (_scanEnable&0x1)
+
+/*
+ * Resident font data aligned to 16 bytes for optimal access.
+ */
+static const uint8_t residentfont[] __attribute__((aligned(16))) = {
+0x00, 0xe7, 0xe7, 0xc6, 0x01, 0x83, 0x01, 0x00, 0xff, 0x00, 0xff, 0xf0, 0xc3, 0xf3, 0xf7, 0x81, 
+0x00, 0x18, 0xff, 0xef, 0x83, 0xc7, 0x83, 0x00, 0xff, 0xc3, 0x3c, 0x70, 0x66, 0x33, 0x36, 0xbd, 
+0x00, 0x5a, 0xbd, 0xef, 0xc7, 0x83, 0xc7, 0x81, 0x7e, 0x66, 0x99, 0xf0, 0x66, 0xf3, 0xf7, 0xc3, 
+0x00, 0x18, 0xff, 0xef, 0xef, 0xef, 0xef, 0xc3, 0x3c, 0x24, 0xdb, 0xd7, 0x66, 0x03, 0x36, 0x7e, 
+0x00, 0xdb, 0x3c, 0xc7, 0xc7, 0xef, 0xef, 0xc3, 0x3c, 0x24, 0xdb, 0xcc, 0xc3, 0x03, 0x36, 0x7e, 
+0x00, 0x99, 0x7e, 0x83, 0x83, 0x6d, 0xc7, 0x81, 0x7e, 0x66, 0x99, 0xcc, 0x81, 0x07, 0x76, 0xc3, 
+0x00, 0x18, 0xff, 0x01, 0x01, 0x01, 0x01, 0x00, 0xff, 0xc3, 0x3c, 0xcc, 0xe7, 0x0f, 0x6e, 0xbd, 
+0x00, 0xe7, 0xe7, 0x00, 0x00, 0x83, 0x83, 0x00, 0xff, 0x00, 0xff, 0x87, 0x81, 0x0e, 0x0c, 0x81, 
+0x08, 0x20, 0x81, 0x66, 0xf7, 0xe3, 0x00, 0x81, 0x81, 0x81, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+0x0e, 0xe0, 0xc3, 0x66, 0xbd, 0x16, 0x00, 0xc3, 0xc3, 0x81, 0x81, 0x03, 0x00, 0x42, 0x81, 0xff, 
+0x8f, 0xe3, 0xe7, 0x66, 0xbd, 0xc3, 0x00, 0xe7, 0xe7, 0x81, 0xc0, 0x06, 0x0c, 0x66, 0xc3, 0xff, 
+0xef, 0xef, 0x81, 0x66, 0xb7, 0x66, 0x00, 0x81, 0x81, 0x81, 0xef, 0xef, 0x0c, 0xff, 0xe7, 0xe7, 
+0x8f, 0xe3, 0x81, 0x66, 0xb1, 0x66, 0xe7, 0xe7, 0x81, 0xe7, 0xc0, 0x06, 0x0c, 0x66, 0xff, 0xc3, 
+0x0e, 0xe0, 0xe7, 0x00, 0xb1, 0xc3, 0xe7, 0xc3, 0x81, 0xc3, 0x81, 0x03, 0xef, 0x42, 0xff, 0x81, 
+0x08, 0x20, 0xc3, 0x66, 0xb1, 0x68, 0xe7, 0x81, 0x81, 0x81, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+0x00, 0x00, 0x81, 0x00, 0x00, 0xc7, 0x00, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+0x00, 0x81, 0x66, 0xc6, 0x81, 0x00, 0x83, 0x81, 0xc0, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x60, 
+0x00, 0xc3, 0x66, 0xc6, 0xe3, 0x6c, 0xc6, 0x81, 0x81, 0x81, 0x66, 0x81, 0x00, 0x00, 0x00, 0xc0, 
+0x00, 0xc3, 0x42, 0xef, 0x06, 0xcc, 0x83, 0x03, 0x03, 0xc0, 0xc3, 0x81, 0x00, 0x00, 0x00, 0x81, 
+0x00, 0x81, 0x00, 0xc6, 0xc3, 0x81, 0x67, 0x00, 0x03, 0xc0, 0xff, 0xe7, 0x00, 0xe7, 0x00, 0x03, 
+0x00, 0x81, 0x00, 0xef, 0x60, 0x03, 0xcd, 0x00, 0x03, 0xc0, 0xc3, 0x81, 0x00, 0x00, 0x00, 0x06, 
+0x00, 0x00, 0x00, 0xc6, 0xc7, 0x66, 0xcc, 0x00, 0x81, 0x81, 0x66, 0x81, 0x81, 0x00, 0x81, 0x0c, 
+0x00, 0x81, 0x00, 0xc6, 0x81, 0x6c, 0x67, 0x00, 0xc0, 0x03, 0x00, 0x00, 0x81, 0x00, 0x81, 0x08, 
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 
+0x83, 0x81, 0xc7, 0xc7, 0xc1, 0xef, 0x83, 0xef, 0xc7, 0xc7, 0x00, 0x00, 0x60, 0x00, 0x06, 0xc7, 
+0xc6, 0x83, 0x6c, 0x6c, 0xc3, 0x0c, 0x06, 0x6c, 0x6c, 0x6c, 0x81, 0x81, 0xc0, 0x00, 0x03, 0x6c, 
+0x6c, 0x81, 0x60, 0x60, 0xc6, 0x0c, 0x0c, 0xc0, 0x6c, 0x6c, 0x81, 0x81, 0x81, 0xe7, 0x81, 0xc0, 
+0x6d, 0x81, 0xc1, 0xc3, 0xcc, 0xcf, 0xcf, 0x81, 0xc7, 0xe7, 0x00, 0x00, 0x03, 0x00, 0xc0, 0x81, 
+0x6c, 0x81, 0x03, 0x60, 0xef, 0x60, 0x6c, 0x03, 0x6c, 0x60, 0x00, 0x00, 0x81, 0x00, 0x81, 0x81, 
+0xc6, 0x81, 0x66, 0x6c, 0xc0, 0x6c, 0x6c, 0x03, 0x6c, 0xc0, 0x81, 0x81, 0xc0, 0xe7, 0x03, 0x00, 
+0x83, 0xe7, 0xef, 0xc7, 0xe1, 0xc7, 0xc7, 0x03, 0xc7, 0x87, 0x81, 0x81, 0x60, 0x00, 0x06, 0x81, 
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 
+0xc7, 0x83, 0xcf, 0xc3, 0x8f, 0xef, 0xef, 0xc3, 0x6c, 0xc3, 0xe1, 0x6e, 0x0f, 0x6c, 0x6c, 0xc7, 
+0x6c, 0xc6, 0x66, 0x66, 0xc6, 0x26, 0x26, 0x66, 0x6c, 0x81, 0xc0, 0x66, 0x06, 0xee, 0x6e, 0x6c, 
+0xed, 0x6c, 0x66, 0x0c, 0x66, 0x86, 0x86, 0x0c, 0x6c, 0x81, 0xc0, 0xc6, 0x06, 0xef, 0x6f, 0x6c, 
+0xed, 0xef, 0xc7, 0x0c, 0x66, 0x87, 0x87, 0x0c, 0xef, 0x81, 0xc0, 0x87, 0x06, 0xef, 0xed, 0x6c, 
+0xed, 0x6c, 0x66, 0x0c, 0x66, 0x86, 0x86, 0xec, 0x6c, 0x81, 0xcc, 0xc6, 0x26, 0x6d, 0xec, 0x6c, 
+0x0c, 0x6c, 0x66, 0x66, 0xc6, 0x26, 0x06, 0x66, 0x6c, 0x81, 0xcc, 0x66, 0x66, 0x6c, 0x6c, 0x6c, 
+0x87, 0x6c, 0xcf, 0xc3, 0x8f, 0xef, 0x0f, 0xa3, 0x6c, 0xc3, 0x87, 0x6e, 0xef, 0x6c, 0x6c, 0xc7, 
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+0xcf, 0xc7, 0xcf, 0xc3, 0xe7, 0x6c, 0x6c, 0x6c, 0x6c, 0x66, 0xef, 0xc3, 0x0c, 0xc3, 0x01, 0x00, 
+0x66, 0x6c, 0x66, 0x66, 0xe7, 0x6c, 0x6c, 0x6c, 0x6c, 0x66, 0x6c, 0x03, 0x06, 0xc0, 0x83, 0x00, 
+0x66, 0x6c, 0x66, 0x03, 0xa5, 0x6c, 0x6c, 0x6c, 0xc6, 0x66, 0xc8, 0x03, 0x03, 0xc0, 0xc6, 0x00, 
+0xc7, 0x6c, 0xc7, 0x81, 0x81, 0x6c, 0x6c, 0x6d, 0x83, 0xc3, 0x81, 0x03, 0x81, 0xc0, 0x6c, 0x00, 
+0x06, 0x6c, 0xc6, 0xc0, 0x81, 0x6c, 0x6c, 0x6d, 0xc6, 0x81, 0x23, 0x03, 0xc0, 0xc0, 0x00, 0x00, 
+0x06, 0xec, 0x66, 0x66, 0x81, 0x6c, 0xc6, 0xef, 0x6c, 0x81, 0x66, 0x03, 0x60, 0xc0, 0x00, 0x00, 
+0x0f, 0xc7, 0x6e, 0xc3, 0xc3, 0xc7, 0x83, 0xc6, 0x6c, 0xc3, 0xef, 0xc3, 0x20, 0xc3, 0x00, 0x00, 
+0x00, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 
+0x03, 0x00, 0x0e, 0x00, 0xc1, 0x00, 0xc3, 0x00, 0x0e, 0x81, 0x60, 0x0e, 0x83, 0x00, 0x00, 0x00, 
+0x81, 0x00, 0x06, 0x00, 0xc0, 0x00, 0x66, 0x00, 0x06, 0x00, 0x00, 0x06, 0x81, 0x00, 0x00, 0x00, 
+0xc0, 0x87, 0xc7, 0xc7, 0xc7, 0xc7, 0x06, 0x67, 0xc6, 0x83, 0x60, 0x66, 0x81, 0xce, 0xcd, 0xc7, 
+0x00, 0xc0, 0x66, 0x6c, 0xcc, 0x6c, 0x8f, 0xcc, 0x67, 0x81, 0x60, 0xc6, 0x81, 0xef, 0x66, 0x6c, 
+0x00, 0xc7, 0x66, 0x0c, 0xcc, 0xef, 0x06, 0xcc, 0x66, 0x81, 0x60, 0x87, 0x81, 0x6d, 0x66, 0x6c, 
+0x00, 0xcc, 0x66, 0x6c, 0xcc, 0x0c, 0x06, 0xc7, 0x66, 0x81, 0x66, 0xc6, 0x81, 0x6d, 0x66, 0x6c, 
+0x00, 0x67, 0xcd, 0xc7, 0x67, 0xc7, 0x0f, 0xc0, 0x6e, 0xc3, 0x66, 0x6e, 0xc3, 0x6d, 0x66, 0xc7, 
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x8f, 0x00, 0x00, 0xc3, 0x00, 0x00, 0x00, 0x00, 0x00, 
+0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0x81, 0x07, 0x67, 0x00, 
+0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x81, 0x81, 0x81, 0xcd, 0x01, 
+0xcd, 0x67, 0xcd, 0xe7, 0xcf, 0xcc, 0x6c, 0x6c, 0x6c, 0x6c, 0xe7, 0x81, 0x81, 0x81, 0x00, 0x83, 
+0x66, 0xcc, 0x67, 0x0c, 0x03, 0xcc, 0x6c, 0x6d, 0xc6, 0x6c, 0xc4, 0x07, 0x81, 0xe0, 0x00, 0xc6, 
+0x66, 0xcc, 0x06, 0xc7, 0x03, 0xcc, 0x6c, 0x6d, 0x83, 0x6c, 0x81, 0x81, 0x81, 0x81, 0x00, 0x6c, 
+0xc7, 0xc7, 0x06, 0x60, 0x63, 0xcc, 0xc6, 0xef, 0xc6, 0xe7, 0x23, 0x81, 0x81, 0x81, 0x00, 0x6c, 
+0x06, 0xc0, 0x0f, 0xcf, 0xc1, 0x67, 0x83, 0xc6, 0x6c, 0x60, 0xe7, 0xe0, 0x81, 0x07, 0x00, 0xef, 
+0x0f, 0xe1, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xcf, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+0xc7, 0xcc, 0xc0, 0xc7, 0x6c, 0x03, 0x03, 0x00, 0xc7, 0x6c, 0x03, 0x66, 0xc7, 0x03, 0x6c, 0x83, 
+0x6c, 0x00, 0x81, 0x28, 0x00, 0x81, 0x03, 0x00, 0x28, 0x00, 0x81, 0x00, 0x28, 0x81, 0x83, 0xc6, 
+0x0c, 0xcc, 0xc7, 0x87, 0x87, 0x87, 0x87, 0xe7, 0xc7, 0xc7, 0xc7, 0x83, 0x83, 0x00, 0xc6, 0xc7, 
+0x0c, 0xcc, 0x6c, 0xc0, 0xc0, 0xc0, 0xc0, 0x0c, 0x6c, 0x6c, 0x6c, 0x81, 0x81, 0x83, 0x6c, 0x6c, 
+0x6c, 0xcc, 0xef, 0xc7, 0xc7, 0xc7, 0xc7, 0x0c, 0xef, 0xef, 0xef, 0x81, 0x81, 0x81, 0xef, 0xef, 
+0xc7, 0xcc, 0x0c, 0xcc, 0xcc, 0xcc, 0xcc, 0xe7, 0x0c, 0x0c, 0x0c, 0x81, 0x81, 0x81, 0x6c, 0x6c, 
+0xc0, 0x67, 0xc7, 0x67, 0x67, 0x67, 0x67, 0xc0, 0xc7, 0xc7, 0xc7, 0xc3, 0xc3, 0xc3, 0x6c, 0x6c, 
+0x87, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x83, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+0x81, 0x00, 0xe3, 0xc7, 0x6c, 0x03, 0x87, 0x06, 0x6c, 0x6c, 0x6c, 0x81, 0x83, 0x66, 0x8f, 0xe0, 
+0x03, 0x00, 0xc6, 0x28, 0x00, 0x81, 0x48, 0x03, 0x00, 0x83, 0x00, 0x81, 0xc6, 0x66, 0xcc, 0xb1, 
+0xef, 0xe7, 0xcc, 0xc7, 0xc7, 0xc7, 0x00, 0xcc, 0x6c, 0xc6, 0x6c, 0xe7, 0x46, 0xc3, 0xcc, 0x81, 
+0x0c, 0x81, 0xef, 0x6c, 0x6c, 0x6c, 0xcc, 0xcc, 0x6c, 0x6c, 0x6c, 0x0c, 0x0f, 0xe7, 0xaf, 0xc3, 
+0x8f, 0xe7, 0xcc, 0x6c, 0x6c, 0x6c, 0xcc, 0xcc, 0x6c, 0x6c, 0x6c, 0x0c, 0x06, 0x81, 0x6c, 0x81, 
+0x0c, 0x8d, 0xcc, 0x6c, 0x6c, 0x6c, 0xcc, 0xcc, 0xe7, 0xc6, 0x6c, 0xe7, 0x66, 0xe7, 0xfc, 0x8d, 
+0xef, 0xe7, 0xec, 0xc7, 0xc7, 0xc7, 0x67, 0x67, 0x60, 0x83, 0xc7, 0x81, 0xcf, 0x81, 0x6c, 0x07, 
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xcf, 0x00, 0x00, 0x81, 0x00, 0x81, 0x7c, 0x00, 
+0x81, 0xc0, 0xc0, 0x81, 0x67, 0x67, 0xc3, 0x83, 0x81, 0x00, 0x00, 0x36, 0x36, 0x81, 0x00, 0x00, 
+0x03, 0x81, 0x81, 0x03, 0xcd, 0xcd, 0xc6, 0xc6, 0x00, 0x00, 0x00, 0x6e, 0x6e, 0x00, 0x33, 0xcc, 
+0x87, 0x00, 0xc7, 0xcc, 0x00, 0x00, 0xc6, 0xc6, 0x81, 0x00, 0x00, 0xc6, 0xc6, 0x81, 0x66, 0x66, 
+0xc0, 0x83, 0x6c, 0xcc, 0xcd, 0x6e, 0xe3, 0x83, 0x81, 0xef, 0xef, 0xe7, 0xa7, 0x81, 0xcc, 0x33, 
+0xc7, 0x81, 0x6c, 0xcc, 0x66, 0x6f, 0x00, 0x00, 0x03, 0x0c, 0x60, 0x33, 0x63, 0xc3, 0x66, 0x66, 
+0xcc, 0x81, 0x6c, 0xcc, 0x66, 0xed, 0xe7, 0xc7, 0x36, 0x0c, 0x60, 0x66, 0xa6, 0xc3, 0x33, 0xcc, 
+0x67, 0xc3, 0xc7, 0x67, 0x66, 0xec, 0x00, 0x00, 0xe3, 0x00, 0x00, 0xcc, 0xfd, 0x81, 0x00, 0x00, 
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x60, 0x00, 0x00, 0x00, 
+0x22, 0x55, 0x77, 0x81, 0x81, 0x81, 0x63, 0x00, 0x00, 0x63, 0x63, 0x00, 0x63, 0x63, 0x81, 0x00, 
+0x88, 0xaa, 0xdd, 0x81, 0x81, 0x81, 0x63, 0x00, 0x00, 0x63, 0x63, 0x00, 0x63, 0x63, 0x81, 0x00, 
+0x22, 0x55, 0x77, 0x81, 0x81, 0x8f, 0x63, 0x00, 0x8f, 0x6f, 0x63, 0xef, 0x6f, 0x63, 0x8f, 0x00, 
+0x88, 0xaa, 0xdd, 0x81, 0x81, 0x81, 0x63, 0x00, 0x81, 0x60, 0x63, 0x60, 0x60, 0x63, 0x81, 0x00, 
+0x22, 0x55, 0x77, 0x81, 0x8f, 0x8f, 0x6f, 0xef, 0x8f, 0x6f, 0x63, 0x6f, 0xef, 0xef, 0x8f, 0x8f, 
+0x88, 0xaa, 0xdd, 0x81, 0x81, 0x81, 0x63, 0x63, 0x81, 0x63, 0x63, 0x63, 0x00, 0x00, 0x00, 0x81, 
+0x22, 0x55, 0x77, 0x81, 0x81, 0x81, 0x63, 0x63, 0x81, 0x63, 0x63, 0x63, 0x00, 0x00, 0x00, 0x81, 
+0x88, 0xaa, 0xdd, 0x81, 0x81, 0x81, 0x63, 0x63, 0x81, 0x63, 0x63, 0x63, 0x00, 0x00, 0x00, 0x81, 
+0x81, 0x81, 0x00, 0x81, 0x00, 0x81, 0x81, 0x63, 0x63, 0x00, 0x63, 0x00, 0x63, 0x00, 0x63, 0x81, 
+0x81, 0x81, 0x00, 0x81, 0x00, 0x81, 0x81, 0x63, 0x63, 0x00, 0x63, 0x00, 0x63, 0x00, 0x63, 0x81, 
+0x81, 0x81, 0x00, 0x81, 0x00, 0x81, 0xf1, 0x63, 0x73, 0xf3, 0x7f, 0xff, 0x73, 0xff, 0x7f, 0xff, 
+0x81, 0x81, 0x00, 0x81, 0x00, 0x81, 0x81, 0x63, 0x03, 0x03, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 
+0xf1, 0xff, 0xff, 0xf1, 0xff, 0xff, 0xf1, 0x73, 0xf3, 0x73, 0xff, 0x7f, 0x73, 0xff, 0x7f, 0xff, 
+0x00, 0x00, 0x81, 0x81, 0x00, 0x81, 0x81, 0x63, 0x00, 0x63, 0x00, 0x63, 0x63, 0x00, 0x63, 0x00, 
+0x00, 0x00, 0x81, 0x81, 0x00, 0x81, 0x81, 0x63, 0x00, 0x63, 0x00, 0x63, 0x63, 0x00, 0x63, 0x00, 
+0x00, 0x00, 0x81, 0x81, 0x00, 0x81, 0x81, 0x63, 0x00, 0x63, 0x00, 0x63, 0x63, 0x00, 0x63, 0x00, 
+0x63, 0x00, 0x00, 0x63, 0x81, 0x00, 0x00, 0x63, 0x81, 0x81, 0x00, 0xff, 0x00, 0x0f, 0xf0, 0xff, 
+0x63, 0x00, 0x00, 0x63, 0x81, 0x00, 0x00, 0x63, 0x81, 0x81, 0x00, 0xff, 0x00, 0x0f, 0xf0, 0xff, 
+0x63, 0xff, 0x00, 0x63, 0xf1, 0xf1, 0x00, 0x63, 0xff, 0x81, 0x00, 0xff, 0x00, 0x0f, 0xf0, 0xff, 
+0x63, 0x00, 0x00, 0x63, 0x81, 0x81, 0x00, 0x63, 0x81, 0x81, 0x00, 0xff, 0x00, 0x0f, 0xf0, 0xff, 
+0xff, 0xff, 0xff, 0xf3, 0xf1, 0xf1, 0xf3, 0xff, 0xff, 0x8f, 0xf1, 0xff, 0xff, 0x0f, 0xf0, 0x00, 
+0x00, 0x81, 0x63, 0x00, 0x00, 0x81, 0x63, 0x63, 0x81, 0x00, 0x81, 0xff, 0xff, 0x0f, 0xf0, 0x00, 
+0x00, 0x81, 0x63, 0x00, 0x00, 0x81, 0x63, 0x63, 0x81, 0x00, 0x81, 0xff, 0xff, 0x0f, 0xf0, 0x00, 
+0x00, 0x81, 0x63, 0x00, 0x00, 0x81, 0x63, 0x63, 0x81, 0x00, 0x81, 0xff, 0xff, 0x0f, 0xf0, 0x00, 
+0x00, 0x87, 0xef, 0x00, 0xef, 0x00, 0x00, 0x00, 0xe7, 0x83, 0x83, 0xe0, 0x00, 0x60, 0xe1, 0x00, 
+0x00, 0xcc, 0x6c, 0x00, 0x6c, 0x00, 0x00, 0x67, 0x81, 0xc6, 0xc6, 0x81, 0x00, 0xc0, 0x03, 0xc7, 
+0x67, 0xcc, 0x0c, 0xef, 0x06, 0xe7, 0x66, 0xcd, 0xc3, 0x6c, 0x6c, 0xc0, 0xe7, 0xe7, 0x06, 0x6c, 
+0xcd, 0x8d, 0x0c, 0xc6, 0x03, 0x8d, 0x66, 0x81, 0x66, 0xef, 0x6c, 0xe3, 0xbd, 0xbd, 0xe7, 0x6c, 
+0x8c, 0xcc, 0x0c, 0xc6, 0x06, 0x8d, 0x66, 0x81, 0x66, 0x6c, 0xc6, 0x66, 0xbd, 0xbd, 0x06, 0x6c, 
+0xcd, 0x6c, 0x0c, 0xc6, 0x6c, 0x8d, 0x66, 0x81, 0xc3, 0xc6, 0xc6, 0x66, 0xe7, 0xe7, 0x03, 0x6c, 
+0x67, 0xcc, 0x0c, 0xc6, 0xef, 0x07, 0xc7, 0x81, 0x81, 0x83, 0xee, 0xc3, 0x00, 0x06, 0xe1, 0x6c, 
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x00, 0xe7, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00, 
+0x00, 0x81, 0x03, 0xc0, 0xe0, 0x81, 0x00, 0x00, 0x83, 0x00, 0x00, 0xf0, 0xc6, 0x87, 0x00, 0x00, 
+0xef, 0x81, 0x81, 0x81, 0xb1, 0x81, 0x81, 0x67, 0xc6, 0x00, 0x00, 0xc0, 0x63, 0xc0, 0x00, 0x00, 
+0x00, 0xe7, 0xc0, 0x03, 0xb1, 0x81, 0x00, 0xcd, 0xc6, 0x00, 0x00, 0xc0, 0x63, 0x81, 0xc3, 0x00, 
+0xef, 0x81, 0x81, 0x81, 0x81, 0x81, 0xe7, 0x00, 0x83, 0x81, 0x81, 0xc0, 0x63, 0x03, 0xc3, 0x00, 
+0x00, 0x81, 0x03, 0xc0, 0x81, 0x81, 0x00, 0x67, 0x00, 0x81, 0x00, 0xce, 0x63, 0xc7, 0xc3, 0x00, 
+0xef, 0x00, 0x00, 0x00, 0x81, 0x8d, 0x81, 0xcd, 0x00, 0x00, 0x00, 0xc6, 0x00, 0x00, 0xc3, 0x00, 
+0x00, 0xe7, 0xe7, 0xe7, 0x81, 0x8d, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc3, 0x00, 0x00, 0x00, 0x00, 
+0x00, 0x00, 0x00, 0x00, 0x81, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc1, 0x00, 0x00, 0x00, 0x00};
+
+/*
+ * Lookup table for expanding 8-bit values to 32-bit values with repeated patterns.
+ * Each entry corresponds to a specific bit pattern expansion used in the VPU.
+ */
+static const uint32_t quadexpand[] __attribute__((aligned(16))) = {
+	0x00000000, 0xFF000000, 0x00FF0000, 0xFFFF0000,
+	0x0000FF00, 0xFF00FF00, 0x00FFFF00, 0xFFFFFF00,
+	0x000000FF, 0xFF0000FF, 0x00FF00FF, 0xFFFF00FF,
+	0x0000FFFF, 0xFF00FFFF, 0x00FFFFFF, 0xFFFFFFFF,
+};
+
+/*
+ * VGA palette lookup table aligned to 16 bytes.
+ * Contains 256 entries of 32-bit color values used for rendering.
+ */
+static const uint32_t vgapalette[] __attribute__((aligned(16))) = {
+	0x00000000, 0x000002aa, 0x0014aa00, 0x0000aaaa, 0x00aa0003, 0x00aa00aa, 0x00aa5500, 0x00aaaaaa, 0x00555555, 0x005555ff, 0x0055ff55, 0x0055ffff, 0x00ff5555, 0x00fd55ff, 0x00ffff55, 0x00ffffff,
+	0x00000000, 0x00101010, 0x00202020, 0x00353535, 0x00454545, 0x00555555, 0x00656565, 0x00757575, 0x008a8a8a, 0x009a9a9a, 0x00aaaaaa, 0x00bababa, 0x00cacaca, 0x00dfdfdf, 0x00efefef, 0x00ffffff,
+	0x000004ff, 0x004104ff, 0x008203ff, 0x00be02ff, 0x00fd00ff, 0x00fe00be, 0x00ff0082, 0x00ff0041, 0x00ff0008, 0x00ff4105, 0x00ff8200, 0x00ffbe00, 0x00ffff00, 0x00beff00, 0x0082ff00, 0x0041ff01,
+	0x0024ff00, 0x0022ff42, 0x001dff82, 0x0012ffbe, 0x0000ffff, 0x0000beff, 0x000182ff, 0x000041ff, 0x008282ff, 0x009e82ff, 0x00be82ff, 0x00df82ff, 0x00fd82ff, 0x00fe82df, 0x00ff82be, 0x00ff829e,
+	0x00ff8282, 0x00ff9e82, 0x00ffbe82, 0x00ffdf82, 0x00ffff82, 0x00dfff82, 0x00beff82, 0x009eff82, 0x0082ff82, 0x0082ff9e, 0x0082ffbe, 0x0082ffdf, 0x0082ffff, 0x0082dfff, 0x0082beff, 0x00829eff,
+	0x00babaff, 0x00cabaff, 0x00dfbaff, 0x00efbaff, 0x00febaff, 0x00febaef, 0x00ffbadf, 0x00ffbaca, 0x00ffbaba, 0x00ffcaba, 0x00ffdfba, 0x00ffefba, 0x00ffffba, 0x00efffba, 0x00dfffba, 0x00caffbb,
+	0x00baffba, 0x00baffca, 0x00baffdf, 0x00baffef, 0x00baffff, 0x00baefff, 0x00badfff, 0x00bacaff, 0x00010171, 0x001c0171, 0x00390171, 0x00550071, 0x00710071, 0x00710055, 0x00710039, 0x0071001c,
+	0x00710001, 0x00711c01, 0x00713900, 0x00715500, 0x00717100, 0x00557100, 0x00397100, 0x001c7100, 0x00097100, 0x0009711c, 0x00067139, 0x00037155, 0x00007171, 0x00005571, 0x00003971, 0x00001c71,
+	0x00393971, 0x00453971, 0x00553971, 0x00613971, 0x00713971, 0x00713961, 0x00713955, 0x00713945, 0x00713939, 0x00714539, 0x00715539, 0x00716139, 0x00717139, 0x00617139, 0x00557139, 0x0045713a,
+	0x00397139, 0x00397145, 0x00397155, 0x00397161, 0x00397171, 0x00396171, 0x00395571, 0x00394572, 0x00515171, 0x00595171, 0x00615171, 0x00695171, 0x00715171, 0x00715169, 0x00715161, 0x00715159,
+	0x00715151, 0x00715951, 0x00716151, 0x00716951, 0x00717151, 0x00697151, 0x00617151, 0x00597151, 0x00517151, 0x0051715a, 0x00517161, 0x00517169, 0x00517171, 0x00516971, 0x00516171, 0x00515971,
+	0x00000042, 0x00110041, 0x00200041, 0x00310041, 0x00410041, 0x00410032, 0x00410020, 0x00410010, 0x00410000, 0x00411000, 0x00412000, 0x00413100, 0x00414100, 0x00314100, 0x00204100, 0x00104100,
+	0x00034100, 0x00034110, 0x00024120, 0x00014131, 0x00004141, 0x00003141, 0x00002041, 0x00001041, 0x00202041, 0x00282041, 0x00312041, 0x00392041, 0x00412041, 0x00412039, 0x00412031, 0x00412028,
+	0x00412020, 0x00412820, 0x00413120, 0x00413921, 0x00414120, 0x00394120, 0x00314120, 0x00284120, 0x00204120, 0x00204128, 0x00204131, 0x00204139, 0x00204141, 0x00203941, 0x00203141, 0x00202841,
+	0x002d2d41, 0x00312d41, 0x00352d41, 0x003d2d41, 0x00412d41, 0x00412d3d, 0x00412d35, 0x00412d31, 0x00412d2d, 0x0041312d, 0x0041352d, 0x00413d2d, 0x0041412d, 0x003d412d, 0x0035412d, 0x0031412d,
+	0x002d412d, 0x002d4131, 0x002d4135, 0x002d413d, 0x002d4141, 0x002d3d41, 0x002d3541, 0x002d3141, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000
+};
+
+// Internal function to read a 32-bit value from a specified VPU register offset.
+uint32_t videoread32(struct SPPlatform* _platform, uint32_t offset)
+{
+	struct SPIoctl ioctlstruct;
+	ioctlstruct.offset = offset;
+	ioctlstruct.value = 0;
+	if (ioctl(_platform->sandpiperfd, SP_IOCTL_VIDEO_READ, &ioctlstruct) < 0)
+		return 0;
+	return ioctlstruct.value;
+}
+
+// Internal function to write a 32-bit value to a specified VPU register offset.
+void videowrite32(struct SPPlatform* _platform, uint32_t offset, uint32_t value)
+{
+	struct SPIoctl ioctlstruct;
+	ioctlstruct.offset = offset;
+	ioctlstruct.value = value;
+	ioctl(_platform->sandpiperfd, SP_IOCTL_VIDEO_WRITE, &ioctlstruct);
+}
+
+// Internal function to read a 32-bit value from the VPU palette at a specified offset.
+uint32_t paletteread32(struct SPPlatform* _platform, uint32_t offset)
+{
+	struct SPIoctl ioctlstruct;
+	ioctlstruct.offset = offset;
+	ioctlstruct.value = 0;
+	if (ioctl(_platform->sandpiperfd, SP_IOCTL_PALETTE_READ, &ioctlstruct) < 0)
+		return 0xCDCDCDCD;
+	return ioctlstruct.value;
+}
+
+// Internal function to write a 32-bit value to the VPU palette at a specified offset.
+void palettewrite32(struct SPPlatform* _platform, uint32_t offset, uint32_t value)
+{
+	struct SPIoctl ioctlstruct;
+	ioctlstruct.offset = offset;
+	ioctlstruct.value = value;
+	ioctl(_platform->sandpiperfd, SP_IOCTL_PALETTE_WRITE, &ioctlstruct);
+}
+
+/*
+ * Sets the default VGA palette by writing each color entry to the hardware.
+ * Iterates over all 256 palette entries and sends them to the VPU.
+ */
+void VPUSetDefaultPalette(struct EVideoContext *_context)
+{
+	for (uint32_t i=0; i<256; ++i)
+		palettewrite32(_context->m_platform, i & 0xFF, vgapalette[i]);
+}
+
+ /*
+  * Sets the scanout address for the second video page.
+  * The address must be 64-byte aligned.
+  * This is only used by the sync-swap mechanism on the VPU.
+  */
+void VPUSetScanoutAddress2(struct EVideoContext *_context, const uint32_t _scanOutAddress64ByteAligned)
+{
+	videowrite32(_context->m_platform, 0, VPUCMD_SETVPAGE2);
+	videowrite32(_context->m_platform, 0, _scanOutAddress64ByteAligned);
+}
+
+/*
+ * Sets the scanout address for layer B.
+ * The address must be 64-byte aligned.
+ */
+void VPUSetScanoutAddressB(struct EVideoContext *_context, const uint32_t _scanOutAddress64ByteAligned)
+{
+	videowrite32(_context->m_platform, 0, VPUCMD_SETVPAGE_B);
+	videowrite32(_context->m_platform, 0, _scanOutAddress64ByteAligned);
+}
+
+/*
+ * Sets the second scanout address for layer B (used by sync-swap).
+ * The address must be 64-byte aligned.
+ */
+void VPUSetScanoutAddress2B(struct EVideoContext *_context, const uint32_t _scanOutAddress64ByteAligned)
+{
+	videowrite32(_context->m_platform, 0, VPUCMD_SETVPAGE2_B);
+	videowrite32(_context->m_platform, 0, _scanOutAddress64ByteAligned);
+}
+
+ /*
+  * Initiates a (optionally) vsynced swap between the two video pages set up by
+  * VPUSetScanoutAddress and VPUSetScanoutAddress2.
+  * If _donotwaitforvsync is non-zero, the swap will not wait for vertical sync.
+  */
+void VPUSyncSwap(struct EVideoContext *_context, uint8_t _donotwaitforvsync)
+{
+	videowrite32(_context->m_platform, 0, (_donotwaitforvsync<<8) | VPUCMD_SYNCSWAP);
+}
+
+/*
+ * Initiates a (optionally) vsynced swap between layer B buffers.
+ * If _donotwaitforvsync is non-zero, the swap will not wait for vertical sync.
+ */
+void VPUSyncSwapB(struct EVideoContext *_context, uint8_t _donotwaitforvsync)
+{
+	videowrite32(_context->m_platform, 0, (_donotwaitforvsync<<8) | VPUCMD_SYNCSWAP_B);
+}
+
+/*
+ * Sets layer B mix mode and key color (RGB565) for layer blending.
+ * _layerBEnable enables dual-layer mode when set to 1.
+ * _mixMode selects the blend mode (0-4 per hardware).
+ */
+void VPUSetMixMode(struct EVideoContext *_context, uint8_t _layerBEnable, uint8_t _mixMode, uint16_t _keyColorRGB565)
+{
+	uint32_t cmd = VPUCMD_SETMIXMODE
+		| ((_layerBEnable & 0x1) << 8)
+		| ((_mixMode & 0x7) << 9)
+		| (((uint32_t)_keyColorRGB565 & 0xFFFF) << 12);
+	videowrite32(_context->m_platform, 0, cmd);
+}
+
+/*
+ * Shifts the scanline cache write address by the specified offset, in number of bytes.
+ * This can be used to adjust the write position within the cache for effects like scrolling.
+ */
+void VPUShiftCache(struct EVideoContext *_context, uint8_t _offset)
+{
+	videowrite32(_context->m_platform, 0, VPUCMD_SHIFTCACHE);
+	videowrite32(_context->m_platform, 0, _offset);
+}
+
+ /*
+  * Shifts the scanline cache read address by the specified offset, in number of bytes.
+  * This can be used to implement panning or other display effects.
+  */
+void VPUShiftScanout(struct EVideoContext *_context, uint8_t _offset)
+{
+	videowrite32(_context->m_platform, 0, VPUCMD_SHIFTSCANOUT);
+	videowrite32(_context->m_platform, 0, _offset);
+}
+
+/*
+ * Shifts the pixel cache address by the specified offset, in number of pixels.
+ * This can be used for fine-grained control over pixel rendering positions.
+ * The range of the shift is 0 to 7 pixels.
+ */
+void VPUShiftPixel(struct EVideoContext *_context, uint8_t _offset)
+{
+	videowrite32(_context->m_platform, 0, VPUCMD_SHIFTPIXEL);
+	videowrite32(_context->m_platform, 0, _offset);
+}
+
+/*
+ * Configures the video mode, color mode, and scanout enable settings for the VPU.
+ * If a valid context is provided, it updates the context's state accordingly.
+ * Otherwise, it directly writes the settings to the hardware registers.
+ */
+void VPUSetVideoMode(struct EVideoContext *_context, const enum EVideoMode _mode, const enum EColorMode _cmode, const enum EVideoScanoutEnable _scanEnable)
+{
+	uint32_t videoModeSelect = ((_mode == EVM_320_240) || (_mode == EVM_320_480)) ? 0 : 1; // Pick between 320(0) and 640(1) wide modes
+
+	if (_context)
+	{
+		// Store for later
+		_context->m_vmode = _mode;
+		_context->m_cmode = _cmode;
+
+		// NOTE: Caller sets vmode/cmode fields
+		_context->m_scanEnable = _scanEnable;
+		_context->m_scanlineDoubling = ((_mode == EVM_320_240) || (_mode == EVM_640_240)) ? EVD_Enable : EVD_Disable; // NOTE: We'll support more modes by exposing this later
+		_context->m_strideInWords = VPUGetStride(_context->m_vmode, _context->m_cmode) / sizeof(uint32_t);
+
+		VPUGetDimensions(_context->m_vmode, &_context->m_graphicsWidth, &_context->m_graphicsHeight);
+
+		// NOTE: For the time being console is always running at 640x480 mode
+		_context->m_consoleWidth = (uint16_t)(_context->m_graphicsWidth/8);
+		_context->m_consoleHeight = (uint16_t)(_context->m_graphicsHeight/8);
+		_context->m_consoleUpdated = 0;
+
+		videowrite32(_context->m_platform, 0, VPUCMD_SETVMODE);
+		videowrite32(_context->m_platform, 0, MAKEVMODEINFO((uint32_t)_context->m_cmode, videoModeSelect, (uint32_t)_context->m_scanlineDoubling, (uint32_t)_scanEnable));
+	}
+	else
+	{
+		// Does not preserve state, mostly preferred during shutdown
+		videowrite32(_context->m_platform, 0, VPUCMD_SETVMODE);
+		videowrite32(_context->m_platform, 0, MAKEVMODEINFO((uint32_t)_cmode, videoModeSelect, ((_mode == EVM_320_240) || (_mode == EVM_640_240)) ? EVD_Enable : EVD_Disable, (uint32_t)_scanEnable));
+	}
+}
+
+/*
+ * Sends a no-operation command to the VPU.
+ * This can be used in combination with the VPUGetFIFONotEmpty() command to implement barriers.
+ */
+void VPUNoop(struct EVideoContext *_context)
+{
+	videowrite32(_context->m_platform, 0, VPUCMD_NOOP);
+}
+
+/*
+ * Sets the scanout address for the VPU.
+ * The address must be 64-byte aligned.
+ */
+void VPUSetScanoutAddress(struct EVideoContext *_context, const uint32_t _scanOutAddress64ByteAligned)
+{
+	_context->m_scanoutAddressCacheAligned = _scanOutAddress64ByteAligned;
+	//EAssert((_scanOutAddress64ByteAligned&0x3F) == 0, "Video scanout address has to be aligned to 64 bytes\n");
+
+	videowrite32(_context->m_platform, 0, VPUCMD_SETVPAGE);
+	videowrite32(_context->m_platform, 0, (uint32_t)_scanOutAddress64ByteAligned);
+}
+
+ /*
+  * Sets the CPU write address for the VPU.
+  * The address must be 64-byte aligned.
+  */
+void VPUSetWriteAddress(struct EVideoContext *_context, const uint32_t _cpuWriteAddress64ByteAligned)
+{
+	_context->m_cpuWriteAddressCacheAligned = _cpuWriteAddress64ByteAligned;
+	//EAssert((_writeAddress64ByteAligned&0x3F) == 0, "Video CPU write address has to be aligned to 64 bytes\n");
+}
+
+/*
+ * Sets a palette entry in the VPU's color palette.
+ * _paletteIndex specifies the palette slot to set.
+ * _red, _green, and _blue specify the color components (0-255).
+ */
+void VPUSetPal(struct EVideoContext *_context, const uint8_t _paletteIndex, const uint32_t _red, const uint32_t _green, const uint32_t _blue)
+{
+	palettewrite32(_context->m_platform, _paletteIndex & 0xFF, MAKECOLORRGB24(_red, _green, _blue));
+}
+
+ /*
+  * Clears the current CPU write page with the specified color.
+  * _colorWord is a 32-bit value representing the color to fill
+  * and contains a 4-pixel wide color pattern.
+  */
+void VPUClear(struct EVideoContext *_context, const uint32_t _colorWord)
+{
+	uint32_t *vramBase = (uint32_t*)_context->m_cpuWriteAddressCacheAligned;
+	uint32_t W = _context->m_graphicsHeight * _context->m_strideInWords;
+	for (uint32_t i=0; i<W; ++i)
+		vramBase[i] = _colorWord;
+}
+
+/*
+ * Reads the current value of the vertical blanking (vblank) counter.
+ * The vblank counter alternates between 0 and 1 for each vertical blanking event.
+ */
+uint32_t VPUReadVBlankCounter(struct EVideoContext *_context)
+{
+	// vblank counter lives at this address
+	return videoread32(_context->m_platform, 0) & 0x1;
+}
+
+/*
+ * Retrieves the current scanline being drawn by the VPU.
+ * The scanline value is extracted from the hardware register.
+ * Valid scanline values range from 0 to 524.
+ * Note that this will not be perfectly timed with the VPU due
+ * to memory bus delays vs video output.
+ */
+uint32_t VPUGetScanline(struct EVideoContext *_context)
+{
+	return (videoread32(_context->m_platform, 0) & 0x7FE) >> 1;
+}
+
+/*
+ * Checks if the VPU's command FIFO is not empty.
+ * Returns 1 if there are commands pending in the FIFO, 0 otherwise.
+ * This can be used to wait for a noop at the end of a command stream
+ * to implement barries / sync points etc.
+ */
+uint32_t VPUGetFIFONotEmpty(struct EVideoContext *_context)
+{
+	return (videoread32(_context->m_platform, 0) & 0x800) >> 11;
+}
+
+ /*
+  * Writes a value to the VPU's control register.
+  * _setFlag determines whether to set (1) or clear (0) the control register bits.
+  * _value is the value to write to or clear from the control register.
+  */
+void VPUWriteControlRegister(struct EVideoContext *_context, uint8_t _setFlag, uint8_t _value)
+{
+	videowrite32(_context->m_platform, 0, VPUCMD_WCONTROLREG | (_setFlag ? (1 << 8) : 0) | (_value << 9));
+}
+
+/*
+ * Reads the current value of the VPU's control register.
+ */
+uint8_t VPUReadControlRegister(struct EVideoContext *_context)
+{
+	return (uint8_t)((videoread32(_context->m_platform, 0) & 0xFF000) >> 12);
+}
+
+/*
+ * Swaps the read and write pages for double buffering, on the CPU side context, and sets the new scanout and write pointers.
+ * _sc is the swap context containing framebuffer addresses and the current cycle count.
+ */
+void VPUSwapPages(struct EVideoContext* _context, struct EVideoSwapContext *_sc)
+{
+	_sc->readpage = ((_sc->cycle)%2) ? _sc->framebufferA->dmaAddress : _sc->framebufferB->dmaAddress;
+	_sc->writepage = ((_sc->cycle)%2) ? _sc->framebufferB->cpuAddress : _sc->framebufferA->cpuAddress;
+	VPUSetWriteAddress(_context, (uint32_t)_sc->writepage);
+	VPUSetScanoutAddress(_context, (uint32_t)_sc->readpage);
+	_sc->cycle = _sc->cycle + 1;
+}
+
+/*
+ * Waits for the next vsync event on the CPU.
+ * This function blocks until the VPU's VBlank counter flips,
+ * indicating that a new frame has started.
+ * This is not a precise way to time for vsync, as it depends on the polling frequency and system load.
+ * The recommended way to do this is to use a swapsync / noop pair and wait for the noop on the CPU instead,
+ * then swap the buffer pointers on the CPU.
+ */
+void VPUWaitVSync(struct EVideoContext *_context)
+{
+	volatile uint32_t prevvsync = VPUReadVBlankCounter(_context);
+	volatile uint32_t currentvsync;
+	do {
+		currentvsync = VPUReadVBlankCounter(_context);
+	} while (currentvsync == prevvsync);
+}
+
+/*
+ * Renders a string of text onto the screen at the specified position with the given foreground and background colors.
+ * _foregroundIndex and _backgroundIndex are palette indices for the text color and background color, respectively.
+ * _x and _y specify the starting pixel coordinates for the text.
+ * _message is a pointer to the character array containing the text to be rendered.
+ * _length is the number of characters to render from the _message array.
+ */
+void VPUPrintString(struct EVideoContext *_context, const uint8_t _foregroundIndex, const uint8_t _backgroundIndex, const uint16_t _x, const uint16_t _y, const char *_message, int _length)
+{
+	uint32_t *vramBase = (uint32_t*)_context->m_cpuWriteAddressCacheAligned;
+	uint32_t stride = _context->m_strideInWords;
+	uint32_t FG = (_foregroundIndex<<24) | (_foregroundIndex<<16) | (_foregroundIndex<<8) | _foregroundIndex;
+	uint32_t BG = (_backgroundIndex<<24) | (_backgroundIndex<<16) | (_backgroundIndex<<8) | _backgroundIndex;
+
+	// Align to 4 pixels
+	uint16_t cx = _x&0xFFFC;
+	// Y is aligned to 1 pixel
+	uint16_t cy = _y;
+
+	for (int i=0; i<_length; ++i)
+	{
+		int currentchar = _message[i];
+		if (currentchar<32)
+			continue;
+
+		int charrow = (currentchar>>4)*8;
+		int charcol = (currentchar%16);
+		for (int y=0; y<8; ++y)
+		{
+			int yoffset = (cy*8+y)*stride;
+			// Expand bit packed character row into individual pixels
+			uint8_t chardata = residentfont[charcol+((charrow+y)*16)];
+			// Output the 2 words (8 pixels) for this row
+			for (int x=0; x<2; ++x)
+			{
+				// X offset in words
+				int xoffset = cx + x;
+				// Generate foreground / background output via masks
+				// Note that the nibbles of the font bytes are flipped for this to work
+				uint32_t mask = quadexpand[chardata&0x0F];
+				uint32_t invmask = ~mask;
+				uint32_t fourPixels = (mask & FG) | (invmask & BG);
+				// Output the combined 4-pixel value
+				vramBase[xoffset + yoffset] = fourPixels;
+				// Move to the next set of 4 pixels
+				chardata = chardata >> 4;
+			}
+		}
+		// Next char position (2 words)
+		cx+=2;
+	}
+}
+
+/*
+ * Renders a string of text in RGB565 format at the specified position with the given foreground and background colors.
+ * _base is the base address of the framebuffer.
+ * _strideBytes is the stride of the framebuffer in bytes.
+ * _width and _height are the dimensions of the framebuffer.
+ * _x and _y specify the starting pixel coordinates for the text.
+ * _text is a pointer to the null-terminated string to be rendered.
+ * _fgColor and _bgColor are RGB565 color values for the text color and background color, respectively.
+ * _length is the number of characters to render from the _message array.
+ */
+void VPUPrintStringRGB565(uint8_t* _base, uint32_t _strideBytes, uint32_t _width, uint32_t _height,
+	uint16_t _x, uint16_t _y, const char* _text, uint16_t _fgColor, uint16_t _bgColor, int _length)
+{
+	for (int i = 0; i < _length; ++i)
+	{
+		int ch = _text[i];
+		if (ch < 32) continue;
+		
+		int charRow = (ch >> 4) * 8;
+		int charCol = ch % 16;
+		
+		for (int cy = 0; cy < 8; ++cy)
+		{
+			uint32_t yPos = _y + cy;
+			if (yPos >= _height) break;
+			
+			uint16_t* row = (uint16_t*)(_base + yPos * _strideBytes);
+			uint8_t charData = residentfont[charCol + ((charRow + cy) * 16)];
+			
+			for (int cx = 0; cx < 8; ++cx)
+			{
+				uint32_t xPos = _x + i * 8 + cx;
+				if (xPos >= _width) break;
+				
+				int bitPos = (cx < 4) ? (3 - cx) : (11 - cx);
+				uint8_t bit = (charData >> bitPos) & 1;
+				row[xPos] = bit ? _fgColor : _bgColor;
+			}
+		}
+	}
+}
+
+/*
+ * Resolves the console's character and color buffers into the current CPU write page,
+ * rendering all visible characters with their respective colors.
+ * Also handles the rendering of the blinking caret if it is set to be visible.
+ */
+void VPUConsoleResolve(struct EVideoContext *_context)
+{
+	uint32_t *vramBase = (uint32_t*)_context->m_cpuWriteAddressCacheAligned;
+	uint8_t *characterBase = _context->m_characterBuffer;
+	uint8_t *colorBase = _context->m_colorBuffer;
+	uint32_t stride = _context->m_strideInWords;
+	const uint16_t H = _context->m_consoleHeight;
+	const uint16_t W = _context->m_consoleWidth;
+
+	for (uint16_t cy=0; cy<H; ++cy)
+	{
+		for (uint16_t cx=0; cx<W; ++cx)
+		{
+			int currentchar = characterBase[cx+cy*W];
+			if (currentchar<32)
+				continue;
+
+			uint8_t currentcolor = colorBase[cx+cy*W];
+			uint32_t BG = (currentcolor>>4)&0x0F;
+			BG = (BG<<24) | (BG<<16) | (BG<<8) | BG;
+			uint32_t FG = currentcolor&0x0F;
+			FG = (FG<<24) | (FG<<16) | (FG<<8) | FG;
+
+			int charrow = (currentchar>>4)*8;
+			int charcol = (currentchar%16);
+			for (int y=0; y<8; ++y)
+			{
+				int yoffset = (cy*8+y)*stride;
+				// Expand bit packed character row into individual pixels
+				uint8_t chardata = residentfont[charcol+((charrow+y)*16)];
+				// Output the 2 words (8 pixels) for this row
+				for (int x=0; x<2; ++x)
+				{
+					// X offset in words
+					int xoffset = cx*2 + x;
+					// Generate foreground / background output via masks
+					// Note that the nibbles of the font bytes are flipped for this to work
+					uint32_t mask = quadexpand[chardata&0x0F];
+					uint32_t invmask = ~mask;
+					uint32_t fourPixels = (mask & FG) | (invmask & BG);
+					// Output the combined 4-pixel value
+					vramBase[xoffset + yoffset] = fourPixels;
+					// Move to the next set of 4 pixels
+					chardata = chardata >> 4;
+				}
+			}
+		}
+	}
+
+	// Show caret if it's in the visible state
+	if (_context->m_caretBlink)
+	{
+		int cx = _context->m_caretX;
+		int cy = _context->m_caretY;
+		uint32_t yoffset = (cy*8+7)*stride; // Last row of the character
+		uint32_t xoffset = cx*2; // 2 words per character
+		uint32_t *caret = &vramBase[xoffset + yoffset];
+		uint32_t FG = CONSOLEDIMGREEN;
+
+        if (_context->m_caretType == 0)
+        {
+    		FG = (FG<<24) | (FG<<16) | (FG<<8) | FG;
+		    // Regular cursor is 8 pixels wide, 2 pixels high
+		    *caret = FG;
+		    *(caret+1) = FG;
+		    caret -= stride;
+		    *caret = FG;
+		    *(caret+1) = FG;
+        }
+        else
+        {
+            // Insert cursor shows differently and is taller
+            FG = (FG<<8) | FG;
+		    *caret |= FG;
+		    caret -= stride;
+		    *caret |= FG;
+		    caret -= stride;
+		    *caret |= FG;
+		    caret -= stride;
+		    *caret |= FG;
+		    caret -= stride;
+		    *caret |= FG;
+		    caret -= stride;
+		    *caret |= FG;
+		    caret -= stride;
+		    *caret |= FG;
+		    caret -= stride;
+		    *caret |= FG;
+        }
+    }
+
+	_context->m_consoleUpdated = 0;
+}
+
+/*
+ * Scrolls the console content up by one row.
+ * This function moves all rows up by one, discarding the top row,
+ * and clears the bottom row with spaces and the default background color.
+ */
+void VPUConsoleScrollUp(struct EVideoContext *_context)
+{
+	const uint16_t W = _context->m_consoleWidth;
+	const uint16_t H_1 = _context->m_consoleHeight - 1;
+
+	// We're trying to write past end of console; scroll up the contents of the console
+	// NOTE: This does not save the contents of the text buffer that has scrolled off
+	uint8_t* targettext = _context->m_characterBuffer;
+	uint8_t* targetcolor = _context->m_colorBuffer;
+	uint8_t* sourcetext = _context->m_characterBuffer + W;
+	uint8_t* sourcecolor = _context->m_colorBuffer + W;
+	uint8_t* lasttextrow = _context->m_characterBuffer + W*H_1;
+	uint8_t* lastcolorrow = _context->m_colorBuffer + W*H_1;
+	__builtin_memcpy((void*)targettext, (void*)sourcetext, W*H_1);
+	__builtin_memcpy((void*)targetcolor, (void*)sourcecolor, W*H_1);
+	// Fill last row with spaces
+	__builtin_memset((void*)lasttextrow, 0x20, W);
+	// Fill last row with default background
+	__builtin_memset((void*)lastcolorrow, (CONSOLEDEFAULTBG<<4) | (CONSOLEDEFAULTFG), W);
+}
+
+/*
+ * Scrolls the console content down by one row.
+ * This function moves all rows down by one, discarding the bottom row,
+ * and clears the top row with spaces and the default background color.
+ */
+void VPUConsoleScrollDown(struct EVideoContext *_context)
+{
+	const uint16_t W = _context->m_consoleWidth;
+	const uint16_t H_1 = _context->m_consoleHeight - 1;
+	// We're trying to write before start of console; scroll down the contents of the console
+	// NOTE: This does not save the contents of the text buffer that has scrolled off
+	uint8_t* targettext = _context->m_characterBuffer + W;
+	uint8_t* targetcolor = _context->m_colorBuffer + W;
+	uint8_t* sourcetext = _context->m_characterBuffer;
+	uint8_t* sourcecolor = _context->m_colorBuffer;
+	uint8_t* firsttextrow = _context->m_characterBuffer;
+	uint8_t* firstcolorrow = _context->m_colorBuffer;
+	__builtin_memcpy((void*)targettext, (void*)sourcetext, W*H_1);
+	__builtin_memcpy((void*)targetcolor, (void*)sourcecolor, W*H_1);
+	// Fill first row with spaces
+	__builtin_memset((void*)firsttextrow, 0x20, W);
+	// Fill first row with default background
+	__builtin_memset((void*)firstcolorrow, (CONSOLEDEFAULTBG<<4) | (CONSOLEDEFAULTFG), W);
+}
+
+/*
+ * Sets the foreground and background colors for the console text.
+ * _foregroundIndex and _backgroundIndex are palette indices for the text color and background color, respectively.
+ */
+void VPUConsoleSetColors(struct EVideoContext *_context, const uint8_t _foregroundIndex, const uint8_t _backgroundIndex)
+{
+	_context->m_consoleColor = ((_backgroundIndex&0x0F)<<4) | (_foregroundIndex&0x0F);
+}
+
+/*
+ * Sets the foreground color for the console text.
+ * _foregroundIndex is a palette index for the text color.
+ */
+void VPUConsoleSetForeground(struct EVideoContext *_context, const uint8_t _foregroundIndex)
+{
+	_context->m_consoleColor = (_context->m_consoleColor & 0xF0) | (_foregroundIndex&0x0F);
+}
+
+/*
+ * Sets the background color for the console text.
+ * _backgroundIndex is a palette index for the background color.
+ */
+void VPUConsoleSetBackground(struct EVideoContext *_context, const uint8_t _backgroundIndex)
+{
+	_context->m_consoleColor = (_context->m_consoleColor & 0x0F) | ((_backgroundIndex&0x0F)<<4);
+}
+
+/*
+ * Clears the console screen by filling it with spaces and the default background color.
+ * Resets the cursor position to the top-left corner.
+ */
+void VPUConsoleClear(struct EVideoContext *_context)
+{
+	uint8_t *characterBase = _context->m_characterBuffer;
+	uint8_t *colorBase = _context->m_colorBuffer;
+	// Fill console with spaces
+	__builtin_memset(characterBase, 0x20, _context->m_consoleWidth*_context->m_consoleHeight);
+	__builtin_memset(colorBase, _context->m_consoleColor, _context->m_consoleWidth*_context->m_consoleHeight);
+	_context->m_consoleUpdated = 1;
+	_context->m_cursorX = 0;
+	_context->m_cursorY = 0;
+
+	//UARTPrintf("\033[2J");
+}
+
+/*
+ * Prints a string of text onto the console at the current cursor position without advancing the cursor.
+ * This function respects newline, tab, and carriage return characters.
+ * _message is a pointer to the character array containing the text to be rendered.
+ * _length is the number of characters to render from the _message array.
+ */
+void VPUConsolePrintInPlace(struct EVideoContext *_context, const char *_message, int _length)
+{
+	uint8_t *characterBase = _context->m_characterBuffer;
+	uint8_t *colorBase = _context->m_colorBuffer;
+	uint32_t stride = _context->m_consoleWidth;
+	int cx = _context->m_cursorX;
+	int cy = _context->m_cursorY;
+	const uint16_t W = _context->m_consoleWidth;
+	const uint16_t H_1 = _context->m_consoleHeight - 1;
+	uint8_t currentcolor = _context->m_consoleColor;
+
+	int i=0;
+	int isNotTab = 1;
+	while (_message[i] != 0 && i<_length)
+	{
+		int currentchar = _message[i];
+
+		if (currentchar == '\n') // Line feed moves to the next line
+		{
+			cx = 0; // We assume carriage return here as well as line feed
+			cy++;
+		}
+		else if (currentchar == '\t') // Tab steps 4 places without touching the text
+		{
+			cx += 4; // Based on DOS console tab width
+			// NOTE: This is not supposed to trigger any behavior except wrap around on same line
+			isNotTab = 0;
+		}
+		else if (currentchar == '\r') // Carriage return rewinds to top of line
+		{
+			cx=0;
+		}
+		else
+		{
+			characterBase[cy*stride+cx] = currentchar;
+			colorBase[cy*stride+cx] = currentcolor;
+			cx++;
+		}
+
+		if (cx >= W)
+		{
+			cx = 0;
+			cy += isNotTab; // TAB won't wrap to next line, it's just walks between tap stops on current line
+		}
+
+		if (cy > H_1) // Going off the screen will make us abort
+            break;
+
+		++i;
+	}
+
+	_context->m_consoleUpdated = 1;
+}
+
+/*
+ * Prints a string of text onto the console at the current cursor position,
+ * advancing the cursor as characters are rendered. This function respects
+ * newline, tab, and carriage return characters.
+ * _message is a pointer to the character array containing the text to be rendered.
+ * _length is the number of characters to render from the _message array.
+ */
+void VPUConsolePrint(struct EVideoContext *_context, const char *_message, int _length)
+{
+	uint8_t *characterBase = _context->m_characterBuffer;
+	uint8_t *colorBase = _context->m_colorBuffer;
+	uint32_t stride = _context->m_consoleWidth;
+	int cx = _context->m_cursorX;
+	int cy = _context->m_cursorY;
+	const uint16_t W = _context->m_consoleWidth;
+	const uint16_t H_1 = _context->m_consoleHeight - 1;
+	uint8_t currentcolor = _context->m_consoleColor;
+
+	int i=0;
+	int isNotTab = 1;
+	while (_message[i] != 0 && i<_length)
+	{
+		int currentchar = _message[i];
+
+		if (currentchar == '\n') // Line feed moves to the next line
+		{
+			cx = 0; // We assume carriage return here as well as line feed
+			cy++;
+		}
+		else if (currentchar == '\t') // Tab steps 4 places without touching the text
+		{
+			cx += 4; // Based on DOS console tab width
+			// NOTE: This is not supposed to trigger any behavior except wrap around on same line
+			isNotTab = 0;
+		}
+		else if (currentchar == '\r') // Carriage return rewinds to top of line
+		{
+			cx=0;
+		}
+		else
+		{
+			characterBase[cy*stride+cx] = currentchar;
+			colorBase[cy*stride+cx] = currentcolor;
+			cx++;
+		}
+
+		if (cx >= W)
+		{
+			cx = 0;
+			cy += isNotTab; // TAB won't wrap to next line, it's just walks between tap stops on current line
+		}
+
+		if (cy > H_1)
+		{
+			VPUConsoleScrollUp(_context);
+			cy = H_1;
+			//UARTPrintf("\033[M");
+		}
+
+		++i;
+	}
+	_context->m_cursorX = cx;
+	_context->m_cursorY = cy;
+	_context->m_consoleUpdated = 1;
+
+	//UARTPrintf("%s", _message);
+}
+
+/*
+ * Retrieves the width and height dimensions for a given video mode, in pixels.
+ * _mode specifies the video mode.
+ * _width and _height are pointers to variables where the dimensions will be stored.
+ */
+void VPUGetDimensions(const enum EVideoMode _mode, uint32_t *_width, uint32_t *_height)
+{
+	*_width = ((_mode == EVM_640_240) || (_mode == EVM_640_480)) ? 640 : 320;
+	*_height = ((_mode == EVM_640_480) || (_mode == EVM_320_480)) ? 480 : 240;
+}
+
+/*
+ * Calculates the stride (number of bytes per row) for a given video mode and color mode.
+ * _mode specifies the video mode.
+ * _cmode specifies the color mode.
+ * Returns the stride in bytes.
+ */
+uint32_t VPUGetStride(const enum EVideoMode _mode, const enum EColorMode _cmode)
+{
+    uint32_t stride = 0;
+    if (_cmode == ECM_8bit_Indexed)
+        stride = ((_mode == EVM_320_240) || (_mode == EVM_320_480)) ? 3 : 5;
+    else // ECM_16bit_RGB
+        stride = ((_mode == EVM_320_240) || (_mode == EVM_320_480)) ? 5 : 10;
+
+    return stride * 128;
+}
+
+/*
+ * Moves the console cursor by the specified offsets.
+ * dx and dy are the horizontal and vertical offsets, respectively.
+ * The cursor position is clamped within the console boundaries.
+ */
+void VPUConsoleMoveCursor(struct EVideoContext *_context, int dx, int dy)
+{
+ 	const uint16_t W = _context->m_consoleWidth;
+     const uint16_t W_1 = _context->m_consoleWidth - 1;
+	const uint16_t H_1 = _context->m_consoleHeight - 1;
+
+     int cx = _context->m_cursorX + dx;
+     int cy = _context->m_cursorY + dy;
+
+    if (cx >= W)
+    {
+        cx = 0;
+        ++cy;
+    }
+
+    if (cx < 0)
+    {
+        if (cy == 0)
+            cx = 0;
+        else
+        {
+            cx = W_1;
+            --cy;
+        }
+    }
+
+    if (cy < 0)
+    {
+        cy = 0;
+    }
+
+    if (cy > H_1)
+    {
+        VPUConsoleScrollUp(_context);
+        cy = H_1;
+    }
+
+    _context->m_cursorX = cx;
+    _context->m_cursorY = cy;
+}
+
+/*
+ * Moves the console cursor to the beginning of the current line.
+ */
+void VPUConsoleHomeCursor(struct EVideoContext *_context)
+{
+	_context->m_cursorX = 0;
+}
+
+/*
+ * Moves the console cursor to the end of the current line,
+ * just after the last non-space character.
+ */
+void VPUConsoleEndCursor(struct EVideoContext *_context)
+{
+    uint8_t *characterBase = _context->m_characterBuffer;
+    uint32_t stride = _context->m_consoleWidth;
+    const uint16_t W_1 = _context->m_consoleWidth - 1;
+
+    for (uint16_t i=W_1; i!=0; i--)
+    {
+        if (characterBase[_context->m_cursorY*stride+i] != ' ')
+        {
+            _context->m_cursorX = i+1;
+            if (_context->m_cursorX > W_1)
+                _context->m_cursorX = W_1;
+            return;
+        }
+    }
+}
+
+/*
+ * Copies a line of text from the console's character buffer into a provided buffer.
+ * _line specifies the line number to copy; if set to VPU_AUTO, the current cursor line is used.
+ * _xStart and _xEnd define the horizontal range of characters to copy.
+ * _buffer is a pointer to a character array where the copied text will be stored.
+ * The copied text is null-terminated.
+ */
+void VPUConsoleCopyLine(struct EVideoContext *_context, uint16_t _line, uint16_t _xStart, uint16_t _xEnd, char *_buffer)
+{
+	uint8_t *characterBase = _context->m_characterBuffer;
+	uint32_t stride = _context->m_consoleWidth;
+	uint16_t cy = _line == VPU_AUTO ? _context->m_cursorY : _line;
+
+    int i = 0;
+	for (uint16_t cx=_xStart; cx<_xEnd; ++cx)
+		_buffer[i++] = characterBase[cy*stride+cx];
+    _buffer[i] = 0;
+}
+
+/*
+ * Fills the current line from the cursor position to the end with the specified character.
+ * Also updates the color buffer with the current console color.
+ * Advances the cursor to the beginning of the next line, scrolling the console if necessary.
+ * Returns the number of characters filled.
+ */
+int VPUConsoleFillLine(struct EVideoContext *_context, const char _character)
+{
+	uint8_t *characterBase = _context->m_characterBuffer;
+	uint8_t *colorBase = _context->m_colorBuffer;
+	uint32_t stride = _context->m_consoleWidth;
+	const uint16_t H_1 = _context->m_consoleHeight-1;
+	const uint16_t W = _context->m_consoleWidth;
+	uint8_t currentcolor = _context->m_consoleColor;
+
+	int cy = _context->m_cursorY;
+	int numchars = W - _context->m_cursorX;
+	for (uint16_t cx=_context->m_cursorX; cx<W; ++cx)
+	{
+		characterBase[cy*stride+cx] = _character;
+		colorBase[cy*stride+cx] = currentcolor;
+	}
+	_context->m_cursorX = 0;
+	_context->m_cursorY++;
+
+	if (_context->m_cursorY > H_1)
+	{
+		VPUConsoleScrollUp(_context);
+		_context->m_cursorY = H_1;
+		//UARTPrintf("\033[M");
+	}
+
+	_context->m_consoleUpdated = 1;
+
+	return numchars;
+}
+
+/*
+ * Inserts a character into the console's character buffer at the specified position,
+ * shifting existing characters to the right. Also updates the color buffer with the
+ * current console color.
+ * _x and _y specify the position where the character will be inserted.
+ * _character is the character to insert.
+ */
+void VPUInsertCharacter(struct EVideoContext *_context, uint16_t _x, uint16_t _y, uint8_t _character)
+{
+	uint8_t *characterBase = _context->m_characterBuffer;
+	uint8_t *colorBase = _context->m_colorBuffer;
+	uint32_t stride = _context->m_consoleWidth;
+	const uint16_t W_1 = _context->m_consoleWidth - 1;
+
+	for (uint16_t x=W_1; x!=_x; x--)
+	{
+	characterBase[_y*stride+x] = characterBase[_y*stride+x-1];
+	colorBase[_y*stride+x] = colorBase[_y*stride+x-1];
+	}
+
+	characterBase[_y*stride+_x] = _character;
+	colorBase[_y*stride+_x] = _context->m_consoleColor;
+}
+
+/*
+ * Removes a character from the console's character buffer at the specified position,
+ * shifting subsequent characters to the left. Also updates the color buffer with the
+ * current console color.
+ * _x and _y specify the position of the character to remove.
+ */
+void VPURemoveCharacter(struct EVideoContext *_context, uint16_t _x, uint16_t _y)
+{
+	uint8_t *characterBase = _context->m_characterBuffer;
+	uint8_t *colorBase = _context->m_colorBuffer;
+	uint32_t stride = _context->m_consoleWidth;
+	const uint16_t W = _context->m_consoleWidth;
+
+	for (uint16_t x=_x; x<W; x++)
+	{
+		if (x+1 < W)
+		{
+			characterBase[_y*stride+x] = characterBase[_y*stride+x+1];
+			colorBase[_y*stride+x] = colorBase[_y*stride+x+1];
+		}
+		else
+		{
+			characterBase[_y*stride+x] = ' ';
+			colorBase[_y*stride+x] = _context->m_consoleColor;
+		}
+	}
+}
+
+/*
+ * Sets the console cursor to the specified position.
+ * The position is clamped within the console boundaries.
+ * Also updates the caret position to match the cursor.
+ */
+void VPUConsoleSetCursor(struct EVideoContext *_context, uint16_t _x, uint16_t _y)
+{
+	const uint16_t W_1 = _context->m_consoleWidth - 1;
+	const uint16_t H_1 = _context->m_consoleHeight - 1;
+	if (_x > W_1)
+		_x = W_1;
+	if (_y > H_1)
+		_y = H_1;
+
+	// Cursor and caret move at the same time in this scenario
+	_context->m_cursorX = _x;
+	_context->m_cursorY = _y;
+	_context->m_caretX = _x;
+	_context->m_caretY = _y;
+
+	_context->m_consoleUpdated = 1;
+}
+
+/*
+ * Initializes the video context with the given platform.
+ * Allocates memory for the character and color buffers.
+ * Sets the default color palette.
+ */
+void VPUInitVideo(struct EVideoContext* _context, struct  SPPlatform* _platform)
+{
+	_context->m_platform = _platform;
+
+	_context->m_colorBuffer = (uint8_t*)malloc(640*480+128);
+	_context->m_characterBuffer = (uint8_t*)malloc(640*480+128);
+
+	VPUSetDefaultPalette(_context);
+}
+
+/*
+ * Shuts down the video context by freeing allocated resources.
+ */
+void VPUShutdownVideo(struct EVideoContext* _context)
+{
+	if (_context && _context->m_characterBuffer)
+	{
+		free(_context->m_characterBuffer);
+		_context->m_characterBuffer = 0;
+	}
+	if (_context && _context->m_colorBuffer)
+	{
+		free(_context->m_colorBuffer);
+		_context->m_colorBuffer = 0;
+	}
+}
