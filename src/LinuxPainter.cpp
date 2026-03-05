@@ -71,7 +71,7 @@ void LinuxPainter::PaintPlayer(Plane *player)
 {
 	int x = player->GetX() - player->GetWidth()/2;
 	int y = player->GetY() - player->GetHeight()/2;
-	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite_duck, SPRITE_W, SPRITE_H, x, y, TRANSPARENT_KEY);
+	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite_player, player->GetWidth(), player->GetHeight(), x, y, 3);
 }
 void LinuxPainter::PaintEnemy(Plane *enemy)
 {
@@ -91,6 +91,7 @@ void LinuxPainter::PaintBullet(Bullet *bullet)
 void LinuxPainter::init_palette(struct EVideoContext *vctx)
 {
 	VPUSetDefaultPalette(vctx);
+	/*
 	// Animal colors
 	VPUSetPal(vctx, 1, 255, 220, 50);  // Yellow (duck body)
 	VPUSetPal(vctx, 2, 255, 140, 0);   // Orange (duck beak/feet)
@@ -105,6 +106,23 @@ void LinuxPainter::init_palette(struct EVideoContext *vctx)
 		uint8_t c = (uint8_t)(20 + i * 10);
 		VPUSetPal(vctx, (uint8_t)(16 + i), c, c, (uint8_t)(40 + i * 8));
 	}
+	*/
+
+	VPUSetPal(vctx, 0, 93,67,48);
+	VPUSetPal(vctx, 1, 114,99,70);
+	VPUSetPal(vctx, 2, 77,45,27);
+	VPUSetPal(vctx, 3, 32,44,8);
+	VPUSetPal(vctx, 4, 73,69,24);
+	VPUSetPal(vctx, 5, 85,96,9);
+	VPUSetPal(vctx, 6, 183,60,21);
+	VPUSetPal(vctx, 7, 193,170,28);
+
+	for (int i = 0; i < 8; ++i)
+	{
+		uint8_t c = (uint8_t)(20 + i * 10);
+		VPUSetPal(vctx, (uint8_t)(16 + i), c, c, (uint8_t)(40 + i * 8));
+	}
+
 }
 
 void LinuxPainter::fill_background(uint8_t *dst, uint32_t stride, uint32_t frame)

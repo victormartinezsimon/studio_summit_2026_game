@@ -35,9 +35,9 @@ int main(int argc, char** argv)
 
 	Plane* player = new Plane();
 	player->SetSize(PLANE_WIDTH, PLANE_HEIGHT);
-	player->SetPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT * 0.9);
+	player->SetPosition(SCREEN_WIDTH/2, SCREEN_HEIGHT*0.9);
 	player->SetBulletsToFire(0);
-	player->SetFireRate(1);
+	player->SetFireRate(2);
 
 
 	Pool<Plane, PLANES_POOL_SIZE> enemiesPool;
