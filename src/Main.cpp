@@ -9,8 +9,12 @@
 #include "Plane.h"
 #include "LinuxPainter.h"
 
+#include "controller.h"
+#include "controller.c"
+
 int main(int argc, char** argv)
 {
+	/*
 	(void)argc; (void)argv;
 
 	Painter* p = new LinuxPainter();
@@ -91,7 +95,7 @@ int main(int argc, char** argv)
 		p->PaintBackground();
 		p->PaintPlayer(player);
 
-		/*
+		
 		for (auto&& enemy : enemies)
 		{
 			p->PaintEnemy(enemy);
@@ -101,8 +105,25 @@ int main(int argc, char** argv)
 		{
 			p->PaintBullet(&bullet);
 		});
-		*/
+		/
 		
 		p->EndPaint();
 	}
+	*/
+
+	if( controller_open( CONTROLLER_MODE_AUTO ) != CONTROLLER_OK )
+    {
+        printf( "failed to open controller\n" );
+        exit( -1 );
+    }
+    while( 1 )
+    {
+        int     r, val;
+        r = controller_read( &val );
+        if( r == CONTROLLER_OK )
+        {
+            printf( "%d\n", val );
+        }
+    }
+    return( 0 );
 }
