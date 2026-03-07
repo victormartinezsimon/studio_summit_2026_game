@@ -8,12 +8,20 @@
 #include "Bullet.h"
 #include "Plane.h"
 #include "LinuxPainter.h"
+#include "InputManager.h"
 
-#include "controller.h"
-#include "controller.c"
 
 int main(int argc, char** argv)
 {
+	InputManager mngr;
+
+	while(true)
+	{
+		int value = mngr.GetInputValue();
+		printf("value: %d\n", value);
+	}
+
+
 	/*
 	(void)argc; (void)argv;
 
@@ -111,19 +119,5 @@ int main(int argc, char** argv)
 	}
 	*/
 
-	if( controller_open( CONTROLLER_MODE_AUTO ) != CONTROLLER_OK )
-    {
-        printf( "failed to open controller\n" );
-        exit( -1 );
-    }
-    while( 1 )
-    {
-        int     r, val;
-        r = controller_read( &val );
-        if( r == CONTROLLER_OK )
-        {
-            printf( "%d\n", val );
-        }
-    }
-    return( 0 );
+	
 }
