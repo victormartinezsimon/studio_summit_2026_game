@@ -8,7 +8,7 @@
 GameManager::GameManager(InputManager *input, Plane *player, Pool<Plane, PLANES_POOL_SIZE> *enemiesPool,
 						 Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool, PainterManager *painterManager)
 	: _inputManager(input), _player(player), _enemiesPool(enemiesPool), _bulletsPool(bulletsPool),
-	  _painterManager(painterManager), _currentState(STATES::MENU), _currentLevel(0)
+	  _painterManager(painterManager), _currentState(STATES::MENU), _currentLevel(3)
 {
 	currentPlayerVelocitiyBulletX = PLAYER_DEFAULT_BULLET_VEL_X;
 	currentPlayerVelocitiyBulletY = PLAYER_DEFAULT_BULLET_VEL_Y;
@@ -68,11 +68,11 @@ void GameManager::UpdateBattle(const float deltaTime)
 	// update player
 	_player->Update(deltaTime);
 
-	// update enemies
 
 	// update bullets
 	_bulletsPool->for_each_active([deltaTime](Bullet &obj)
 								  { obj.Update(deltaTime); });
+
 
 	// clear bulets
 	std::vector<Bullet *> bulletsToDelete;
@@ -84,6 +84,7 @@ void GameManager::UpdateBattle(const float deltaTime)
 									  }
 									  // search for collision
 								  });
+
 
 	for (auto &bullet : bulletsToDelete)
 	{
@@ -97,6 +98,7 @@ void GameManager::UpdateImprovement(const float deltaTime)
 void GameManager::UpdateInitialMovement(const float deltaTime)
 {
 	_player->SetPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT * 0.9);
+	StartLevel();
 	_currentState = STATES::BATTLE;
 }
 
@@ -153,6 +155,16 @@ void GameManager::PaintBattle() const
 	}
 
 	{
+		auto currentUsed = _enemiesPool->GetCurrentUsed();
+		for (auto &&enemy : currentUsed)
+		{
+			float posX, posY;
+			enemy->GetPaintPosition(posX, posY);
+			_painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, enemy->GetWidth(), enemy->GetHeight(), posX, posY);
+		}
+	}
+
+	{
 		float playerX, playerY;
 		_player->GetPaintPosition(playerX, playerY);
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player->GetWidth(), _player->GetHeight(), playerX, playerY);
@@ -163,4 +175,51 @@ void GameManager::PaintImprovements() const
 }
 void GameManager::PaintInitialMovement() const
 {
+}
+
+void GameManager::StartLevel()
+{
+	SpawnEnemies();
+}
+
+void GameManager::GetMinMaxXPosiblePositionForEnemies(float &minX, float &maxX) const
+{
+	minX = 0 + ENEMY_WIDTH / 2;
+	maxX = SCREEN_WIDTH - ENEMY_WIDTH / 2;
+}
+
+void GameManager::SpawnEnemies()
+{
+	int levelConfigID = std::min(_currentLevel, TOTAL_LEVELS_CONFIG);
+	int enemiesToSpawn = LEVELS_CONFIGS[levelConfigID];
+
+	float currentY = SCREEN_HEIGHT* 0.1f;
+
+	while (enemiesToSpawn > 0)
+	{
+		int enemiesRow = std::min(enemiesToSpawn, MAX_ENEMIES_PER_ROW);
+		enemiesToSpawn -= enemiesRow;
+		SpawnRowEnemies(enemiesRow, currentY);
+		currentY += SCREEN_HEIGHT * 0.05f + ENEMY_HEIGHT;
+	}
+}
+void GameManager::SpawnRowEnemies(int enemiesToSpawn, float posY)
+{
+	float minX, maxX;
+	GetMinMaxXPosiblePositionForEnemies(minX, maxX);
+
+	float screenWidth = maxX - minX;
+	float holeDistance = (screenWidth - (enemiesToSpawn * ENEMY_WIDTH)) /enemiesToSpawn;
+
+	float currentPositionX = minX + holeDistance / 2 + ENEMY_WIDTH/2;
+	for(int enemyID = 0; enemyID < enemiesToSpawn; ++enemyID)
+	{
+		float posX = currentPositionX;
+		currentPositionX += ENEMY_WIDTH + holeDistance;
+
+		auto enemy = _enemiesPool->Get();
+		enemy->SetPosition(posX, posY);
+		enemy->SetSize(ENEMY_WIDTH, ENEMY_HEIGHT);
+		enemy->SetFireRate(0);
+	}
 }

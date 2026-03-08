@@ -41,6 +41,12 @@ private:
 	void SpanwPlayerBullet(int index, Plane *p);
 
 private:
+	void StartLevel();
+	void SpawnEnemies();
+	void SpawnRowEnemies(int totalEnemies, float posY);
+	void GetMinMaxXPosiblePositionForEnemies(float &minX, float &maxX) const;
+
+private:
 	enum class STATES
 	{
 		MENU,
@@ -60,7 +66,7 @@ private:
 	STATES _currentState = STATES::MENU;
 	int _currentLevel = 0;
 	Plane *_player;
-	Pool<Plane, PLANES_POOL_SIZE> *_enemiesPool;
-	Pool<Bullet, BULLETS_POOL_SIZE> *_bulletsPool;
+	Pool<Plane, PLANES_POOL_SIZE>* _enemiesPool;
+	Pool<Bullet, BULLETS_POOL_SIZE>* _bulletsPool;
 	PainterManager *_painterManager;
 };
