@@ -3,6 +3,7 @@
 #include "Plane.h"
 #include "Bullet.h"
 #include "PainterManager.h"
+#include "Sprites.h"
 
 GameManager::GameManager(InputManager *input, Plane *player, Pool<Plane, PLANES_POOL_SIZE> *enemiesPool,
 						 Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool, PainterManager *painterManager)
@@ -31,7 +32,7 @@ void GameManager::Update(const float deltaTime)
 	}
 }
 
-void GameManager::Paint()
+void GameManager::Paint() const
 {
 	_painterManager->ClearListPaint();
 	switch (_currentState)
@@ -116,20 +117,31 @@ void GameManager::SpanwPlayerBullet(int index, Plane *p)
 	bullet->SetSize(BULLETS_WIDTH, BULLETS_HEIGHT);
 }
 
-void GameManager::PaintMenu()
+void GameManager::PaintMenu()const
 {
 }
-void GameManager::PaintBattle()
+void GameManager::PaintBattle()const
 {
 	{
 		float playerX, playerY;
 		_player->GetPaintPosition(playerX, playerY);
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player->GetWidth(), _player->GetHeight(), playerX, playerY);
 	}
+
+	{
+		auto currentUsed = _bulletsPool->GetConstCurrentUsed();
+		for(auto&& bullet : currentUsed)
+		{
+			float posX, posY;
+			bullet->GetPaintPosition(posX, posY);
+			_painterManager->AddToPaint(PainterManager::SPRITE_ID::BULLET, _player->GetWidth(), _player->GetHeight(), posX, posY);
+
+		}
+	}
 }
-void GameManager::PaintImprovements()
+void GameManager::PaintImprovements()const
 {
 }
-void GameManager::PaintInitialMovement()
+void GameManager::PaintInitialMovement()const
 {
 }

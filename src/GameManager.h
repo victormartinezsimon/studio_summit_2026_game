@@ -24,13 +24,13 @@ private:
 	void UpdateInitialMovement(const float deltaTime);
 
 public:
-	void Paint();
+	void Paint() const;
 
 private:
-	void PaintMenu();
-	void PaintBattle();
-	void PaintImprovements();
-	void PaintInitialMovement();
+	void PaintMenu() const;
+	void PaintBattle() const;
+	void PaintImprovements() const;
+	void PaintInitialMovement()const;
 
 private:
 	void GetMinMaxXPosiblePosition(float &minX, float &maxX) const;
