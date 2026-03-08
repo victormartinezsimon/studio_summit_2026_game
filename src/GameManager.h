@@ -49,6 +49,12 @@ private:
 		INITIAL_MOVEMENT
 	};
 
+	private:
+	float currentPlayerVelocitiyBulletX; 
+	float currentPlayerVelocitiyBulletY; 
+	float currentPlayerFireRate;
+
+
 private:
 	InputManager *_inputManager;
 	STATES _currentState = STATES::MENU;

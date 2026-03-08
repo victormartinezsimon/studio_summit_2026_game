@@ -3,11 +3,11 @@
 #include "sprites.h"
 #include "Painter.h"
 
-
 PainterManager::PainterManager()
 {
-	//_sprites.insert({SPRITE_ID::PLAYER, sprite_player});
 	_sprites[SPRITE_ID::PLAYER] = sprite_player;
+	_sprites[SPRITE_ID::ENEMY] = sprite_player;
+	_sprites[SPRITE_ID::BULLET] = sprite_bullet;
 	_painter = new Painter();
 }
 

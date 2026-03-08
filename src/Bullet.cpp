@@ -1,6 +1,7 @@
 #include "Bullet.h"
 #include <cmath>
 #include "GameConfig.h"
+#include "Sprites.h"
 
 Bullet::Bullet():_velocityX(0), _velocityY(0)
 {

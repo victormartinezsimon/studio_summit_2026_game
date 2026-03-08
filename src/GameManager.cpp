@@ -10,6 +10,10 @@ GameManager::GameManager(InputManager *input, Plane *player, Pool<Plane, PLANES_
 	: _inputManager(input), _player(player), _enemiesPool(enemiesPool), _bulletsPool(bulletsPool),
 	  _painterManager(painterManager), _currentState(STATES::MENU), _currentLevel(0)
 {
+	currentPlayerVelocitiyBulletX = PLAYER_DEFAULT_BULLET_VEL_X;
+	currentPlayerVelocitiyBulletY = PLAYER_DEFAULT_BULLET_VEL_Y;
+	currentPlayerFireRate = PLAYER_DEFAULT_FIRE_RATE;
+
 	ConfigurePlayer();
 }
 
@@ -67,8 +71,24 @@ void GameManager::UpdateBattle(const float deltaTime)
 	// update enemies
 
 	// update bullets
+	_bulletsPool->for_each_active([deltaTime](Bullet &obj)
+								  { obj.Update(deltaTime); });
 
 	// clear bulets
+	std::vector<Bullet *> bulletsToDelete;
+	_bulletsPool->for_each_active([&bulletsToDelete](Bullet &obj)
+								  {
+									  if (obj.GetY() < 0 || obj.GetY() > SCREEN_HEIGHT)
+									  {
+										  bulletsToDelete.push_back(&obj);
+									  }
+									  // search for collision
+								  });
+
+	for (auto &bullet : bulletsToDelete)
+	{
+		_bulletsPool->Release(bullet);
+	}
 }
 void GameManager::UpdateImprovement(const float deltaTime)
 {
@@ -104,7 +124,7 @@ void GameManager::ConfigurePlayer()
 {
 	_player->SetSize(PLANE_WIDTH, PLANE_HEIGHT);
 	_player->SetBulletsOrigin(1);
-	_player->SetFireRate(2);
+	_player->SetFireRate(currentPlayerFireRate);
 	_player->SetCallbackFire([this](int index, Plane *p)
 							 { this->SpanwPlayerBullet(index, p); });
 }
@@ -113,35 +133,34 @@ void GameManager::SpanwPlayerBullet(int index, Plane *p)
 {
 	auto bullet = _bulletsPool->Get();
 	bullet->SetPosition(p->GetX(), p->GetY());
-	bullet->SetVelocity(0, PLAYER_BULLET_VEL_Y);
+	bullet->SetVelocity(currentPlayerVelocitiyBulletX, currentPlayerVelocitiyBulletY);
 	bullet->SetSize(BULLETS_WIDTH, BULLETS_HEIGHT);
 }
 
-void GameManager::PaintMenu()const
+void GameManager::PaintMenu() const
 {
 }
-void GameManager::PaintBattle()const
+void GameManager::PaintBattle() const
 {
+	{
+		auto currentUsed = _bulletsPool->GetCurrentUsed();
+		for (auto &&bullet : currentUsed)
+		{
+			float posX, posY;
+			bullet->GetPaintPosition(posX, posY);
+			_painterManager->AddToPaint(PainterManager::SPRITE_ID::BULLET, bullet->GetWidth(), bullet->GetHeight(), posX, posY);
+		}
+	}
+
 	{
 		float playerX, playerY;
 		_player->GetPaintPosition(playerX, playerY);
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player->GetWidth(), _player->GetHeight(), playerX, playerY);
 	}
-
-	{
-		auto currentUsed = _bulletsPool->GetConstCurrentUsed();
-		for(auto&& bullet : currentUsed)
-		{
-			float posX, posY;
-			bullet->GetPaintPosition(posX, posY);
-			_painterManager->AddToPaint(PainterManager::SPRITE_ID::BULLET, _player->GetWidth(), _player->GetHeight(), posX, posY);
-
-		}
-	}
 }
-void GameManager::PaintImprovements()const
+void GameManager::PaintImprovements() const
 {
 }
-void GameManager::PaintInitialMovement()const
+void GameManager::PaintInitialMovement() const
 {
 }

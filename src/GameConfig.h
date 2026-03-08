@@ -10,12 +10,9 @@ constexpr unsigned int BULLETS_POOL_SIZE = 200;
 
 constexpr std::string_view BACKGROUND_IMAGE = "images/background.png";
 
-constexpr unsigned int PLAYER_BULLET_VEL_Y = -10;
+constexpr int PLAYER_DEFAULT_BULLET_VEL_X = 0;
+constexpr int PLAYER_DEFAULT_BULLET_VEL_Y = -10;
+constexpr float PLAYER_DEFAULT_FIRE_RATE = 20;
 
-constexpr std::string_view ENEMY_IMAGE = "images/enemy.png";
 constexpr unsigned int ENEMY_WIDTH = 50;
 constexpr unsigned int ENEMY_HEIGHT = 50;
-
-constexpr std::string_view BULLET_IMAGE = "images/bullet.png";
-constexpr unsigned int BULLETS_WIDTH = 10;
-constexpr unsigned int BULLETS_HEIGHT = 10;
