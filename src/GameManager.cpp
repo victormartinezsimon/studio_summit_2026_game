@@ -2,10 +2,14 @@
 #include "InputManager.h"
 #include "Plane.h"
 #include "Bullet.h"
+#include "PainterManager.h"
 
-GameManager::GameManager(InputManager *input, Plane *player, Pool<Plane, PLANES_POOL_SIZE> *enemiesPool, Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool)
-	: _inputManager(input), _player(player), _enemiesPool(enemiesPool), _bulletsPool(bulletsPool), _currentState(STATES::MENU)
+GameManager::GameManager(InputManager *input, Plane *player, Pool<Plane, PLANES_POOL_SIZE> *enemiesPool,
+						 Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool, PainterManager *painterManager)
+	: _inputManager(input), _player(player), _enemiesPool(enemiesPool), _bulletsPool(bulletsPool),
+	  _painterManager(painterManager), _currentState(STATES::MENU), _currentLevel(0)
 {
+	ConfigurePlayer();
 }
 
 void GameManager::Update(const float deltaTime)
@@ -23,6 +27,26 @@ void GameManager::Update(const float deltaTime)
 		break;
 	case STATES::INITIAL_MOVEMENT:
 		UpdateInitialMovement(deltaTime);
+		break;
+	}
+}
+
+void GameManager::Paint()
+{
+	_painterManager->ClearListPaint();
+	switch (_currentState)
+	{
+	case STATES::BATTLE:
+		PaintBattle();
+		break;
+	case STATES::MENU:
+		PaintMenu();
+		break;
+	case STATES::IMPROVEMENT_SELECTOR:
+		PaintImprovements();
+		break;
+	case STATES::INITIAL_MOVEMENT:
+		PaintInitialMovement();
 		break;
 	}
 }
@@ -51,7 +75,7 @@ void GameManager::UpdateImprovement(const float deltaTime)
 }
 void GameManager::UpdateInitialMovement(const float deltaTime)
 {
-	_player->SetPosition(SCREEN_WIDTH/2, SCREEN_HEIGHT*0.9);
+	_player->SetPosition(SCREEN_WIDTH / 2, SCREEN_HEIGHT * 0.9);
 	_currentState = STATES::BATTLE;
 }
 
@@ -73,4 +97,39 @@ void GameManager::MovePlayer()
 	float realPosition = position + minX;
 
 	_player->SetPositionX(realPosition);
+}
+
+void GameManager::ConfigurePlayer()
+{
+	_player->SetSize(PLANE_WIDTH, PLANE_HEIGHT);
+	_player->SetBulletsOrigin(1);
+	_player->SetFireRate(2);
+	_player->SetCallbackFire([this](int index, Plane *p)
+							 { this->SpanwPlayerBullet(index, p); });
+}
+
+void GameManager::SpanwPlayerBullet(int index, Plane *p)
+{
+	auto bullet = _bulletsPool->Get();
+	bullet->SetPosition(p->GetX(), p->GetY());
+	bullet->SetVelocity(0, PLAYER_BULLET_VEL_Y);
+	bullet->SetSize(BULLETS_WIDTH, BULLETS_HEIGHT);
+}
+
+void GameManager::PaintMenu()
+{
+}
+void GameManager::PaintBattle()
+{
+	{
+		float playerX, playerY;
+		_player->GetPaintPosition(playerX, playerY);
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player->GetWidth(), _player->GetHeight(), playerX, playerY);
+	}
+}
+void GameManager::PaintImprovements()
+{
+}
+void GameManager::PaintInitialMovement()
+{
 }

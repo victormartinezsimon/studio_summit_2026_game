@@ -13,6 +13,7 @@ constexpr std::string_view BACKGROUND_IMAGE = "images/background.png";
 constexpr std::string_view PLANE_IMAGE = "images/player.png";
 constexpr unsigned int PLANE_WIDTH = 64;
 constexpr unsigned int PLANE_HEIGHT = 64;
+constexpr unsigned int PLAYER_BULLET_VEL_Y = -10;
 
 constexpr std::string_view ENEMY_IMAGE = "images/enemy.png";
 constexpr unsigned int ENEMY_WIDTH = 50;

@@ -1,41 +1,7 @@
 #pragma once
-#ifndef _WIN32
-	#include <array>
-	#include "GameConfig.h"
-	#include "Painter.h"
 
-	#include <stdint.h>
-	#include <stdbool.h>
-	#include <stdio.h>
-	#include <string.h>
+#include "GameConfig.h"
 
-	#include "core.h"
-	#include "platform.h"
-	#include "vpu.h"
-
-	#if defined(__ARM_NEON) || defined(__ARM_NEON__)
-	#include <arm_neon.h>
-	#endif
-
-	#define VIDEO_MODE      EVM_320_240
-	#define VIDEO_COLOR     ECM_8bit_Indexed
-
-	#define SPRITE_W        32
-	#define SPRITE_H        32
-	#define SPRITE_COUNT    4
-	#define TRANSPARENT_KEY 0
-
-	struct Sprite
-	{
-		int x;
-		int y;
-		int vx;
-		int vy;
-	};
-
-	static struct SPPlatform* s_platform = NULL;
-	static struct SPSizeAlloc frameBufferA;
-	static struct SPSizeAlloc frameBufferB;
 
 	// Duck sprite (32x32)
 	static const uint8_t sprite_duck[SPRITE_W * SPRITE_H] = {
@@ -181,7 +147,8 @@
 		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 	};
 
-	static const uint8_t sprite_player[PLANE_WIDTH * PLANE_HEIGHT] ={
+
+static const uint8_t sprite_player[PLANE_WIDTH * PLANE_HEIGHT] ={
 		3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
 3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
 3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
@@ -246,49 +213,4 @@
 3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
 3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
 3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
-
-	};
-
-	class Bullet;
-	class Plane;
-
-	class LinuxPainter : public Painter
-	{
-	public:
-		LinuxPainter();
-		~LinuxPainter();
-
-	public:
-		void BeginPaint() override;
-		void EndPaint() override;
-		float GetDeltaTime() override;
-		bool HasEnded() override;
-
-	public:
-		void PaintBackground() override;
-		void PaintPlayer(Plane* player) override;
-		void PaintEnemy(Plane* enemy) override;
-		void PaintBullet(Bullet* bullet) override;
-
-	private:
-		void init_palette(struct EVideoContext* vctx);
-		void fill_background(uint8_t* dst, uint32_t stride, uint32_t frame);
-		void masked_blit_8(
-			uint8_t* dst,
-			uint32_t dst_stride,
-			int dst_w,
-			int dst_h,
-			const uint8_t* src,
-			int src_w,
-			int src_h,
-			int dst_x,
-			int dst_y,
-			uint8_t key);
-
-	private:
-		SPPlatform* s_platform;
-		uint32_t stride;
-		uint8_t* dst;
-	};
-
-#endif
+};

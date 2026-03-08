@@ -58,6 +58,16 @@ public:
 		}
 	}	
 
+	const std::list<T*> GetCurrentUsed()
+	{
+		return used_;
+	}
+
+	const std::list<const T*> GetConstCurrentUsed()
+	{
+		return used_;
+	}
+
 private:
 	std::list<T*> free_;
 	std::list<T*> used_;

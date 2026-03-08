@@ -8,10 +8,11 @@ public:
 	Bullet();
 
 public:
-	void SetVelocity(float vel);
+	void SetVelocity(float velX, float velY);
 	void Update(const float deltaTime);
 
 
 private:
+	float _velocityX;
 	float _velocityY;
 };

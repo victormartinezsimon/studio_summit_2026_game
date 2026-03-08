@@ -1,10 +1,8 @@
-#include "LinuxPainter.h"
-#include "Plane.h"
-#include "Bullet.h"
+#include "Painter.h"
 #include <stdexcept>
 #include <thread>
 
-LinuxPainter::LinuxPainter()
+Painter::Painter()
 {
 	s_platform = SPInitPlatform();
 
@@ -34,62 +32,35 @@ LinuxPainter::LinuxPainter()
 	VPUClear(s_platform->vx, 0x00000000);
 }
 
-LinuxPainter::~LinuxPainter()
+Painter::~Painter()
 {
 }
 
-void LinuxPainter::PaintBackground()
-{
-}
 
-void LinuxPainter::BeginPaint()
+
+void Painter::BeginPaint()
 {
 	VPUSwapPages(s_platform->vx, s_platform->sc);
-
-	dst = (uint8_t *)s_platform->sc->writepage;
-	fill_background(dst, stride, 0);
 }
 
-void LinuxPainter::EndPaint()
+void Painter::EndPaint()
 {
 	VPUSyncSwap(s_platform->vx, 0);
 	VPUNoop(s_platform->vx);
 	std::this_thread::sleep_for(std::chrono::milliseconds(16));
 }
 
-float LinuxPainter::GetDeltaTime()
+void Painter::PaintBackground()
 {
-	return 0.16f;
+	dst = (uint8_t *)s_platform->sc->writepage;
+	fill_background(dst, stride, 0);
+}
+void Painter::PaintItem(const uint8_t* sprite, unsigned int width, unsigned int height, unsigned int x, unsigned int y)
+{
+	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, 3);
 }
 
-bool LinuxPainter::HasEnded()
-{
-	return false;
-}
-
-void LinuxPainter::PaintPlayer(Plane *player)
-{
-	float x, y;
-	player->GetPaintPosition(x, y);
-
-	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite_player, player->GetWidth(), player->GetHeight(), x, y, 3);
-}
-void LinuxPainter::PaintEnemy(Plane *enemy)
-{
-	float x, y;
-	enemy->GetPaintPosition(x, y);
-	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite_cow, SPRITE_W, SPRITE_H, x, y, TRANSPARENT_KEY);
-}
-
-void LinuxPainter::PaintBullet(Bullet *bullet)
-{
-	float x, y;
-	bullet->GetPaintPosition(x, y);
-
-	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite_rabbit, SPRITE_W, SPRITE_H, x, y, TRANSPARENT_KEY);
-}
-
-void LinuxPainter::init_palette(struct EVideoContext *vctx)
+void Painter::init_palette(struct EVideoContext *vctx)
 {
 	VPUSetDefaultPalette(vctx);
 	/*
@@ -126,7 +97,7 @@ void LinuxPainter::init_palette(struct EVideoContext *vctx)
 
 }
 
-void LinuxPainter::fill_background(uint8_t *dst, uint32_t stride, uint32_t frame)
+void Painter::fill_background(uint8_t *dst, uint32_t stride, uint32_t frame)
 {
 	for (int y = 0; y < SCREEN_HEIGHT; ++y)
 	{
@@ -139,12 +110,12 @@ void LinuxPainter::fill_background(uint8_t *dst, uint32_t stride, uint32_t frame
 	}
 }
 
-void LinuxPainter::masked_blit_8(
+void Painter::masked_blit_8(
 	uint8_t *dst,
 	uint32_t dst_stride,
 	int dst_w,
 	int dst_h,
-	const uint8_t *src,
+	const uint8_t*src,
 	int src_w,
 	int src_h,
 	int dst_x,

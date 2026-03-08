@@ -6,22 +6,39 @@
 class InputManager;
 class Plane;
 class Bullet;
+class PainterManager;
 
 class GameManager
 {
 public:
-	GameManager(InputManager *input, Plane *player, Pool<Plane, PLANES_POOL_SIZE> *enemiesPool, Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool);
+	GameManager(InputManager *input, Plane *player, Pool<Plane, PLANES_POOL_SIZE> *enemiesPool,
+				Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool, PainterManager *painterManager);
 
 public:
 	void Update(const float deltaTime);
+
+private:
 	void UpdateMenu(const float deltaTime);
 	void UpdateBattle(const float deltaTime);
 	void UpdateImprovement(const float deltaTime);
 	void UpdateInitialMovement(const float deltaTime);
 
+public:
+	void Paint();
+
 private:
-	void GetMinMaxXPosiblePosition(float& minX, float& maxX)const;
+	void PaintMenu();
+	void PaintBattle();
+	void PaintImprovements();
+	void PaintInitialMovement();
+
+private:
+	void GetMinMaxXPosiblePosition(float &minX, float &maxX) const;
 	void MovePlayer();
+
+private:
+	void ConfigurePlayer();
+	void SpanwPlayerBullet(int index, Plane *p);
 
 private:
 	enum class STATES
@@ -39,4 +56,5 @@ private:
 	Plane *_player;
 	Pool<Plane, PLANES_POOL_SIZE> *_enemiesPool;
 	Pool<Bullet, BULLETS_POOL_SIZE> *_bulletsPool;
+	PainterManager *_painterManager;
 };

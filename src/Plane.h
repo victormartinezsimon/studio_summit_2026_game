@@ -12,9 +12,11 @@ public:
 
 public:
 	void SetFireRate(float fireRate);
+	void IncreaseFireRate(float increase);
 
 public:
-	void SetBulletsToFire(int bullets);
+	void SetBulletsOrigin(int bullets);
+	void IncreaseBulletsOrigin(int bullets);
 
 public:
 	void IncreaseLives();
@@ -26,7 +28,7 @@ public:
 private:
 	std::function<void(int, Plane*)> _callbackFire;
 	float _fireRate = 0;
-	float _bulletsToFire = 1;
+	float _bulletsOrigin = 1;
 	unsigned int _lives = 0;
 	bool _immune = false;
 	float _currentAcumTime = 0;
