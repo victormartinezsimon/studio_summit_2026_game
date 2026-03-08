@@ -20,6 +20,11 @@ public:
 		_Y = y;
 	}
 
+	void SetPositionX( float x)
+	{
+		_X = x;
+	}
+
 	void GetPaintPosition(float& finalX, float& finalY)
 	{
 		finalX = GetX() - GetWidth() / 2;

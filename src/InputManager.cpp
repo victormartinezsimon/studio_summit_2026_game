@@ -23,7 +23,7 @@ InputManager::InputManager()
     // Set up keyboard device
 	fds[0].fd = SPFindKeyboardDevice();
 	fds[0].events = POLLIN;
-	
+	_havekeyboard = true;
 	if (fds[0].fd < 0)
 	{
 		//printf("Could not find keyboard device. Make sure a keyboard is connected.\n");
@@ -61,13 +61,13 @@ void InputManager::UpdateFakeController()
             {
                 if (ev.type == EV_KEY && ev.value == 1)  // Key press
                 {
-                    if (ev.code == KEY_LEFT)
+                    if (ev.code == KEY_A)
                     {
                         _fakeControllerValue-= fakeIncrease;
                     }
                     else
                     {
-                        if(ev.code == KEY_RIGHT)
+                        if(ev.code == KEY_D)
                         {
                             _fakeControllerValue += fakeIncrease;
                         }

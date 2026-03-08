@@ -9,12 +9,12 @@
 #include "Plane.h"
 #include "LinuxPainter.h"
 #include "InputManager.h"
+#include "GameManager.h"
 
 
 int main(int argc, char** argv)
 {
 	/*
-	InputManager mngr;
 
 	while(true)
 	{
@@ -26,9 +26,29 @@ int main(int argc, char** argv)
 	
 	(void)argc; (void)argv;
 
-	Painter* p = new LinuxPainter();
-
+	InputManager* inputManager = new InputManager();
+	Painter* painter = new LinuxPainter();
 	Pool<Bullet, BULLETS_POOL_SIZE> bulletsPool;
+	Pool<Plane, PLANES_POOL_SIZE> enemiesPool;
+	Plane* player = new Plane();
+	player->SetSize(PLANE_WIDTH, PLANE_HEIGHT);
+	player->SetBulletsToFire(0);
+
+	GameManager*gm = new GameManager(inputManager, player, &enemiesPool, &bulletsPool);
+
+	while(true)
+	{
+		float deltaTime = painter->GetDeltaTime();
+
+		gm->Update(deltaTime);
+		painter->BeginPaint();
+		painter->PaintBackground();
+		painter->PaintPlayer(player);
+		painter->EndPaint();
+	}
+
+
+/*
 
 	auto spawnPlayerBullet = [&bulletsPool](int index, Plane* p)
 		{
@@ -47,7 +67,7 @@ int main(int argc, char** argv)
 	};
 
 	Plane* player = new Plane();
-	player->SetSize(PLANE_WIDTH, PLANE_HEIGHT);
+	
 	player->SetPosition(SCREEN_WIDTH/2, SCREEN_HEIGHT*0.9);
 	player->SetBulletsToFire(0);
 	player->SetFireRate(2);
@@ -104,7 +124,7 @@ int main(int argc, char** argv)
 		p->PaintBackground();
 		p->PaintPlayer(player);
 
-		/*
+		
 		for (auto&& enemy : enemies)
 		{
 			p->PaintEnemy(enemy);
@@ -114,11 +134,11 @@ int main(int argc, char** argv)
 		{
 			p->PaintBullet(&bullet);
 		});
-		*/
+		
 		
 		p->EndPaint();
 	}
 	
-
+	*/
 	
 }

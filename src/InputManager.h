@@ -13,5 +13,5 @@ private:
     void UpdateFakeController();
     int _fakeControllerValue = 0;
     bool _havekeyboard = false;
-    unsigned int fakeIncrease = 1;
+    unsigned int fakeIncrease = 10;
 };
