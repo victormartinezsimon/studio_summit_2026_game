@@ -25,7 +25,7 @@ public:
 		_X = x;
 	}
 
-	void GetPaintPosition(float& finalX, float& finalY)
+	void GetPaintPosition(float& finalX, float& finalY) const
 	{
 		finalX = GetX() - GetWidth() / 2;
 		finalY = GetY() - GetHeight() / 2;
