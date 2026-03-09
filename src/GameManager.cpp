@@ -152,15 +152,18 @@ void GameManager::ConfigurePlayer()
 	_player->SetSize(PLANE_WIDTH, PLANE_HEIGHT);
 	_player->SetBulletsTotalSources(playerData.bulletsSource);
 	_player->SetFireRate(playerData.fireRate);
+	_player->SetHasShield(playerData.hasShield);
 	_player->SetCallbackFire([this](int sourceIndex, Plane *p)
 							 { this->SpawnBullet(sourceIndex, p, true, playerData); });
 }
 
 void GameManager::SpawnBullet(int sourceIndex, Plane *p, bool forPlayer, const modifiable_data &data)
 {
+	
 	auto bullet = _bulletsPool->Get();
-	float positionX = p->GetX();
+	bullet->SetSize(BULLETS_WIDTH, BULLETS_HEIGHT);
 
+	float positionX = p->GetX();
 	if (sourceIndex == 1)
 	{
 		positionX = p->GetX() - p->GetWidth() / 2;
@@ -172,10 +175,12 @@ void GameManager::SpawnBullet(int sourceIndex, Plane *p, bool forPlayer, const m
 	}
 
 	bullet->SetPosition(positionX, p->GetY());
-	bullet->SetSize(BULLETS_WIDTH, BULLETS_HEIGHT);
 	bullet->SetVelocity(data.velocityBulletX, data.velocityBulletY);
 	bullet->SetSize(BULLETS_WIDTH, BULLETS_HEIGHT);
 	bullet->SetPlayerTeam(forPlayer);
+	//bullet->SetHasPenetration(data.bulletHasPenetration);//TODO => review why this fails
+	bullet->SetHasExplostion(data.bulletHasExplosion);
+	
 }
 
 void GameManager::PaintMenu() const
@@ -272,9 +277,9 @@ void GameManager::SpawnRowEnemies(int enemiesToSpawn, float posY)
 void GameManager::ConfigureEnemy(Plane *enemy)
 {
 	enemy->SetSize(ENEMY_WIDTH, ENEMY_HEIGHT);
-	enemy->SetFireRate(enemyData.fireRate);
 	enemy->SetBulletsTotalSources(enemyData.bulletsSource);
 	enemy->SetFireRate(enemyData.fireRate);
+	enemy->SetHasShield(enemyData.hasShield);
 	enemy->SetCallbackFire([this](int sourceIndex, Plane *p)
 						   { this->SpawnBullet(sourceIndex, p, false, enemyData); });
 }
@@ -302,10 +307,11 @@ void GameManager::UpdateBullets(float deltaTime)
 			if (HasCollision(bullet, enemy))
 			{
 				enemiesToDelete.push_back(enemy);
-				// if(!bullet->HasPenetration())
+				if (!bullet->GetHasPenetration())
 				{
 					bulletsToDelete.push_back(bullet);
 				}
+
 				break; // only 1 collistion per bullet per frame
 			}
 		}
@@ -318,8 +324,11 @@ void GameManager::UpdateBullets(float deltaTime)
 
 	for (auto &bullet : bulletsToDelete)
 	{
+		if (bullet->GetHasExplostion())
+		{
+			DoExplosion(bullet, enemiesToDelete);
+		}
 		_bulletsPool->Release(bullet);
-		// do somthing with explosion
 	}
 
 	for (auto &enemy : enemiesToDelete)
@@ -337,10 +346,16 @@ void GameManager::UpdateEnemies(float deltaTime)
 	}
 }
 
-bool GameManager::HasCollision(const Bullet *bullet, const Plane *plane) const
+bool GameManager::HasCollision(const Bullet *bullet, Plane *plane) const
 {
 	if (bullet->GetPlayerTeam() == plane->GetPlayerTeam())
 	{
+		return false;
+	}
+
+	if (plane->GetHasShield())
+	{
+		plane->SetHasShield(false);
 		return false;
 	}
 
@@ -353,4 +368,21 @@ bool GameManager::CollsisionDetection(float ax, float ay, float aw, float ah,
 {
 	return (std::abs(ax - bx) < (aw + bw) / 2.0f &&
 			std::abs(ay - by) < (ah + bh) / 2.0f);
+}
+
+void GameManager::DoExplosion(Bullet *bullet, std::vector<Plane *> &enemiesToDelete)
+{
+	bullet->SetSize(EXPLOSION_SIZE, EXPLOSION_SIZE);
+	auto currentEnemies = _enemiesPool->GetCurrentUsed();
+	for (auto &&enemy : currentEnemies)
+	{
+		if (HasCollision(bullet, enemy))
+		{
+			enemiesToDelete.push_back(enemy);
+		}
+	}
+	if (HasCollision(bullet, _player))
+	{
+		// do something
+	}
 }

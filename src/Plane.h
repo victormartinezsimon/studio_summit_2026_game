@@ -18,17 +18,13 @@ public:
 	void SetBulletsTotalSources(int bullets);
 
 public:
-	void IncreaseLives();
-
-public:
-	void SetImmune(bool immune);
-	bool IsImmune() const;
+	void SetHasShield(bool value);
+	bool GetHasShield() const;
 
 private:
 	std::function<void(int, Plane*)> _callbackFire;
 	float _fireRate = 0;
 	float _bulletsTotalSources = 1;
-	unsigned int _lives = 0;
-	bool _immune = false;
 	float _currentAcumTime = 0;
+	bool _hasShield = false;
 };

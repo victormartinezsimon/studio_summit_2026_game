@@ -56,7 +56,7 @@ private:
 private:
 	void ConfigurePlayer();
 	void UpdateBullets(float deltaTime);
-	bool HasCollision(const Bullet *bullet, const Plane *plane) const;
+	bool HasCollision(const Bullet *bullet, Plane *plane) const;
 	bool CollsisionDetection(float ax, float ay, float aw, float ah,
 							 float bx, float by, float bw, float bh) const;
 
@@ -73,6 +73,9 @@ private:
 	void SpawnEnemies();
 	void SpawnRowEnemies(int totalEnemies, float posY);
 	void GetMinMaxXPosiblePositionForEnemies(float &minX, float &maxX) const;
+
+private:
+	void DoExplosion(Bullet* bullet, std::vector<Plane *>& enemiesToDelete);
 
 private:
 	enum class STATES

@@ -17,17 +17,13 @@ void Plane::SetBulletsTotalSources(int bullets)
 	_bulletsTotalSources = bullets;
 }
 
-void Plane::IncreaseLives()
+void Plane::SetHasShield(bool value)
 {
-	_lives++;
+	_hasShield = value;
 }
-void Plane::SetImmune(bool immune)
+bool Plane::GetHasShield() const
 {
-	_immune = immune;
-}
-bool Plane::IsImmune() const
-{
-	return _immune;
+	return _hasShield;
 }
 
 void Plane::Update(const float deltaTime)

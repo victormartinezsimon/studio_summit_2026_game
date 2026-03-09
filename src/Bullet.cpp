@@ -3,7 +3,7 @@
 #include "GameConfig.h"
 #include "Sprites.h"
 
-Bullet::Bullet():_velocityX(0), _velocityY(0)
+Bullet::Bullet() : _velocityX(0), _velocityY(0)
 {
 	SetSize(BULLETS_WIDTH, BULLETS_HEIGHT);
 }
@@ -21,4 +21,24 @@ void Bullet::Update(const float deltaTime)
 
 	float newY = deltaTime * _velocityY;
 	_Y += newY;
+}
+
+void Bullet::SetHasPenetration(bool value)
+{
+	_hasPenetration = value;
+}
+
+bool Bullet::GetHasPenetration() const
+{
+	return _hasPenetration;
+}
+
+void Bullet::SetHasExplostion(bool value)
+{
+	_hasExplosion = value;
+}
+
+bool Bullet::GetHasExplostion() const
+{
+	return _hasExplosion;
 }
