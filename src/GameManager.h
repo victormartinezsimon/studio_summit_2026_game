@@ -30,7 +30,7 @@ private:
 	void PaintMenu() const;
 	void PaintBattle() const;
 	void PaintImprovements() const;
-	void PaintInitialMovement()const;
+	void PaintInitialMovement() const;
 
 private:
 	void GetMinMaxXPosiblePosition(float &minX, float &maxX) const;
@@ -40,12 +40,13 @@ private:
 	void ConfigurePlayer();
 	void SpawnPlayerBullet(int index, Plane *p);
 	void UpdateBullets(float deltaTime);
-	bool HasCollision(const Bullet* bullet, const Plane* plane)const;
+	bool HasCollision(const Bullet *bullet, const Plane *plane) const;
 	bool CollsisionDetection(float ax, float ay, float aw, float ah,
-                  float bx, float by, float bw, float bh)const;
+							 float bx, float by, float bw, float bh) const;
+
 private:
 	void UpdateEnemies(float deltaTime);
-	void ConfigureEnemy(Plane* enemy);
+	void ConfigureEnemy(Plane *enemy);
 	void SpawnEnemyBullet(int index, Plane *p);
 
 private:
@@ -64,28 +65,27 @@ private:
 		INITIAL_MOVEMENT
 	};
 
-	private:
-	//TODO: move this to a struct
-	float currentPlayerVelocitiyBulletX; 
-	float currentPlayerVelocitiyBulletY; 
-	float currentPlayerFireRate;
-	int currentPlayerBulletsOrigin;
-	bool currentPlayerHasPenetration;//for the future
-	bool currentPlayerHasExplosion;//for the future
-	bool currentPlayerHasShield;//for the future
+private:
+	struct modifiable_data
+	{
+		float velocityBulletX;
+		float velocityBulletY;
+		float fireRate;
+		int bulletsOrigin;
+		bool bulletHasPenetration;
+		bool bulletHasExplosion;
+		bool hasShield;
+	};
 	
-	float currentEnemyVelocitiyBulletX; 
-	float currentEnemyVelocitiyBulletY; 
-	float currentEnemyFireRate;
-	int currentEnemyBulletsOrigin;
-
+	modifiable_data playerData;
+	modifiable_data enemyData;
 
 private:
 	InputManager *_inputManager;
 	STATES _currentState = STATES::MENU;
 	int _currentLevel = 0;
 	Plane *_player;
-	Pool<Plane, PLANES_POOL_SIZE>* _enemiesPool;
-	Pool<Bullet, BULLETS_POOL_SIZE>* _bulletsPool;
+	Pool<Plane, PLANES_POOL_SIZE> *_enemiesPool;
+	Pool<Bullet, BULLETS_POOL_SIZE> *_bulletsPool;
 	PainterManager *_painterManager;
 };

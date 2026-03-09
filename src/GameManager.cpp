@@ -10,15 +10,22 @@ GameManager::GameManager(InputManager *input, Plane *player, Pool<Plane, PLANES_
 	: _inputManager(input), _player(player), _enemiesPool(enemiesPool), _bulletsPool(bulletsPool),
 	  _painterManager(painterManager), _currentState(STATES::MENU), _currentLevel(0)
 {
-	currentPlayerVelocitiyBulletX = PLAYER_DEFAULT_BULLET_VEL_X;
-	currentPlayerVelocitiyBulletY = PLAYER_DEFAULT_BULLET_VEL_Y;
-	currentPlayerFireRate = PLAYER_DEFAULT_FIRE_RATE;
-	currentPlayerBulletsOrigin = PLAYER_DEFAULT_BULLETS_ORIGIN;
 
-	currentEnemyVelocitiyBulletX = ENEMY_DEFAULT_BULLET_VEL_X;
-	currentEnemyVelocitiyBulletY = ENEMY_DEFAULT_BULLET_VEL_Y;
-	currentEnemyFireRate = ENEMY_DEFAULT_FIRE_RATE;
-	currentEnemyBulletsOrigin = ENEMY_DEFAULT_BULLETS_ORIGIN;
+	playerData.velocityBulletX = DEFAULT_BULLET_VEL_X;
+	playerData.velocityBulletY = -DEFAULT_BULLET_VEL_Y;
+	playerData.fireRate = DEFAULT_FIRE_RATE;
+	playerData.bulletsOrigin = DEFAULT_BULLETS_ORIGIN;
+	playerData.bulletHasPenetration = DEFAULT_BULLET_HAS_PENETRATION;
+	playerData.bulletHasExplosion = DEFAULT_BULLET_HAS_EXPLOSION;
+	playerData.hasShield = DEFAULT_HAS_SHIELD;
+
+	enemyData.velocityBulletX = DEFAULT_BULLET_VEL_X;
+	enemyData.velocityBulletY = DEFAULT_BULLET_VEL_Y;
+	enemyData.fireRate = DEFAULT_FIRE_RATE;
+	enemyData.bulletsOrigin = DEFAULT_BULLETS_ORIGIN;
+	enemyData.bulletHasPenetration = DEFAULT_BULLET_HAS_PENETRATION;
+	enemyData.bulletHasExplosion = DEFAULT_BULLET_HAS_EXPLOSION;
+	enemyData.hasShield = DEFAULT_HAS_SHIELD;
 
 	ConfigurePlayer();
 }
@@ -120,8 +127,8 @@ void GameManager::MovePlayer()
 void GameManager::ConfigurePlayer()
 {
 	_player->SetSize(PLANE_WIDTH, PLANE_HEIGHT);
-	_player->SetBulletsOrigin(currentPlayerBulletsOrigin);
-	_player->SetFireRate(currentPlayerFireRate);
+	_player->SetBulletsOrigin(playerData.bulletsOrigin);
+	_player->SetFireRate(playerData.fireRate);
 	_player->SetCallbackFire([this](int index, Plane *p)
 							 { this->SpawnPlayerBullet(index, p); });
 }
@@ -130,7 +137,7 @@ void GameManager::SpawnPlayerBullet(int index, Plane *p)
 {
 	auto bullet = _bulletsPool->Get();
 	bullet->SetPosition(p->GetX(), p->GetY());
-	bullet->SetVelocity(currentPlayerVelocitiyBulletX, currentPlayerVelocitiyBulletY);
+	bullet->SetVelocity(playerData.velocityBulletX, playerData.velocityBulletY);
 	bullet->SetSize(BULLETS_WIDTH, BULLETS_HEIGHT);
 	bullet->SetPlayerTeam(true);
 }
@@ -228,9 +235,9 @@ void GameManager::SpawnRowEnemies(int enemiesToSpawn, float posY)
 void GameManager::ConfigureEnemy(Plane *enemy)
 {
 	enemy->SetSize(ENEMY_WIDTH, ENEMY_HEIGHT);
-	enemy->SetFireRate(currentEnemyFireRate);
-	enemy->SetBulletsOrigin(currentEnemyBulletsOrigin);
-	enemy->SetFireRate(currentEnemyFireRate);
+	enemy->SetFireRate(enemyData.fireRate);
+	enemy->SetBulletsOrigin(enemyData.bulletsOrigin);
+	enemy->SetFireRate(enemyData.fireRate);
 	enemy->SetCallbackFire([this](int index, Plane *p)
 						   { this->SpawnEnemyBullet(index, p); });
 }
@@ -239,7 +246,7 @@ void GameManager::SpawnEnemyBullet(int index, Plane *p)
 {
 	auto bullet = _bulletsPool->Get();
 	bullet->SetPosition(p->GetX(), p->GetY());
-	bullet->SetVelocity(currentEnemyVelocitiyBulletX, currentEnemyVelocitiyBulletY);
+	bullet->SetVelocity(enemyData.velocityBulletX, enemyData.velocityBulletY);
 	bullet->SetSize(BULLETS_WIDTH, BULLETS_HEIGHT);
 	bullet->SetPlayerTeam(false);
 }
