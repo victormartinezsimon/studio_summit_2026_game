@@ -267,11 +267,11 @@ void GameManager::UpdateBullets(float deltaTime)
 			if (HasCollision(bullet, enemy))
 			{
 				enemiesToDelete.push_back(enemy);
-
 				// if(!bullet->HasPenetration())
 				{
 					bulletsToDelete.push_back(bullet);
 				}
+				break;//only 1 collistion per bullet per frame
 			}
 		}
 
