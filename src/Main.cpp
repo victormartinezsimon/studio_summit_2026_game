@@ -18,7 +18,6 @@ int main(int argc, char **argv)
 
 	InputManager *inputManager = new InputManager();
 	PainterManager* painterManager = new PainterManager();
-	//Painter *painter = new Painter();
 	Pool<Bullet, BULLETS_POOL_SIZE> bulletsPool;
 	Pool<Plane, PLANES_POOL_SIZE> enemiesPool;
 
@@ -44,8 +43,6 @@ int main(int argc, char **argv)
 	delete inputManager;
 	delete painterManager;
 	delete player;
-
-	/*
 
 		auto spawnPlayerBullet = [&bulletsPool](int index, Plane* p)
 			{
