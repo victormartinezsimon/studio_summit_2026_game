@@ -18,8 +18,8 @@ public:
 	bool GetHasExplostion() const;
 
 private:
-	float _velocityX;
-	float _velocityY;
-	bool _hasPenetration;
-	bool _hasExplosion;
+	float _velocityX = 0;
+	float _velocityY = 0;
+	bool _hasPenetration = false;
+	bool _hasExplosion = false;
 };
