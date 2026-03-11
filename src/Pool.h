@@ -45,6 +45,11 @@ public:
 		_used[index] = false;
 	}
 
+	void ReturnAll()
+	{
+		_used.fill(false);
+	}
+
 	void for_each_active(std::function<void(T&)> func) 
 	{
 		for(int i = 0; i < N; ++i)

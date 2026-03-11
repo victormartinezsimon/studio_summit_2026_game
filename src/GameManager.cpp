@@ -253,6 +253,9 @@ void GameManager::StartLevel()
 
 void GameManager::EndLevel()
 {
+	_enemiesPool.ReturnAll();
+	_bulletsPool.ReturnAll();
+	
 	_currentState = STATES::IMPROVEMENT_SELECTOR;
 	++_currentLevel;
 }
