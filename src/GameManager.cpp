@@ -7,7 +7,7 @@
 
 GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	: _inputManager(input),
-	  _painterManager(painterManager), _currentState(STATES::MENU), _currentLevel(0)
+	  _painterManager(painterManager), _currentState(STATES::ENTER_IN_MENU), _currentLevel(0)
 {
 	InitializeConstantValues();
 	InitializeImprovementsFunctions();
@@ -56,11 +56,16 @@ void GameManager::InitializeImprovementsFunctions()
 
 void GameManager::Update(const float deltaTime)
 {
+	_currentFrameInputValue = _inputManager->GetInputValue();
+	_currentFrameInputValueNormalized = _inputManager->NormalizeValue(_currentFrameInputValue);
+
 	switch (_currentState)
 	{
 	case STATES::BATTLE:
 		UpdateBattle(deltaTime);
 		break;
+	case STATES::ENTER_IN_MENU:
+		UpdateEnterMenu( deltaTime );
 	case STATES::MENU:
 		UpdateMenu(deltaTime);
 		break;
@@ -81,6 +86,7 @@ void GameManager::Paint()
 	case STATES::BATTLE:
 		PaintBattle();
 		break;
+	case STATES::ENTER_IN_MENU:
 	case STATES::MENU:
 		PaintMenu();
 		break;
@@ -93,10 +99,29 @@ void GameManager::Paint()
 	}
 }
 
+void GameManager::UpdateEnterMenu(const float deltaTime)
+{
+	
+	_buttonAManager.SelectInPosition(2, {SCREEN_WIDTH * MAIN_MENU_MIN_VALUE, SCREEN_WIDTH * MAIN_MENU_MAX_VALUE}, 
+		[this](int selection)
+	{
+		_playingStartAnimation = false;
+		_currentState = STATES::INITIAL_MOVEMENT;
+
+	});
+	
+	_currentState = STATES::MENU;
+
+	_player.SetSize(PLANE_WIDTH, PLANE_HEIGHT);
+	_player.SetPosition(0, SCREEN_HEIGHT * 0.9);
+}
+
 void GameManager::UpdateMenu(const float deltaTime)
 {
-	_playingStartAnimation = false;
-	_currentState = STATES::INITIAL_MOVEMENT;
+	_buttonAManager.Update(deltaTime, _currentFrameInputValueNormalized, _currentFrameInputValue);
+	
+	// move player
+	MovePlayer();
 }
 void GameManager::UpdateBattle(const float deltaTime)
 {
@@ -143,10 +168,9 @@ void GameManager::MovePlayer()
 {
 	float minX, maxX;
 	GetMinMaxXPosiblePosition(minX, maxX);
-	float percent = _inputManager->GetInputValueNormalized();
 
 	float diffWidth = maxX - minX;
-	float position = diffWidth * percent;
+	float position = diffWidth * _currentFrameInputValueNormalized;
 
 	float realPosition = position + minX;
 
@@ -211,6 +235,11 @@ void GameManager::SpawnBullet(int sourceIndex, const Plane &p, bool forPlayer, c
 
 void GameManager::PaintMenu()
 {
+	{
+		float playerX, playerY;
+		_player.GetPaintPosition(playerX, playerY);
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player.GetWidth(), _player.GetHeight(), playerX, playerY);
+	}
 }
 void GameManager::PaintBattle()
 {

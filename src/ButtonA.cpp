@@ -1,9 +1,7 @@
 #include "ButtonA.h"
-#include "InputManager.h"
+#include "GameConfig.h"
 
-ButtonA::ButtonA(InputManager *inputManager) : _inputManager(inputManager), _enabled(false) {}
-
-void ButtonA::SelectInPosition(float duration, std::pair<int, int> marginA, std::pair<int, int> marginB, std::function<void(int)> callback)
+void ButtonA::SelectInPosition(float duration, std::pair<int, int> marginA, std::function<void(int)> callback)
 {
     _duration = duration;
     _callback = callback;
@@ -11,8 +9,6 @@ void ButtonA::SelectInPosition(float duration, std::pair<int, int> marginA, std:
     _enabled = true;
 
     _marginA = marginA;
-    _marginB = marginB;
-    _lastInputValue = -1;
     _acumTime = 0;
 }
 
@@ -25,7 +21,7 @@ void ButtonA::SelectAfterTime(float duration, std::function<void(int)> callback)
     _acumTime = 0;
 }
 
-void ButtonA::Update(float deltaTime)
+void ButtonA::Update(float deltaTime,const float currentInputValueNormalized, const float currentInputValue)
 {
     if (!_enabled)
     {
@@ -34,52 +30,40 @@ void ButtonA::Update(float deltaTime)
 
     if (_isSelectInPosition)
     {
-        UpdateSelectInPosition(deltaTime);
+        UpdateSelectInPosition(deltaTime,currentInputValueNormalized, currentInputValue);
     }
     else
     {
-        UpdateSelectAfterTime(deltaTime);
+        UpdateSelectAfterTime(deltaTime,currentInputValueNormalized, currentInputValue);
     }
 }
 
-void ButtonA::UpdateSelectInPosition(const float deltaTime)
+void ButtonA::UpdateSelectInPosition(const float deltaTime, const float currentInputValueNormalized, const float currentInputValue)
 {
-    auto currentInputValue = _inputManager->GetInputValue();
-
-    int selection = -1;
-    if(_marginA.first <= currentInputValue && currentInputValue <= _marginA.second)
+    float screenValue = SCREEN_WIDTH * currentInputValueNormalized;
+    if(_marginA.first <= screenValue && screenValue <= _marginA.second)
     {
         _acumTime += deltaTime;
-        selection = 0;
     }
     else
     {
-        if(_marginB.first <= currentInputValue && currentInputValue <= _marginB.second)
-        {
-            _acumTime += deltaTime;
-            selection = 1;
-        }
-        else
-        {
-            selection = -1;
-            _acumTime = 0;
-        }
+        _acumTime = 0;
     }
     
     if(_acumTime >= _duration)
     {
-        _callback(selection);
+        _callback(0);//always 0
         _enabled = false;
     }
 
 }
-void ButtonA::UpdateSelectAfterTime(const float deltaTime)
+void ButtonA::UpdateSelectAfterTime(const float deltaTime, const float currentInputValueNormalized, const float currentInputValue)
 {
     _acumTime += deltaTime;
 
     if (_acumTime > _duration)
     {
-        auto value = _inputManager->GetInputValueNormalized();
+        auto value = currentInputValueNormalized;
         _callback(value <= 0.5f ? 0 : 1);
         _enabled = false;
     }

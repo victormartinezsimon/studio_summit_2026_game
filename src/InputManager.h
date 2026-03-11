@@ -8,6 +8,7 @@ public:
 public:
 	int GetInputValue();
     float GetInputValueNormalized();
+    float NormalizeValue(int value)const;
 
 private:
     void UpdateFakeController();

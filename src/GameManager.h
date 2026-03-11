@@ -7,6 +7,7 @@
 #include "Plane.h"
 #include "Bullet.h"
 #include "EasingManager.h"
+#include "ButtonA.h"
 
 class InputManager;
 class PainterManager;
@@ -34,6 +35,7 @@ public:
 	void Paint();
 
 private:
+	void UpdateEnterMenu(const float deltaTime);
 	void UpdateMenu(const float deltaTime);
 	void UpdateBattle(const float deltaTime);
 	void UpdateImprovement(const float deltaTime);
@@ -87,6 +89,7 @@ private:
 private:
 	enum class STATES
 	{
+		ENTER_IN_MENU,
 		MENU,
 		BATTLE,
 		IMPROVEMENT_SELECTOR,
@@ -107,6 +110,9 @@ private:
 	PainterManager *_painterManager;
 	EasingManager _easingManager;
 	bool _playingStartAnimation =false;
+	ButtonA _buttonAManager;
+	float _currentFrameInputValueNormalized;
+	int _currentFrameInputValue;
 
 private:
 	std::map<std::string, std::function<void(modifiable_data &)>> _improvementFunctions;

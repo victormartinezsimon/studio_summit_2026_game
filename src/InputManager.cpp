@@ -46,8 +46,14 @@ int InputManager::GetInputValue()
 float InputManager::GetInputValueNormalized()
 {
     int value = GetInputValue();
+    return NormalizeValue(value);
+}
+
+float InputManager::NormalizeValue(int value)const
+{
     return value / 255.0;
 }
+
 
 void InputManager::UpdateFakeController()
 {
