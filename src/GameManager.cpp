@@ -123,7 +123,7 @@ void GameManager::UpdateImprovement(const float deltaTime)
 }
 void GameManager::UpdateInitialMovement(const float deltaTime)
 {
-	if(!_playingStartAnimation)
+	if (!_playingStartAnimation)
 	{
 		StartLevel();
 	}
@@ -162,7 +162,7 @@ void GameManager::ConfigurePlayer()
 	_player.SetHasShield(playerData.hasShield);
 	_player.SetPlayerTeam(true);
 	_player.SetCallbackFire([this](int sourceIndex, const Plane &p)
-							 { this->SpawnBullet(sourceIndex, p, true, playerData); });
+							{ this->SpawnBullet(sourceIndex, p, true, playerData); });
 }
 
 void GameManager::SpawnBullet(int sourceIndex, const Plane &p, bool forPlayer, const modifiable_data &data)
@@ -170,7 +170,7 @@ void GameManager::SpawnBullet(int sourceIndex, const Plane &p, bool forPlayer, c
 	auto id = _bulletsPool.Get();
 
 	_bulletsPool.call_for_element(id, [this, sourceIndex, p, forPlayer, data](Bullet &bullet)
-								   {
+								  {
 		bullet.SetSize(BULLETS_WIDTH, BULLETS_HEIGHT);
 
 		float positionX = p.GetX();
@@ -199,7 +199,7 @@ void GameManager::PaintBattle()
 {
 	{
 		_bulletsPool.for_each_active([&](const Bullet &bullet)
-									  {
+									 {
 			float posX, posY;
 			bullet.GetPaintPosition(posX, posY);
 			_painterManager->AddToPaint(PainterManager::SPRITE_ID::BULLET, 
@@ -207,8 +207,8 @@ void GameManager::PaintBattle()
 	}
 
 	{
-		_enemiesPool.for_each_active([this](const Plane& p)
-									  {
+		_enemiesPool.for_each_active([this](const Plane &p)
+									 {
 			float posX, posY;
 			p.GetPaintPosition(posX, posY);
 			_painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, 
@@ -230,6 +230,15 @@ void GameManager::PaintInitialMovement()
 		float playerX, playerY;
 		_player.GetPaintPosition(playerX, playerY);
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player.GetWidth(), _player.GetHeight(), playerX, playerY);
+	}
+
+	{
+		_enemiesPool.for_each_active([this](const Plane &p)
+									 {
+			float posX, posY;
+			p.GetPaintPosition(posX, posY);
+			_painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, 
+				p.GetWidth(), p.GetHeight(), posX, posY); });
 	}
 }
 
@@ -286,7 +295,7 @@ void GameManager::SpawnRowEnemies(int enemiesToSpawn, float posY)
 		auto id = _enemiesPool.Get();
 
 		_enemiesPool.call_for_element(id, [this, posX, posY](Plane &enemy)
-									   {
+									  {
 			enemy.SetPosition(posX, posY);
 			enemy.SetSize(ENEMY_WIDTH, ENEMY_HEIGHT);
 			enemy.SetBulletsTotalSources(enemyData.bulletsSource);
@@ -294,19 +303,18 @@ void GameManager::SpawnRowEnemies(int enemiesToSpawn, float posY)
 			enemy.SetHasShield(enemyData.hasShield);
 			enemy.SetPlayerTeam(false);
 			enemy.SetCallbackFire([this](int sourceIndex, const Plane &p)
-						  { this->SpawnBullet(sourceIndex, p, false, enemyData); }); 
-			});
+						  { this->SpawnBullet(sourceIndex, p, false, enemyData); }); });
 	}
 }
 
 void GameManager::UpdateBullets(float deltaTime)
 {
 	_bulletsPool.for_each_active([deltaTime](Bullet &bullet)
-								  { bullet.Update(deltaTime); });
+								 { bullet.Update(deltaTime); });
 
 	// check if it should be deleted any bullet
 	_bulletsPool.for_each_active([this](Bullet &bullet)
-								  {
+								 {
 									  bool isDestroyed = false;
 									  // check out of screen
 									  if (bullet.GetY() < 0 || bullet.GetY() > SCREEN_HEIGHT)
@@ -341,13 +349,12 @@ void GameManager::UpdateBullets(float deltaTime)
 											  DoExplosion(bullet);
 										  }
 									  } });
-
 }
 
 void GameManager::UpdateEnemies(float deltaTime)
 {
 	_enemiesPool.for_each_active([deltaTime](Plane &enemy)
-								  { enemy.Update(deltaTime); });
+								 { enemy.Update(deltaTime); });
 }
 
 bool GameManager::HasCollision(const Bullet &bullet, Plane &plane) const
@@ -379,7 +386,7 @@ void GameManager::DoExplosion(Bullet &bullet)
 	bullet.SetSize(EXPLOSION_SIZE, EXPLOSION_SIZE);
 
 	_enemiesPool.for_each_active([&bullet, this](Plane &enemy)
-								  {
+								 {
 									  if (HasCollision(bullet, enemy))
 									  {
 										  _enemiesPool.Release(enemy);
@@ -397,13 +404,25 @@ void GameManager::DamagePlayer()
 
 void GameManager::PlayInitialAnimation()
 {
-	_easingManager.AddEase(INTIAL_ANIMATION_DURATION, SCREEN_WIDTH/2, SCREEN_HEIGHT/2,
-	_player.GetX(), _player.GetY(), EasingManager::EASE_TYPES::INOUTCUBE,
-	[this](){
-		_currentState = STATES::BATTLE;
-	},
-	[this](float x, float y) {
-		_player.SetPosition(x,y);
-	}
+	_easingManager.AddEase(INTIAL_ANIMATION_DURATION, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 
+		_player.GetX(), _player.GetY(), EasingManager::EASE_TYPES::INOUTCUBE, 
+		[this]()
+		{
+			_currentState = STATES::BATTLE;
+			_easingManager.FinishAll(); 
+		}, 
+		[this](float x, float y)
+		{ 
+			_player.SetPosition(x, y); 
+		}
 	);
+
+	_enemiesPool.for_each_active(
+		[this](Plane &p)
+		{
+			_easingManager.AddEase(INTIAL_ANIMATION_DURATION, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 
+				p.GetX(), p.GetY(), EasingManager::EASE_TYPES::INOUTCUBE, [] {}, 
+				[&p](float x, float y)
+				{ p.SetPosition(x, y); });
+		});
 }

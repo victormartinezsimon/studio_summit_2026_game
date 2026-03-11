@@ -20,16 +20,25 @@ void EasingManager::Update(const float deltaTime)
 
             if (_eases[i].acumTime > _eases[i].duration)
             {
-                _eases[i].endCallback();
-                _inUse[i] = false;
+                FinishEase(i);
             }
             else
             {
-                _eases[i].tickCallback(x, y);
+                if(_eases[i].tickCallback)
+                {
+                    _eases[i].tickCallback(x, y);
+                }
             }
         }
     }
 }
+
+bool EasingManager::AddEase(float duration, float startX, float startY, 
+		float endX, float endY, EASE_TYPES type)
+{
+    return AddEase(duration, startX, startY, endX, endY, type, nullptr, nullptr);
+}
+
 bool EasingManager::AddEase(float duration, float startX, float startY,
                             float endX, float endY, EASE_TYPES type, std::function<void()> endCallback,
                             std::function<void(float currentX, float currentY)> tickCallback)
@@ -48,6 +57,7 @@ bool EasingManager::AddEase(float duration, float startX, float startY,
             _eases[i].endY = endY;
             _eases[i].type = type;
             _eases[i].tickCallback = tickCallback;
+            return true;
         }
     }
     return false;
@@ -81,6 +91,26 @@ void EasingManager::GetValues(int id, float &x, float &y) const
     break;
     }
 }
+
+void EasingManager::FinishAll()
+{
+    for (int i = 0; i < _inUse.size(); ++i)
+    {
+        FinishEase(i);
+    }
+}
+void EasingManager::FinishEase(int id)
+{
+    if(!_inUse[id]){return;}
+   _eases[id].acumTime = _eases[id].duration;
+    _inUse[id] = false;
+
+    if(_eases[id].endCallback)
+    {
+        _eases[id].endCallback();
+    }
+}
+
 
 float EasingManager::inOutSine(float progress, float startValue, float endValue) const
 {

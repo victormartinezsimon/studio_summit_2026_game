@@ -24,18 +24,23 @@ private:
 		float startY;
 		float endX;
 		float endY;
-		std::function<void()> endCallback;
-		std::function<void(float currentX, float currentY)> tickCallback;
+		std::function<void()> endCallback = nullptr;
+		std::function<void(float currentX, float currentY)> tickCallback = nullptr;
 	};
 
 public:
 	EasingManager();
 
+
 public:
 	void Update(const float deltaTime);
 	bool AddEase(float duration, float startX, float startY, 
+		float endX, float endY, EASE_TYPES type);
+	bool AddEase(float duration, float startX, float startY, 
 		float endX, float endY, EASE_TYPES type, std::function<void()> endCallback,
 		std::function<void(float currentX, float currentY)> tickCallback);
+	void FinishAll();
+	void FinishEase(int id);
 
 private:
 	void GetValues(int id, float& x, float& y)const;
