@@ -40,6 +40,7 @@ private:
 	void UpdateBattle(const float deltaTime);
 	void UpdateImprovement(const float deltaTime);
 	void UpdateInitialMovement(const float deltaTime);
+	void UpdateEnterInicialMovement( const float deltaTime);
 
 private:
 	void PaintMenu();
@@ -93,6 +94,7 @@ private:
 		MENU,
 		BATTLE,
 		IMPROVEMENT_SELECTOR,
+		ENTER_IN_INITIAL_MOVEMENT,
 		INITIAL_MOVEMENT
 	};
 
@@ -109,7 +111,6 @@ private:
 	Pool<Bullet, BULLETS_POOL_SIZE> _bulletsPool;
 	PainterManager *_painterManager;
 	EasingManager _easingManager;
-	bool _playingStartAnimation =false;
 	ButtonA _buttonAManager;
 	float _currentFrameInputValueNormalized;
 	int _currentFrameInputValue;

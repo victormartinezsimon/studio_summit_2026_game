@@ -75,6 +75,9 @@ void GameManager::Update(const float deltaTime)
 	case STATES::INITIAL_MOVEMENT:
 		UpdateInitialMovement(deltaTime);
 		break;
+	case STATES::ENTER_IN_INITIAL_MOVEMENT:
+		UpdateEnterInicialMovement(deltaTime);
+		
 	}
 }
 
@@ -93,6 +96,7 @@ void GameManager::Paint()
 	case STATES::IMPROVEMENT_SELECTOR:
 		PaintImprovements();
 		break;
+	case STATES::ENTER_IN_INITIAL_MOVEMENT:
 	case STATES::INITIAL_MOVEMENT:
 		PaintInitialMovement();
 		break;
@@ -105,8 +109,7 @@ void GameManager::UpdateEnterMenu(const float deltaTime)
 	_buttonAManager.SelectInPosition(2, {SCREEN_WIDTH * MAIN_MENU_MIN_VALUE, SCREEN_WIDTH * MAIN_MENU_MAX_VALUE}, 
 		[this](int selection)
 	{
-		_playingStartAnimation = false;
-		_currentState = STATES::INITIAL_MOVEMENT;
+		_currentState = STATES::ENTER_IN_INITIAL_MOVEMENT;
 
 	});
 	
@@ -143,19 +146,17 @@ void GameManager::UpdateBattle(const float deltaTime)
 }
 void GameManager::UpdateImprovement(const float deltaTime)
 {
-	_playingStartAnimation = false;
-	_currentState = STATES::INITIAL_MOVEMENT;
+	_currentState = STATES::ENTER_IN_INITIAL_MOVEMENT;
 }
 void GameManager::UpdateInitialMovement(const float deltaTime)
 {
-	if (!_playingStartAnimation)
-	{
-		StartLevel();
-	}
-	else
-	{
-		_easingManager.Update(deltaTime);
-	}
+	_easingManager.Update(deltaTime);
+}
+
+void GameManager::UpdateEnterInicialMovement( const float deltaTime)
+{
+	StartLevel();
+	_currentState = STATES::INITIAL_MOVEMENT;
 }
 
 void GameManager::GetMinMaxXPosiblePosition(float &minX, float &maxX) const
@@ -293,7 +294,6 @@ void GameManager::StartLevel()
 	ConfigurePlane(_player, SCREEN_WIDTH / 2, SCREEN_HEIGHT * 0.9, playerData, true);
 	SpawnEnemies();
 	PlayInitialAnimation();
-	_playingStartAnimation = true;
 }
 
 void GameManager::EndLevel()
@@ -460,16 +460,13 @@ void GameManager::DamagePlayer()
 
 void GameManager::PlayInitialAnimation()
 {
-	_easingManager.AddEase(INTIAL_ANIMATION_DURATION, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, _player.GetX(), _player.GetY(), EasingManager::EASE_TYPES::INOUTCUBE, [this]()
-						   {
-			_currentState = STATES::BATTLE;
-			_easingManager.FinishAll(); }, [this](float x, float y)
-						   { _player.SetPosition(x, y); });
-
 	_enemiesPool.for_each_active(
 		[this](Plane &p)
 		{
-			_easingManager.AddEase(INTIAL_ANIMATION_DURATION, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, p.GetX(), p.GetY(), EasingManager::EASE_TYPES::INOUTCUBE, [] {}, [&p](float x, float y)
-								   { p.SetPosition(x, y); });
+			_easingManager.AddEase(INTIAL_ANIMATION_DURATION, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+				 p.GetX(), p.GetY(), EasingManager::EASE_TYPES::INOUTCUBE, 
+				 [this] {_currentState = STATES::BATTLE;}, 
+				 [&p](float x, float y)
+					{ p.SetPosition(x, y); });
 		});
 }
