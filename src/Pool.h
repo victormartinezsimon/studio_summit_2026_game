@@ -32,10 +32,10 @@ public:
 			if(!_used[i])
 			{
 				_used[i] = true;
+				++_currentUse;
 				return i;
 			}
 		}
-		throw std::runtime_error("ObjectPool ended");
 		return -1;
 	}
 
@@ -43,11 +43,14 @@ public:
 	{
 		int index = elem.GetID();
 		_used[index] = false;
+		--_currentUse;
 	}
 
 	void ReturnAll()
 	{
 		_used.fill(false);
+		_currentUse = 0;
+
 	}
 
 	void for_each_active(std::function<void(T&)> func) 
@@ -61,20 +64,17 @@ public:
 
 	void call_for_element(int id, std::function<void(T&)> func) 
 	{
+		if(id == -1){return;}
 		func(_poolElements[id]);
 	}	
 
 	int TotalInUse() const
 	{
-		int count = 0;
-		for(auto v: _used)
-		{
-			count += v? 1: 0;
-		}
-		return count;
+		return _currentUse;
 	}
 
 private:
 	std::array<T,N> _poolElements; 
 	std::array<bool,N> _used; 
+	int _currentUse = 0;
 };
