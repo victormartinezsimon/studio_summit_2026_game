@@ -8,6 +8,7 @@
 #include "Bullet.h"
 #include "EasingManager.h"
 #include "ButtonA.h"
+#include <array>
 
 class InputManager;
 class PainterManager;
@@ -55,6 +56,7 @@ private:
 private:
 	void InitializeConstantValues();
 	void InitializeImprovementsFunctions();
+	void InitializeRandomImprovements();
 
 private:
 	void GetMinMaxXPosiblePosition(float &minX, float &maxX) const;
@@ -122,4 +124,5 @@ private:
 
 private:
 	std::map<std::string, std::function<void(modifiable_data &)>> _improvementFunctions;
+	std::array<std::string, TOTAL_IMPROVEMENTS_TO_SELECT * 2> _randomImprovements;
 };

@@ -4,6 +4,8 @@
 #include "Bullet.h"
 #include "PainterManager.h"
 #include "Sprites.h"
+#include <ctime>
+#include <random>
 
 GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	: _inputManager(input),
@@ -11,6 +13,7 @@ GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 {
 	InitializeConstantValues();
 	InitializeImprovementsFunctions();
+	InitializeRandomImprovements();
 }
 
 void GameManager::InitializeConstantValues()
@@ -53,6 +56,21 @@ void GameManager::InitializeImprovementsFunctions()
 	_improvementFunctions[std::string(IMPROVEMENT_SLOW_SHOTS)] = [](modifiable_data &data)
 	{ data.velocityBulletX *= SLOW_SHOT_MULTIPLICATION, data.velocityBulletY *= SLOW_SHOT_MULTIPLICATION; };
 }
+
+void GameManager::InitializeRandomImprovements()
+{
+	int index = 0;
+	for(auto kvp: _improvementFunctions)
+	{
+		std::string key = kvp.first;
+		_randomImprovements[index] = key;
+		++index;
+	}
+
+	std::mt19937 rng(std::random_device{}());
+    std::shuffle(_randomImprovements.begin(), _randomImprovements.end(), rng);
+}
+
 
 void GameManager::Update(const float deltaTime)
 {

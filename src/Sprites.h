@@ -3,6 +3,8 @@
 #include "GameConfig.h"
 #include <stdint.h>
 
+constexpr unsigned int ENEMY_WIDTH = 64;
+constexpr unsigned int ENEMY_HEIGHT = 64;
 
 	// Rabbit sprite (32x32)
 	constexpr unsigned int BULLETS_WIDTH = 8;
