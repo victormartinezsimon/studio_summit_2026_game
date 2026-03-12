@@ -24,13 +24,13 @@ int main(int argc, char **argv)
 
 	while (true)
 	{
-		const auto start_frame{std::chrono::steady_clock::now()};
+		const auto start_frame{std::chrono::high_resolution_clock::now()};
 
 		gm->Update(deltaTime);
 		gm->Paint();
 		painterManager->Paint();
 
-		const auto end_frame{std::chrono::steady_clock::now()};
+		const auto end_frame{std::chrono::high_resolution_clock::now()};
 		const std::chrono::duration<float> elapsed_seconds{end_frame - start_frame};
 		deltaTime = elapsed_seconds.count();
 		//printf("Total Frames: %f\n", 1.0f/deltaTime);
