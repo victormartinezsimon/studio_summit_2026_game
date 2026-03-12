@@ -11,6 +11,7 @@ constexpr unsigned int MAX_EASING_VALUES = PLANES_POOL_SIZE + 1;
 
 constexpr float MAIN_MENU_MIN_VALUE = 0.3;
 constexpr float MAIN_MENU_MAX_VALUE = 0.7;
+constexpr float MAIN_MENU_TIME_TO_ENTER = 2;
 
 constexpr float INTIAL_ANIMATION_DURATION = 1;
 
@@ -41,5 +42,8 @@ constexpr float INCREASE_FIRE_RATE = 0.8f;
 constexpr float FAST_SHOT_MULTIPLICATION = 1.5;
 constexpr float SLOW_SHOT_MULTIPLICATION = 0.8;
 constexpr float VALUE_MORE_SHOTS_X = 20;
+constexpr int SHOTS_IN_3_SHOTS = 3;
+constexpr int NEW_EXTRA_SOURCES = 3;
 
 constexpr int TOTAL_IMPROVEMENTS_TO_SELECT = 4;
+constexpr float TIME_TO_SELECT_IMPROVEMENT = 5;

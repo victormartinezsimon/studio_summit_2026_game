@@ -40,9 +40,9 @@ void GameManager::InitializeConstantValues()
 void GameManager::InitializeImprovementsFunctions()
 {
 	_improvementFunctions[std::string(IMPROVEMENT_3_SHOTS)] = [](modifiable_data &data)
-	{ data.bulletsPerShot = 3; };
+	{ data.bulletsPerShot = SHOTS_IN_3_SHOTS; };
 	_improvementFunctions[std::string(IMPROVEMENT_INCREASE_ORIGIN)] = [](modifiable_data &data)
-	{ data.bulletsSource = 3; };
+	{ data.bulletsSource = NEW_EXTRA_SOURCES; };
 	_improvementFunctions[std::string(IMPROVEMENT_INCREASE_FIRE_RATE)] = [](modifiable_data &data)
 	{ data.fireRate *INCREASE_FIRE_RATE; };
 	_improvementFunctions[std::string(IMPROVEMENT_GIVE_PENETRATION)] = [](modifiable_data &data)
@@ -127,8 +127,7 @@ void GameManager::Paint()
 
 void GameManager::UpdateEnterMenu(const float deltaTime)
 {
-	
-	_buttonAManager.SelectInPosition(2, {SCREEN_WIDTH * MAIN_MENU_MIN_VALUE, SCREEN_WIDTH * MAIN_MENU_MAX_VALUE}, 
+	_buttonAManager.SelectInPosition(MAIN_MENU_TIME_TO_ENTER, {SCREEN_WIDTH * MAIN_MENU_MIN_VALUE, SCREEN_WIDTH * MAIN_MENU_MAX_VALUE}, 
 		[this](int selection)
 	{
 		_currentState = STATES::ENTER_IN_INITIAL_MOVEMENT;
@@ -168,11 +167,42 @@ void GameManager::UpdateBattle(const float deltaTime)
 }
 void GameManager::UpdateImprovement(const float deltaTime)
 {
-	_currentState = STATES::ENTER_IN_INITIAL_MOVEMENT;
+	MovePlayer();
+	_buttonAManager.Update(deltaTime, _currentFrameInputValueNormalized, _currentFrameInputValue);
 }
 
 void GameManager::UpdateEnterImprovement(const float deltaTime)
 {
+	int levelToCheck = _currentLevel -1;
+	if(levelToCheck * 2 >= TOTAL_IMPROVEMENTS_TO_SELECT)
+	{
+		_currentState = STATES::ENTER_IN_INITIAL_MOVEMENT;
+		return;
+	}
+
+
+	_buttonAManager.SelectAfterTime(TIME_TO_SELECT_IMPROVEMENT, 
+		[this](int selection)
+		{
+			_currentState = STATES::ENTER_IN_INITIAL_MOVEMENT;
+			int levelToCheck = _currentLevel -1;
+
+			if(levelToCheck * 2 >= TOTAL_IMPROVEMENTS_TO_SELECT)
+			{
+				return;
+			}
+
+			auto optionForPlayer = _randomImprovements[levelToCheck * 2 + selection];
+			auto optionForEnemy = _randomImprovements[levelToCheck * 2 + (selection +1) %2];
+
+			_improvementFunctions[optionForPlayer](playerData);
+			_improvementFunctions[optionForEnemy](enemyData);
+		}
+	);
+
+	_player.SetSize(PLANE_WIDTH, PLANE_HEIGHT);
+	_player.SetPosition(0, SCREEN_HEIGHT * 0.9);
+
 	_currentState = STATES::IMPROVEMENT_SELECTOR;
 }
 
@@ -298,6 +328,11 @@ void GameManager::PaintBattle()
 }
 void GameManager::PaintImprovements()
 {
+	{
+		float playerX, playerY;
+		_player.GetPaintPosition(playerX, playerY);
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player.GetWidth(), _player.GetHeight(), playerX, playerY);
+	}
 }
 void GameManager::PaintInitialMovement()
 {
