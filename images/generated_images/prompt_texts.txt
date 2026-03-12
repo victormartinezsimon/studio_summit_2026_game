@@ -1,0 +1,34 @@
+Retro arcade videogame title logo.
+
+Centered text only, no ships, no bullets, no extra objects, no particles.
+Transparent background (PNG, alpha channel).
+
+Text content:
+"[PUT YOUR TITLE HERE]"
+
+Typography & style:
+- Bold, blocky, retro arcade lettering inspired by 80s / early 90s shooters (similar to classic arcade games)
+- Strong 3D effect with subtle extrusion
+- Clean, sharp edges, high readability at small sizes
+- Slight forward tilt or dynamic arcade feel (not cursive)
+
+Color palette:
+- Primary colors: white, blue, red, black
+- Top part of the main words in white → blue gradient
+- Bottom or secondary word in solid red
+- Dark navy/black outline for strong contrast
+- Thin white inner stroke for separation
+- Subtle highlights and shading, no glow bloom
+
+Composition:
+- All text perfectly centered
+- Main title larger, secondary words smaller if needed
+- Compact overall shape suitable for UI, splash screen, or menu header
+
+Rendering:
+- Flat + semi‑3D arcade style (not photorealistic)
+- Crisp, clean vector‑like finish
+- No background color, fully transparent
+
+Aspect ratio:
+- Landscape

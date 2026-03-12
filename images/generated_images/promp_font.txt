@@ -1,0 +1,39 @@
+Retro arcade videogame title font, text only.
+
+Text to render:
+"A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"
+
+Composition:
+- ONE single horizontal line
+- All letters uppercase
+- STRICT monospace: every letter has the same width and spacing
+- Perfectly centered horizontally and vertically
+- Compact, long landscape layout suitable for font atlases or UI headers
+
+Style & typography:
+- Bold, blocky retro arcade lettering inspired by 80s / early 90s shooter games
+- Flat + subtle semi‑3D look with light extrusion (no depth exaggeration)
+- Sharp, clean, geometric edges
+- Very high readability at small sizes
+- Slight forward tilt for dynamic arcade feel (not cursive, not italic)
+
+Colors:
+- All letters use EXACTLY the same color treatment
+- White → blue vertical gradient on the letter faces
+- Dark navy / black outer outline for strong contrast
+- Thin white inner stroke separating face from outline
+- Subtle shading for volume, NO glow, NO bloom, NO soft blur
+
+Rendering:
+- Vector‑like, crisp, clean finish
+- Flat arcade aesthetic (not photorealistic, not painterly)
+- No noise, no texture grain
+
+Background:
+- Fully transparent background (PNG with alpha)
+- No background color, no gradients, no particles, no effects
+
+Restrictions:
+- Text ONLY
+- No ships, no bullets, no icons, no symbols
+- No extra objects of any kind
