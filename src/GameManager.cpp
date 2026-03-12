@@ -69,6 +69,9 @@ void GameManager::Update(const float deltaTime)
 	case STATES::MENU:
 		UpdateMenu(deltaTime);
 		break;
+	case STATES::ENTER_IN_IMPROVEMENT_SELECTOR:
+		UpdateEnterImprovement(deltaTime);
+		break;
 	case STATES::IMPROVEMENT_SELECTOR:
 		UpdateImprovement(deltaTime);
 		break;
@@ -93,6 +96,7 @@ void GameManager::Paint()
 	case STATES::MENU:
 		PaintMenu();
 		break;
+	case STATES::ENTER_IN_IMPROVEMENT_SELECTOR:
 	case STATES::IMPROVEMENT_SELECTOR:
 		PaintImprovements();
 		break;
@@ -148,6 +152,12 @@ void GameManager::UpdateImprovement(const float deltaTime)
 {
 	_currentState = STATES::ENTER_IN_INITIAL_MOVEMENT;
 }
+
+void GameManager::UpdateEnterImprovement(const float deltaTime)
+{
+	_currentState = STATES::IMPROVEMENT_SELECTOR;
+}
+
 void GameManager::UpdateInitialMovement(const float deltaTime)
 {
 	_easingManager.Update(deltaTime);
@@ -301,7 +311,7 @@ void GameManager::EndLevel()
 	_enemiesPool.ReturnAll();
 	_bulletsPool.ReturnAll();
 
-	_currentState = STATES::IMPROVEMENT_SELECTOR;
+	_currentState = STATES::ENTER_IN_IMPROVEMENT_SELECTOR;
 	++_currentLevel;
 }
 

@@ -37,8 +37,12 @@ public:
 private:
 	void UpdateEnterMenu(const float deltaTime);
 	void UpdateMenu(const float deltaTime);
+	
 	void UpdateBattle(const float deltaTime);
+
+	void UpdateEnterImprovement(const float deltaTime);
 	void UpdateImprovement(const float deltaTime);
+
 	void UpdateInitialMovement(const float deltaTime);
 	void UpdateEnterInicialMovement( const float deltaTime);
 
@@ -93,6 +97,7 @@ private:
 		ENTER_IN_MENU,
 		MENU,
 		BATTLE,
+		ENTER_IN_IMPROVEMENT_SELECTOR,
 		IMPROVEMENT_SELECTOR,
 		ENTER_IN_INITIAL_MOVEMENT,
 		INITIAL_MOVEMENT
