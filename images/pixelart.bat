@@ -1,8 +1,5 @@
 @echo off
-REM ================================
-REM Pixel Art Batch + Paleta Global
-REM ImageMagick (Windows)
-REM ================================
+setlocal enabledelayedexpansion
 
 REM --- CONFIGURACION ---
 set INPUT_DIR=input
@@ -12,25 +9,53 @@ REM Resolucion "pixel"
 set PIXEL_W=64
 set PIXEL_H=64
 
-REM Resolucion final (escalada)
-set FINAL_W=64
-set FINAL_H=64
+set PALETE_FILE=%OUTPUT_DIR%/Palette.png
 
-REM Numero de colores
-set COLORS=8
+REM Crear carpeta de salida si no existe
+if not exist %OUTPUT_DIR% (
+  mkdir %OUTPUT_DIR%
+)
 
-REM --------------------
+:MAIN_MENU
+cls
+echo ==========================================
+echo              MAIN MENU
+echo ==========================================
+echo.
+echo   1. Generate Palete
+echo   2. Generate Image
+echo   3. Exit
+echo.
+echo ==========================================
+set /p CHOICE="  Select an option (1-3): "
+
+if "%CHOICE%"=="1" goto FUNCTION_ONE
+if "%CHOICE%"=="2" goto FUNCTION_TWO
+if "%CHOICE%"=="3" goto EXIT
 
 echo.
-echo ================================
-echo Generando paleta global (%COLORS% colores)
-echo ================================
+echo   [!] Invalid option. Please try again.
+timeout /t 2 >nul
+goto MAIN_MENU
+
+
+:FUNCTION_ONE
+cls
+echo ==========================================
+echo              Generate palete
+echo ==========================================
+set /p NUMBER_COLORS="  Select number of colors: "
+
+set "IMG_LIST="
+for /r "%INPUT_DIR%" %%F in (*.png) do (
+  set "IMG_LIST=!IMG_LIST! "%%F""
+)
 
 REM Crear paleta global a partir de TODAS las imagenes
-magick %INPUT_DIR%\*.png ^
+magick !IMG_LIST! ^
   -filter point -resize %PIXEL_W%x%PIXEL_H%! ^
-  -append +dither -colors %COLORS% -unique-colors ^
-  palette.png
+  -append +dither -colors %NUMBER_COLORS% -unique-colors ^
+  "%PALETE_FILE%"
 
 IF ERRORLEVEL 1 (
   echo ERROR al generar la paleta.
@@ -42,52 +67,73 @@ echo Paleta creada: palette.png
 echo.
 
 REM 2. Extraer colores de la paleta como lista hex (un color por linea)
-magick palette.png txt:- ^
+magick "%PALETE_FILE%" txt:- ^
   | findstr /r "[0-9]" ^
   | findstr /v "^#" ^
   > "%OUTPUT_DIR%\palette_colors.txt"
 
-REM Crear carpeta de salida si no existe
-if not exist %OUTPUT_DIR% (
-  mkdir %OUTPUT_DIR%
-)
-
-echo ================================
-echo Convirtiendo imagenes a pixel art
-echo ================================
-
-for %%F in (%INPUT_DIR%\*.png) do (
-  echo Procesando %%~nxF
-
-  REM --- Generar imagen pixel art ---
-  magick "%%F" ^
-    -filter point -resize %PIXEL_W%x%PIXEL_H%! ^
-    -filter point -resize %FINAL_W%x%FINAL_H%! ^
-    -dither none -remap palette.png ^
-    "%OUTPUT_DIR%\%%~nxF"
-
-  REM --- Reducir imagen al tamano pixel y remapear (sin escalar) ---
-  magick "%%F" ^
-    -filter point -resize %PIXEL_W%x%PIXEL_H%! ^
-    -dither none -remap palette.png ^
-    "%OUTPUT_DIR%\%%~nF_indexed.png"
-
-  REM --- Generar CSV via script Python ---
-  echo Generando CSV para %%~nF...
-  python _csv_gen.py %PIXEL_W% %PIXEL_H% "%OUTPUT_DIR%\%%~nF_indexed.png" "%OUTPUT_DIR%\%%~nF.csv"
-
-  REM --- Limpiar imagen temporal ---
-  del "%OUTPUT_DIR%\%%~nF_indexed.png" 2>nul
-)
-
-REM --- Limpiar script temporal ---
-rem del _csv_gen.py 2>nul
-
-echo.
-echo ================================
-echo Proceso terminado
-echo Resultados en: %OUTPUT_DIR%
-echo  - Imagenes pixel art (.png)
-echo  - Arrays de paleta (.csv)
-echo ================================
 pause
+goto MAIN_MENU
+
+
+:FUNCTION_TWO
+cls
+echo ==========================================
+echo              Generate images
+echo ==========================================
+
+for /d %%D in ("%INPUT_DIR%\*") do (
+    set "FOLDER_NAME=%%~nxD"
+    
+    :: Split "WxH" into WIDTH and HEIGHT
+    for /f "tokens=1,2 delims=x" %%A in ("!FOLDER_NAME!") do (
+        set "WIDTH=%%A"
+        set "HEIGHT=%%B"
+    )
+    
+    echo Processing: !FOLDER_NAME! ^(WIDTH=!WIDTH! HEIGHT=!HEIGHT!^)
+    set "FOLDER_IN=%INPUT_DIR%\!FOLDER_NAME!"
+    set "FOLDER_OUT=%OUTPUT_DIR%\!FOLDER_NAME!"
+    echo Input !FOLDER_IN!
+    echo Output !FOLDER_OUT!
+
+    if not exist !FOLDER_OUT! (
+        mkdir !FOLDER_OUT!
+    )
+
+    for %%F in (!FOLDER_IN!\*.png) do (
+        echo Processing %%~nxF
+
+        magick "%%F" ^
+            -filter point -resize !WIDTH!x!HEIGHT!! ^
+            -filter point -resize %PIXEL_W%x%PIXEL_H%! ^
+            -dither none -remap "%PALETE_FILE%" ^
+            "!FOLDER_OUT!\%%~nxF"
+
+        REM --- Reduce image and remap ---
+        magick "%%F" ^
+            -filter point -resize !WIDTH!x!HEIGHT!! ^
+            -dither none -remap "%PALETE_FILE%" ^
+            "%OUTPUT_DIR%\%%~nF_indexed.png"
+
+        REM --- Generar CSV via script Python ---
+        echo Generando CSV para %%~nF...
+        python _csv_gen.py !WIDTH! !HEIGHT! "%OUTPUT_DIR%\%%~nF_indexed.png" "!FOLDER_OUT!\%%~nF.csv"
+
+        REM --- Limpiar imagen temporal ---
+        del "%OUTPUT_DIR%\%%~nF_indexed.png" 2>nul
+    )
+)
+
+pause
+goto MAIN_MENU
+       
+
+:EXIT
+cls
+echo.
+echo   Goodbye!
+echo.
+timeout /t 2 >nul
+endlocal
+exit /b 0

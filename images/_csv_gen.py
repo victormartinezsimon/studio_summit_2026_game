@@ -40,5 +40,6 @@ for line in result2.stdout.splitlines():
             rows[y].append(str(idx))
 with open(csv_name, 'w') as f:
     for row in rows:
-        f.write(','.join(row) + '\n')
+        f.write(','.join(row))
+        f.write(',\n')
 print('CSV guardado: ' + csv_name)
