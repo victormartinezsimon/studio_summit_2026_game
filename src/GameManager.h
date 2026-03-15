@@ -36,12 +36,6 @@ public:
 	void Update(const float deltaTime);
 	void Paint();
 
-
-private:
-	void UpdateBattle(const float deltaTime);
-private:
-	void PaintBattle();
-
 private:
 	void InitializeConstantValues();
 	void InitializeImprovementsFunctions();
@@ -53,47 +47,23 @@ private:
 	void MovePlayer();
 
 private:
-	void ConfigurePlane(Plane& p, const float posX, const float posY, const modifiable_data& data, bool isPlayer);
-	void UpdateBullets(float deltaTime);
-	void ManageBulletCollisions(Bullet& bullet);
-	bool ManageCollisionBetweenBulletAndEnemy(Bullet& bullet, Plane& enemy);
-	bool HasCollision(const Bullet& bullet, Plane& plane) const;
-	bool CollsisionDetection(float ax, float ay, float aw, float ah,
-							 float bx, float by, float bw, float bh) const;
-	void DamagePlayer(); 
+	void ConfigurePlane(Plane &p, const float posX, const float posY, const modifiable_data &data, bool isPlayer);
+	void DamagePlayer();
+
 private:
 	void SpawnEnemies();
 	void SpawnRowEnemies(int totalEnemies, float posY);
 	void GetMinMaxXPosiblePositionForEnemies(float &minX, float &maxX) const;
 
 private:
-	void UpdateEnemies(float deltaTime);
-
-private:
-	void SpawnBullet(int sourceIndex, const Plane& p, bool forPlayer, const modifiable_data &data);
+	void SpawnBullet(int sourceIndex, const Plane &p, bool forPlayer, const modifiable_data &data);
 
 private:
 	void StartLevel();
 	void EndLevel();
 
 private:
-	void ApplyImprovements(const std::string& playerSelection, const std::string& enemySelection);
-
-private:
-	void DoExplosion(Bullet& bullet);
-
-public:
-[[deprecated]]
-	enum class STATES
-	{
-		ENTER_IN_MENU,
-		MENU,
-		BATTLE,
-		ENTER_IN_IMPROVEMENT_SELECTOR,
-		IMPROVEMENT_SELECTOR,
-		ENTER_IN_INITIAL_MOVEMENT,
-		INITIAL_MOVEMENT
-	};
+	void ApplyImprovements(const std::string &playerSelection, const std::string &enemySelection);
 
 private:
 	modifiable_data playerData;
@@ -101,7 +71,6 @@ private:
 
 private:
 	InputManager *_inputManager;
-	STATES _currentState = STATES::MENU;
 	int _currentLevel = 0;
 	Plane _player;
 	Pool<Plane, PLANES_POOL_SIZE> _enemiesPool;
@@ -117,7 +86,7 @@ private:
 	std::array<std::string, TOTAL_IMPROVEMENTS_TO_SELECT * 2> _randomImprovements;
 
 private:
-	std::map<State::STATES, State*> _statesLogic;
+	std::map<State::STATES, State *> _statesLogic;
 	State::STATES _currentStateLogic;
 	State::STATES _oldStateLogic;
 	std::map<State::STATES, std::function<void()>> _statesBeginFunction;
