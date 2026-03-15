@@ -11,3 +11,4 @@
 - ~~Add assets for improvement selector~~
 - ~~logic for multipleshots~~
 - ~~test with different screen sizes~~
+- System for alpha
