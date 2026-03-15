@@ -125,6 +125,9 @@ echo ==========================================
 echo              Generate csv
 echo ==========================================
 
+rem "remove result file"
+del "%OUTPUT_DIR%\sprites.txt"
+
 for /d %%D in ("%INPUT_DIR%\*") do (
     set "FOLDER_NAME=%%~nxD"
     
@@ -144,7 +147,7 @@ for /d %%D in ("%INPUT_DIR%\*") do (
         echo Processing %%~nxF
 
         echo Generando CSV para %%~nF...
-        python _csv_gen.py !WIDTH! !HEIGHT!  "!FOLDER_OUT!\%%~nxF" "!FOLDER_OUT!\%%~nF.csv" "%PALETE_FILE%"
+        python _csv_gen.py !WIDTH! !HEIGHT!  "!FOLDER_OUT!\%%~nxF" "%OUTPUT_DIR%\sprites.txt" "%PALETE_FILE%" %%~nF
 
     )
 )

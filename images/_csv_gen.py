@@ -5,6 +5,7 @@ pixel_h = int(sys.argv[2])
 img_name = sys.argv[3]
 csv_name = sys.argv[4]
 palete_file = sys.argv[5]
+key = sys.argv[6].upper()
 
 result = subprocess.run(['magick', palete_file, 'txt:-'], capture_output=True, text=True)
 palette_colors = []
@@ -39,8 +40,21 @@ for line in result2.stdout.splitlines():
             idx = best
         if 0 <= y < pixel_h:
             rows[y].append(str(idx))
-with open(csv_name, 'w') as f:
-    for row in rows:
+
+# Calculate actual width (size of the longest row) and height (non-empty rows from the top)
+actual_width = max((len(row) for row in rows if row), default=0)
+actual_height = 0
+for i, row in enumerate(rows):
+    if row:
+        actual_height = i + 1
+
+with open(csv_name, 'a') as f:
+    f.write(f'constexpr unsigned int {key}_WIDTH={actual_width};\n')
+    f.write(f'constexpr unsigned int {key}_HEIGHT={actual_height};\n')
+    f.write(f'static const uint8_t sprite_{key}[{key}_WIDTH * {key}_HEIGHT]={{\n')
+    for row in rows[:actual_height]:
         f.write(','.join(row))
         f.write(',\n')
-print('CSV guardado: ' + csv_name)
+    f.write(f'}};\n\n')
+
+print('H guardado: ' + csv_name)
