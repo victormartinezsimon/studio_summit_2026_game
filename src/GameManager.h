@@ -9,9 +9,10 @@
 #include "EasingManager.h"
 #include "ButtonA.h"
 #include <array>
+#include "PainterManager.h"
+
 
 class InputManager;
-class PainterManager;
 
 class GameManager
 {
@@ -56,6 +57,7 @@ private:
 private:
 	void InitializeConstantValues();
 	void InitializeImprovementsFunctions();
+	void InitializeImprovementsUI();
 	void InitializeRandomImprovements();
 
 private:
@@ -124,5 +126,6 @@ private:
 
 private:
 	std::map<std::string, std::function<void(modifiable_data &)>> _improvementFunctions;
+	std::map<std::string, PainterManager::SPRITE_ID> _improvementsUI;
 	std::array<std::string, TOTAL_IMPROVEMENTS_TO_SELECT * 2> _randomImprovements;
 };

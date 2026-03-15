@@ -2,7 +2,6 @@
 #include "InputManager.h"
 #include "Plane.h"
 #include "Bullet.h"
-#include "PainterManager.h"
 #include "Sprites.h"
 #include <ctime>
 #include <random>
@@ -13,6 +12,7 @@ GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 {
 	InitializeConstantValues();
 	InitializeImprovementsFunctions();
+	InitializeImprovementsUI();
 	InitializeRandomImprovements();
 }
 
@@ -55,6 +55,18 @@ void GameManager::InitializeImprovementsFunctions()
 	{ data.velocityBulletX *= FAST_SHOT_MULTIPLICATION, data.velocityBulletY *= FAST_SHOT_MULTIPLICATION; };
 	_improvementFunctions[std::string(IMPROVEMENT_SLOW_SHOTS)] = [](modifiable_data &data)
 	{ data.velocityBulletX *= SLOW_SHOT_MULTIPLICATION, data.velocityBulletY *= SLOW_SHOT_MULTIPLICATION; };
+}
+
+void GameManager::InitializeImprovementsUI()
+{
+	_improvementsUI[std::string(IMPROVEMENT_3_SHOTS)] = PainterManager::SPRITE_ID::SHOT_3_TIMES;
+	_improvementsUI[std::string(IMPROVEMENT_INCREASE_ORIGIN)] = PainterManager::SPRITE_ID::INCREASE_ORIGIN;
+	_improvementsUI[std::string(IMPROVEMENT_INCREASE_FIRE_RATE)] = PainterManager::SPRITE_ID::INCRASE_FIRE_RATE;
+	_improvementsUI[std::string(IMPROVEMENT_GIVE_PENETRATION)] = PainterManager::SPRITE_ID::GIVE_PENETRATION;
+	_improvementsUI[std::string(IMPROVEMENT_GIVE_EXPLOSION)] = PainterManager::SPRITE_ID::GIVE_EXPLOSION;
+	_improvementsUI[std::string(IMPROVEMENT_GIVE_SHIELD)] = PainterManager::SPRITE_ID::GIVE_SHIELD;
+	_improvementsUI[std::string(IMPROVEMENT_FAST_SHOTS)] = PainterManager::SPRITE_ID::FAST_SHOTS;
+	_improvementsUI[std::string(IMPROVEMENT_SLOW_SHOTS)] = PainterManager::SPRITE_ID::SLOW_SHOTS;
 }
 
 void GameManager::InitializeRandomImprovements()
@@ -136,7 +148,7 @@ void GameManager::UpdateEnterMenu(const float deltaTime)
 	
 	_currentState = STATES::MENU;
 
-	_player.SetSize(PLANE_WIDTH, PLANE_HEIGHT);
+	_player.SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
 	_player.SetPosition(0, SCREEN_HEIGHT * 0.9);
 }
 
@@ -200,7 +212,7 @@ void GameManager::UpdateEnterImprovement(const float deltaTime)
 		}
 	);
 
-	_player.SetSize(PLANE_WIDTH, PLANE_HEIGHT);
+	_player.SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
 	_player.SetPosition(0, SCREEN_HEIGHT * 0.9);
 
 	_currentState = STATES::IMPROVEMENT_SELECTOR;
@@ -239,7 +251,7 @@ void GameManager::MovePlayer()
 void GameManager::ConfigurePlane(Plane &p, const float posX, const float posY,
 								 const modifiable_data &data, bool isPlayer)
 {
-	p.SetSize(PLANE_WIDTH, PLANE_HEIGHT);
+	p.SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
 	p.SetPosition(posX, posY);
 	p.SetBulletsTotalSources(data.bulletsSource);
 	p.SetBulletsPerShot(data.bulletsPerShot);
@@ -270,7 +282,7 @@ void GameManager::SpawnBullet(int sourceIndex, const Plane &p, bool forPlayer, c
 
 		_bulletsPool.call_for_element(id, [this, sourceIndex, p, forPlayer, data, velocityBulletX](Bullet &bullet)
 									  {
-			bullet.SetSize(BULLETS_WIDTH, BULLETS_HEIGHT);
+			bullet.SetSize(BULLET_WIDTH, BULLET_HEIGHT);
 
 			float positionX = p.GetX();
 			if (sourceIndex == 1)
@@ -285,7 +297,7 @@ void GameManager::SpawnBullet(int sourceIndex, const Plane &p, bool forPlayer, c
 
 			bullet.SetPosition(positionX, p.GetY());
 			bullet.SetVelocity(velocityBulletX, data.velocityBulletY);
-			bullet.SetSize(BULLETS_WIDTH, BULLETS_HEIGHT);
+			bullet.SetSize(BULLET_WIDTH, BULLET_HEIGHT);
 			bullet.SetPlayerTeam(forPlayer);
 			bullet.SetHasPenetration(data.bulletHasPenetration);
 			bullet.SetHasExplostion(data.bulletHasExplosion); });
@@ -301,7 +313,7 @@ void GameManager::PaintMenu()
 	}
 
 	{
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::TITLE, TITLE_WIDTH, TITLE_HEIGHT, SCREEN_WIDTH*0.5f, SCREEN_HEIGHT * 0.3f);
+		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::TITLE, SCREEN_WIDTH*0.5f, SCREEN_HEIGHT * 0.3f);
 	}
 }
 void GameManager::PaintBattle()
@@ -333,8 +345,25 @@ void GameManager::PaintBattle()
 void GameManager::PaintImprovements()
 {
 	{
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_PLAYER,SELECTOR_PLAYER_WIDTH, SELECTOR_PLAYER_WIDTH, SCREEN_WIDTH*0.2f, SCREEN_HEIGHT * 0.4f);
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_ENEMY, SELECTOR_ENEMY_WIDTH, SELECTOR_ENEMY_HEIGHT, SCREEN_WIDTH*0.8f, SCREEN_HEIGHT * 0.4f);
+		float percentLeft = 0.3;
+		float percentRight = 1- percentLeft;
+		if(_currentFrameInputValueNormalized < 0.5f)
+		{
+			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_PLAYER, SCREEN_WIDTH*percentLeft, SCREEN_HEIGHT * 0.4f);
+			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_ENEMY,  SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
+	
+		}
+		else
+		{
+			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_ENEMY,  SCREEN_WIDTH*percentLeft, SCREEN_HEIGHT * 0.4f);
+			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_PLAYER, SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
+		}
+		/*
+		for(auto kvp: _improvementsUI)
+		{
+			_painterManager->AddUIToPaint(kvp.second, SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
+		}
+		*/
 	}
 
 

@@ -22,17 +22,17 @@ int main(int argc, char **argv)
 
 	float deltaTime = 0;
 
+	auto lastTime = std::chrono::high_resolution_clock::now();
+
 	while (true)
 	{
-		const auto start_frame{std::chrono::high_resolution_clock::now()};
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		deltaTime = std::chrono::duration<float>(currentTime - lastTime).count(); // seconds
+    	lastTime = currentTime;
 
 		gm->Update(deltaTime);
 		gm->Paint();
 		painterManager->Paint();
-
-		const auto end_frame{std::chrono::high_resolution_clock::now()};
-		const std::chrono::duration<float> elapsed_seconds{end_frame - start_frame};
-		deltaTime = elapsed_seconds.count();
 		//printf("Total Frames: %f\n", 1.0f/deltaTime);
 	}
 

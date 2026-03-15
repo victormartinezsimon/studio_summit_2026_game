@@ -52,7 +52,6 @@ public:
 
 private:
 	void init_palette(struct EVideoContext *vctx);
-	void fill_background(uint8_t *dst, uint32_t stride, uint32_t frame);
 	void masked_blit_8(
 		uint8_t *dst,
 		uint32_t dst_stride,

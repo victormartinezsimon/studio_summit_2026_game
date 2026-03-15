@@ -5,7 +5,6 @@
 
 Bullet::Bullet() : _velocityX(0), _velocityY(0)
 {
-	SetSize(BULLETS_WIDTH, BULLETS_HEIGHT);
 }
 
 void Bullet::SetVelocity(float velX, float velY)

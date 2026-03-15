@@ -42,34 +42,26 @@ Painter::~Painter()
 
 void Painter::BeginPaint()
 {
+	//Ensure VPU fifo is empty
+	while(VPUGetFIFONotEmpty(s_platform->vx)) { }
+	//Swap frames
 	VPUSwapPages(s_platform->vx, s_platform->sc);
 }
 
 void Painter::EndPaint()
 {
+	//Add a buffer swap commmand
 	VPUSyncSwap(s_platform->vx, 0);
+	//Insert a no-operation command (barrier) that we can wait on
 	VPUNoop(s_platform->vx);
-	std::this_thread::sleep_for(std::chrono::milliseconds(16));
+	
+	//std::this_thread::sleep_for(std::chrono::milliseconds(16));
 }
 
 void Painter::PaintBackground()
 {
 	dst = (uint8_t *)s_platform->sc->writepage;
-	//fill_background(dst, stride, 0);
-	VPUClear(s_platform->vx,0x10101010);//0xFF080F2A);//(8,15,42));
-}
-
-void Painter::fill_background(uint8_t *dst, uint32_t stride, uint32_t frame)
-{
-	for (int y = 0; y < SCREEN_HEIGHT; ++y)
-	{
-		uint8_t *row = dst + (uint32_t)y * stride;
-		for (int x = 0; x < SCREEN_WIDTH; ++x)
-		{
-			uint8_t v = (uint8_t)(16 + (((x + (int)(frame >> 1)) >> 4) & 7));
-			row[x] = v;
-		}
-	}
+	VPUClear(s_platform->vx,0x10101010);
 }
 
 void Painter::PaintItem(const uint8_t* sprite, unsigned int width, unsigned int height, unsigned int x, unsigned int y)
