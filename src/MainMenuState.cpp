@@ -29,10 +29,21 @@ void MainMenuState::Paint()
 		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::TITLE, 
             SCREEN_WIDTH*0.5f, SCREEN_HEIGHT * 0.3f);
 	}
+
+	{
+		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::START_GAME,
+			SCREEN_WIDTH *0.5f, SCREEN_HEIGHT * 0.7f);
+	}
+
+	{
+		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::TITLE_PLAYER_POSITION,
+			SCREEN_WIDTH *0.5f, SCREEN_HEIGHT * 0.9f);
+	}
 }
 void MainMenuState::OnEnter()
 {
-	_buttonAManager->SelectInPosition(MAIN_MENU_TIME_TO_ENTER, {SCREEN_WIDTH * MAIN_MENU_MIN_VALUE, SCREEN_WIDTH * MAIN_MENU_MAX_VALUE}, 
+	_buttonAManager->SelectInPosition(MAIN_MENU_TIME_TO_ENTER, {SCREEN_WIDTH * 0.5f - MAIN_MENU_POSITION_WIDTH/2, 
+		SCREEN_WIDTH * 0.5f + MAIN_MENU_POSITION_WIDTH/2}, 
 		[this](int selection)
 	{
 		_nextState = STATES::INITIAL_MOVEMENT;

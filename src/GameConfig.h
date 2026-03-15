@@ -9,8 +9,6 @@ constexpr unsigned int PLANES_POOL_SIZE = 11;
 constexpr unsigned int BULLETS_POOL_SIZE = 50;
 constexpr unsigned int MAX_EASING_VALUES = PLANES_POOL_SIZE + 1;
 
-constexpr float MAIN_MENU_MIN_VALUE = 0.3;
-constexpr float MAIN_MENU_MAX_VALUE = 0.7;
 constexpr float MAIN_MENU_TIME_TO_ENTER = 2;
 
 constexpr float POSITION_Y_PLAYER = 0.9f;
