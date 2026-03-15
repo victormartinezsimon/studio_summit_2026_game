@@ -133,15 +133,16 @@ bool BattleState::HasCollision(const Bullet &bullet, Plane *plane) const
     {
         return false;
     }
+   
+    bool hasCollsion = CollsisionDetection(bullet.GetX(), bullet.GetY(), bullet.GetWidth(), bullet.GetHeight(),
+                               plane->GetX(), plane->GetY(), plane->GetWidth(), plane->GetHeight());
 
-    if (plane->GetHasShield())
+    if (hasCollsion && plane->GetHasShield())
     {
         plane->SetHasShield(false);
         return false;
     }
-
-    return CollsisionDetection(bullet.GetX(), bullet.GetY(), bullet.GetWidth(), bullet.GetHeight(),
-                               plane->GetX(), plane->GetY(), plane->GetWidth(), plane->GetHeight());
+    return hasCollsion 
 }
 
 bool BattleState::CollsisionDetection(float ax, float ay, float aw, float ah,
