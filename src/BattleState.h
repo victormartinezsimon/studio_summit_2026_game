@@ -27,7 +27,7 @@ class BattleState: public State
         void UpdateEnemies(float deltaTime);
         void ManageBulletCollisions(Bullet& bullet);
         bool ManageCollisionBetweenBulletAndEnemy(Bullet& bullet, Plane& enemy);
-	    bool HasCollision(const Bullet& bullet, const Plane* plane) const;
+	    bool HasCollision(const Bullet& bullet, Plane* plane) const;
 	    bool CollsisionDetection(float ax, float ay, float aw, float ah,
 							 float bx, float by, float bw, float bh) const;
         void DamagePlayer();

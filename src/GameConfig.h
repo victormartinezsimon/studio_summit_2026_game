@@ -47,5 +47,6 @@ constexpr float VALUE_MORE_SHOTS_X = 20;
 constexpr int SHOTS_IN_3_SHOTS = 3;
 constexpr int NEW_EXTRA_SOURCES = 3;
 
-constexpr int TOTAL_IMPROVEMENTS_TO_SELECT = 4;
+constexpr int TOTAL_IMPROVEMENTS_TO_SELECT = 1;
 constexpr float TIME_TO_SELECT_IMPROVEMENT = 5;
+constexpr int TOTAL_DEFINED_IMPROVEMENTS = 8;

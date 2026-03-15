@@ -117,7 +117,6 @@ bool BattleState::ManageCollisionBetweenBulletAndEnemy(Bullet &bullet, Plane &en
     bool isBulletDestroyed = false;
     if (HasCollision(bullet, &enemy))
     {
-        enemy.SetHasShield(false);
         if (!bullet.GetHasPenetration())
         {
             _bulletsPool->Release(bullet);
@@ -128,7 +127,7 @@ bool BattleState::ManageCollisionBetweenBulletAndEnemy(Bullet &bullet, Plane &en
     return isBulletDestroyed;
 }
 
-bool BattleState::HasCollision(const Bullet &bullet, const Plane *plane) const
+bool BattleState::HasCollision(const Bullet &bullet, Plane *plane) const
 {
     if (bullet.GetPlayerTeam() == plane->GetPlayerTeam())
     {
@@ -137,6 +136,7 @@ bool BattleState::HasCollision(const Bullet &bullet, const Plane *plane) const
 
     if (plane->GetHasShield())
     {
+        plane->SetHasShield(false);
         return false;
     }
 

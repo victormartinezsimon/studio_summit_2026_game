@@ -83,7 +83,7 @@ private:
 
 private:
 	std::map<std::string, std::function<void(modifiable_data &)>> _improvementFunctions;
-	std::array<std::string, TOTAL_IMPROVEMENTS_TO_SELECT * 2> _randomImprovements;
+	std::array<std::string, TOTAL_DEFINED_IMPROVEMENTS> _randomImprovements;
 
 private:
 	std::map<State::STATES, State *> _statesLogic;

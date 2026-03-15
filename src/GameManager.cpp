@@ -90,13 +90,9 @@ void GameManager::InitializeStatesBegin()
 	_statesBeginFunction[State::STATES::IMPROVEMENT_SELECTOR] = [this]()
 	{
 		int levelToCheck = _currentLevel -1;
-
-		if(levelToCheck * 2 < TOTAL_IMPROVEMENTS_TO_SELECT)
-		{
-			auto leftImprovement = _randomImprovements[levelToCheck * 2];
-			auto rightImprovement = _randomImprovements[levelToCheck * 2 + 1];
-			static_cast<ImprovementSelectionState*>(_statesLogic[State::STATES::IMPROVEMENT_SELECTOR])->Configure(leftImprovement, rightImprovement);
-		}
+		auto leftImprovement = _randomImprovements[levelToCheck * 2];
+		auto rightImprovement = _randomImprovements[levelToCheck * 2 + 1];
+		static_cast<ImprovementSelectionState*>(_statesLogic[State::STATES::IMPROVEMENT_SELECTOR])->Configure(leftImprovement, rightImprovement);
 	};
 	_statesBeginFunction[State::STATES::INITIAL_MOVEMENT] = [this]()
 	{
@@ -119,11 +115,11 @@ void GameManager::Update(const float deltaTime)
 
 		if(nextState == State::STATES::IMPROVEMENT_SELECTOR)
 		{
-			int levelToCheck = _currentLevel -1;
+			int levelToCheck = _currentLevel;
 
-			if(levelToCheck * 2 >= TOTAL_IMPROVEMENTS_TO_SELECT)
+			if(levelToCheck >= TOTAL_IMPROVEMENTS_TO_SELECT)
 			{
-				_currentStateLogic = State::STATES::INITIAL_MOVEMENT;
+				nextState = State::STATES::INITIAL_MOVEMENT;
 			}
 		}
 
