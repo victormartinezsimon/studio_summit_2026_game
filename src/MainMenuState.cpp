@@ -15,8 +15,6 @@ State::STATES MainMenuState::Update(const float deltaTime, float _currentFrameIn
     _buttonAManager->Update(deltaTime, _currentFrameInputValueNormalized, _currentFrameInputValue);
 	
 	return _nextState;
-	// move player
-	//MovePlayer();
 }
 void MainMenuState::Paint()
 {

@@ -39,21 +39,16 @@ public:
 private:
 	void UpdateBattle(const float deltaTime);
 
-	void UpdateEnterImprovement(const float deltaTime);
-	void UpdateImprovement(const float deltaTime);
-
 	void UpdateInitialMovement(const float deltaTime);
 	void UpdateEnterInicialMovement( const float deltaTime);
 
 private:
 	void PaintBattle();
-	void PaintImprovements();
 	void PaintInitialMovement();
 
 private:
 	void InitializeConstantValues();
 	void InitializeImprovementsFunctions();
-	void InitializeImprovementsUI();
 	void InitializeRandomImprovements();
 
 private:
@@ -84,6 +79,8 @@ private:
 	void StartLevel();
 	void EndLevel();
 
+private:
+	void ApplyImprovements(const std::string& playerSelection, const std::string& enemySelection);
 
 private:
 	void DoExplosion(Bullet& bullet);
@@ -120,12 +117,9 @@ private:
 	ButtonA _buttonAManager;
 	float _currentFrameInputValueNormalized;
 	int _currentFrameInputValue;
-	std::string _leftImprovement;
-	std::string _rightImprovement;
 
 private:
 	std::map<std::string, std::function<void(modifiable_data &)>> _improvementFunctions;
-	std::map<std::string, PainterManager::SPRITE_ID> _improvementsUI;
 	std::array<std::string, TOTAL_IMPROVEMENTS_TO_SELECT * 2> _randomImprovements;
 
 private:

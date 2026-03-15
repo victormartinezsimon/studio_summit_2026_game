@@ -6,6 +6,7 @@
 #include <ctime>
 #include <random>
 #include "MainMenuState.h"
+#include "ImprovementSelectionState.h"
 
 GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	: _inputManager(input),
@@ -14,13 +15,13 @@ GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 {
 	InitializeConstantValues();
 	InitializeImprovementsFunctions();
-	InitializeImprovementsUI();
 	InitializeRandomImprovements();
 
 	_statesLogic[State::STATES::MENU] = new MainMenuState(&_player, painterManager, &_buttonAManager);
+	_statesLogic[State::STATES::IMPROVEMENT_SELECTOR] = new ImprovementSelectionState(&_player, painterManager, &_buttonAManager,
+	[this](const std::string& player, const std::string& enemy){ApplyImprovements(player, enemy);});
 
-
-	_statesLogic[State::STATES::MENU]->OnEnter();
+	_statesLogic[_currentStateLogic]->OnEnter();
 }
 
 void GameManager::InitializeConstantValues()
@@ -64,17 +65,6 @@ void GameManager::InitializeImprovementsFunctions()
 	{ data.velocityBulletX *= SLOW_SHOT_MULTIPLICATION, data.velocityBulletY *= SLOW_SHOT_MULTIPLICATION; };
 }
 
-void GameManager::InitializeImprovementsUI()
-{
-	_improvementsUI[std::string(IMPROVEMENT_3_SHOTS)] = PainterManager::SPRITE_ID::SHOT_3_TIMES;
-	_improvementsUI[std::string(IMPROVEMENT_INCREASE_ORIGIN)] = PainterManager::SPRITE_ID::INCREASE_ORIGIN;
-	_improvementsUI[std::string(IMPROVEMENT_INCREASE_FIRE_RATE)] = PainterManager::SPRITE_ID::INCRASE_FIRE_RATE;
-	_improvementsUI[std::string(IMPROVEMENT_GIVE_PENETRATION)] = PainterManager::SPRITE_ID::GIVE_PENETRATION;
-	_improvementsUI[std::string(IMPROVEMENT_GIVE_EXPLOSION)] = PainterManager::SPRITE_ID::GIVE_EXPLOSION;
-	_improvementsUI[std::string(IMPROVEMENT_GIVE_SHIELD)] = PainterManager::SPRITE_ID::GIVE_SHIELD;
-	_improvementsUI[std::string(IMPROVEMENT_FAST_SHOTS)] = PainterManager::SPRITE_ID::FAST_SHOTS;
-	_improvementsUI[std::string(IMPROVEMENT_SLOW_SHOTS)] = PainterManager::SPRITE_ID::SLOW_SHOTS;
-}
 
 void GameManager::InitializeRandomImprovements()
 {
@@ -128,6 +118,23 @@ void GameManager::Update(const float deltaTime)
 	if(nextState != _currentStateLogic)
 	{
 		_statesLogic[_currentStateLogic]->OnExit();
+
+		if(nextState == State::STATES::IMPROVEMENT_SELECTOR)
+		{
+			int levelToCheck = _currentLevel -1;
+
+			if(levelToCheck * 2 >= TOTAL_IMPROVEMENTS_TO_SELECT)
+			{
+				_currentStateLogic = State::STATES::INITIAL_MOVEMENT;
+			}
+			else
+			{
+				auto leftImprovement = _randomImprovements[levelToCheck * 2];
+				auto rightImprovement = _randomImprovements[levelToCheck * 2 + 1];
+				static_cast<ImprovementSelectionState*>(_statesLogic[State::STATES::IMPROVEMENT_SELECTOR])->Configure(leftImprovement, rightImprovement);
+			}
+		}
+	
 		_statesLogic[nextState]->OnEnter();
 		_currentStateLogic = nextState;
 	}
@@ -177,54 +184,13 @@ void GameManager::UpdateBattle(const float deltaTime)
 		EndLevel();
 	}
 }
-void GameManager::UpdateImprovement(const float deltaTime)
+
+void GameManager::ApplyImprovements(const std::string& playerSelection, const std::string& enemySelection)
 {
-	MovePlayer();
-	_buttonAManager.Update(deltaTime, _currentFrameInputValueNormalized, _currentFrameInputValue);
+	_improvementFunctions[playerSelection](playerData);
+	_improvementFunctions[enemySelection](enemyData);
 }
 
-void GameManager::UpdateEnterImprovement(const float deltaTime)
-{
-	int levelToCheck = _currentLevel -1;
-	if(levelToCheck * 2 >= TOTAL_IMPROVEMENTS_TO_SELECT)
-	{
-		_currentState = STATES::ENTER_IN_INITIAL_MOVEMENT;
-		return;
-	}
-
-	_leftImprovement = _randomImprovements[levelToCheck * 2];
-	_rightImprovement = _randomImprovements[levelToCheck * 2 + 1];
-
-	_buttonAManager.SelectAfterTime(TIME_TO_SELECT_IMPROVEMENT, 
-		[this](int selection)
-		{
-			_currentState = STATES::ENTER_IN_INITIAL_MOVEMENT;
-			int levelToCheck = _currentLevel -1;
-
-			if(levelToCheck * 2 >= TOTAL_IMPROVEMENTS_TO_SELECT)
-			{
-				return;
-			}
-
-			auto optionForPlayer = _leftImprovement;
-			auto optionForEnemy = _rightImprovement;
-
-			if(selection == 1)
-			{
-				optionForPlayer = _rightImprovement;
-				optionForEnemy = _leftImprovement;
-			}
-
-			_improvementFunctions[optionForPlayer](playerData);
-			_improvementFunctions[optionForEnemy](enemyData);
-		}
-	);
-
-	_player.SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
-	_player.SetPosition(0, SCREEN_HEIGHT * 0.9);
-
-	_currentState = STATES::IMPROVEMENT_SELECTOR;
-}
 
 void GameManager::UpdateInitialMovement(const float deltaTime)
 {
@@ -331,45 +297,6 @@ void GameManager::PaintBattle()
 			_painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, 
 				p.GetWidth(), p.GetHeight(), posX, posY); });
 	}
-
-	{
-		float playerX, playerY;
-		_player.GetPaintPosition(playerX, playerY);
-		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player.GetWidth(), _player.GetHeight(), playerX, playerY);
-	}
-}
-void GameManager::PaintImprovements()
-{
-	{
-		float percentLeft = 0.3;
-		float percentRight = 1- percentLeft;
-
-		_painterManager->AddUIToPaint(_improvementsUI[_leftImprovement], SCREEN_WIDTH*percentLeft, SCREEN_HEIGHT * 0.4f);
-		_painterManager->AddUIToPaint(_improvementsUI[_rightImprovement], SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
-	
-
-		if(_currentFrameInputValueNormalized < 0.5f)
-		{
-			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_PLAYER, SCREEN_WIDTH*percentLeft, SCREEN_HEIGHT * 0.4f);
-			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_ENEMY,  SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
-	
-		}
-		else
-		{
-			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_ENEMY,  SCREEN_WIDTH*percentLeft, SCREEN_HEIGHT * 0.4f);
-			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_PLAYER, SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
-		}
-
-		
-
-		/*
-		for(auto kvp: _improvementsUI)
-		{
-			_painterManager->AddUIToPaint(kvp.second, SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
-		}
-		*/
-	}
-
 
 	{
 		float playerX, playerY;
