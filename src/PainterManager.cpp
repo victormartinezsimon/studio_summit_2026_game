@@ -21,6 +21,18 @@ PainterManager::PainterManager()
 	_sprites[SPRITE_ID::FAST_SHOTS] = sprite_FAST_SHOT;
 	_sprites[SPRITE_ID::SLOW_SHOTS] = sprite_SLOW;	
 	_sprites[SPRITE_ID::GIVE_SHIELD] = sprite_SHIELD;	
+
+	_sprites[SPRITE_ID::NUMBER_0] = sprite_NUMBER_0;
+	_sprites[SPRITE_ID::NUMBER_1] = sprite_NUMBER_1;
+	_sprites[SPRITE_ID::NUMBER_2] = sprite_NUMBER_2;
+	_sprites[SPRITE_ID::NUMBER_3] = sprite_NUMBER_3;
+	_sprites[SPRITE_ID::NUMBER_4] = sprite_NUMBER_4;
+	_sprites[SPRITE_ID::NUMBER_5] = sprite_NUMBER_5;
+	_sprites[SPRITE_ID::NUMBER_6] = sprite_NUMBER_6;
+	_sprites[SPRITE_ID::NUMBER_7] = sprite_NUMBER_7;
+	_sprites[SPRITE_ID::NUMBER_8] = sprite_NUMBER_8;
+	_sprites[SPRITE_ID::NUMBER_9] = sprite_NUMBER_9;
+
 	_painter = new Painter();
 
 	_sizes[SPRITE_ID::PLAYER] = {PLAYER_WIDTH, PLAYER_HEIGHT};
@@ -40,6 +52,18 @@ PainterManager::PainterManager()
 	_sizes[SPRITE_ID::FAST_SHOTS] = {FAST_SHOT_WIDTH, FAST_SHOT_HEIGHT};
 	_sizes[SPRITE_ID::SLOW_SHOTS] = {SLOW_WIDTH, SLOW_HEIGHT};
 	_sizes[SPRITE_ID::GIVE_SHIELD] = {SHIELD_WIDTH, SHIELD_HEIGHT};
+
+
+	_sizes[SPRITE_ID::NUMBER_0] = {NUMBER_0_WIDTH, NUMBER_0_HEIGHT};
+	_sizes[SPRITE_ID::NUMBER_1] = {NUMBER_1_WIDTH, NUMBER_1_HEIGHT};
+	_sizes[SPRITE_ID::NUMBER_2] = {NUMBER_2_WIDTH, NUMBER_2_HEIGHT};
+	_sizes[SPRITE_ID::NUMBER_3] = {NUMBER_3_WIDTH, NUMBER_3_HEIGHT};
+	_sizes[SPRITE_ID::NUMBER_4] = {NUMBER_4_WIDTH, NUMBER_4_HEIGHT};
+	_sizes[SPRITE_ID::NUMBER_5] = {NUMBER_5_WIDTH, NUMBER_5_HEIGHT};
+	_sizes[SPRITE_ID::NUMBER_6] = {NUMBER_6_WIDTH, NUMBER_6_HEIGHT};
+	_sizes[SPRITE_ID::NUMBER_7] = {NUMBER_7_WIDTH, NUMBER_7_HEIGHT};
+	_sizes[SPRITE_ID::NUMBER_8] = {NUMBER_8_WIDTH, NUMBER_8_HEIGHT};
+	_sizes[SPRITE_ID::NUMBER_9] = {NUMBER_9_WIDTH, NUMBER_9_HEIGHT};
 }
 
 PainterManager::~PainterManager()

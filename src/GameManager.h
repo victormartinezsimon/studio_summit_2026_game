@@ -11,6 +11,7 @@
 #include <array>
 #include "PainterManager.h"
 #include "State.h"
+#include "NumberManager.h"
 
 class InputManager;
 
@@ -78,6 +79,7 @@ private:
 	PainterManager *_painterManager;
 	EasingManager _easingManager;
 	ButtonA _buttonAManager;
+	NumberManager _numberManager;
 	float _currentFrameInputValueNormalized;
 	int _currentFrameInputValue;
 

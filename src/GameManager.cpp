@@ -13,7 +13,7 @@
 GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	: _inputManager(input),
 	  _painterManager(painterManager), _currentLevel(0), 
-	  _currentStateLogic(State::STATES::MENU),_currentScore(0)
+	  _currentStateLogic(State::STATES::MENU),_currentScore(0), _numberManager(_painterManager)
 {
 	InitializeConstantValues();
 	InitializeImprovementsFunctions();
@@ -154,6 +154,12 @@ void GameManager::Update(const float deltaTime)
 void GameManager::Paint()
 {
 	_painterManager->ClearListPaint();
+
+	int leftTime = MAX_SECS_PLAYING - _currentTimePlaying;
+	//_numberManager.PaintNumber(81, SCREEN_WIDTH/2, SCREEN_HEIGHT *0.1, 3, NumberManager::PIVOT::CENTER);
+	//_numberManager.PaintNumber(81, SCREEN_WIDTH, SCREEN_HEIGHT *0.4, 3, NumberManager::PIVOT::RIGHT);
+	//_numberManager.PaintNumber(81, 0, SCREEN_HEIGHT *0.8, 3, NumberManager::PIVOT::LEFT);
+	//_numberManager.PaintNumber(leftTime, SCREEN_WIDTH/2, SCREEN_HEIGHT *0.1, 3, NumberManager::PIVOT::CENTER);
 	_statesLogic[_oldStateLogic]->Paint();
 }
 
@@ -296,7 +302,10 @@ void GameManager::SpawnRowEnemies(int enemiesToSpawn, float posY)
 void GameManager::DamagePlayer()
 {
 	_currentScore -= SCORE_PER_PLAYER_HIT;
-	_currentScore = std::max(0, _currentScore);
+	if(_currentScore < 0)
+	{
+		_currentScore = 0;
+	}
 }
 
 
