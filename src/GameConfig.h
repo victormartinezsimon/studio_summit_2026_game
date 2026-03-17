@@ -12,6 +12,10 @@ constexpr unsigned int BULLETS_POOL_SIZE = 200;
 constexpr unsigned int MAX_EASING_VALUES = PLANES_POOL_SIZE + 1;
 constexpr unsigned int MAX_ALPHA_VALUES = 20;
 
+constexpr unsigned char TEAM_PLAYER = 1;
+constexpr unsigned char TEAM_ENEMY = 2;
+constexpr unsigned char TEAM_NEUTRAL = 0;
+
 constexpr float MAIN_MENU_MAX_VALUE = 0.7;
 constexpr float MAIN_MENU_TIME_TO_ENTER = 2;
 

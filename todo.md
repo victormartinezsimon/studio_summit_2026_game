@@ -5,10 +5,14 @@
 - ~~Generate ui for main menu~~
 - ~~Class for easing~~
 - move enemies a little, its too boring right now
-- damage player
+- ~~damage player~~
 - add score
 - sound
 - ~~Add assets for improvement selector~~
 - ~~logic for multipleshots~~
 - ~~test with different screen sizes~~
-- System for alpha
+- ~~System for alpha~~
+- Add meteorites
+- Add background
+- show alpha for damaged planes
+- show alpha for numbers(optional)

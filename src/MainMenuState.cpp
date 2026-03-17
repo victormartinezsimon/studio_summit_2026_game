@@ -18,7 +18,7 @@ State::STATES MainMenuState::Update(const float deltaTime, float _currentFrameIn
 }
 void MainMenuState::Paint()
 {
-	/*
+	
     {
 		float playerX, playerY;
 		_player->GetPaintPosition(playerX, playerY);
@@ -38,7 +38,7 @@ void MainMenuState::Paint()
 		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::TITLE_PLAYER_POSITION,
 			SCREEN_WIDTH *0.5f, SCREEN_HEIGHT * 0.9f);
 	}
-			*/
+	
 }
 void MainMenuState::OnEnter()
 {

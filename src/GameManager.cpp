@@ -104,14 +104,6 @@ void GameManager::InitializeStatesBegin()
 
 void GameManager::Update(const float deltaTime)
 {
-	static bool added = false;
-
-	if(!added)
-	{
-		added = true;
-		_alphaManager.AddUIAlpha(10, SCREEN_WIDTH/2, SCREEN_HEIGHT/2, false,PainterManager::SPRITE_ID::TITLE);
-	}
-
 	_currentFrameInputValue = _inputManager->GetInputValue();
 	_currentFrameInputValueNormalized = _inputManager->NormalizeValue(_currentFrameInputValue);
 
@@ -218,7 +210,14 @@ void GameManager::ConfigurePlane(Plane &p, const float posX, const float posY,
 	p.SetBulletsPerShot(data.bulletsPerShot);
 	p.SetFireRate(data.fireRate);
 	p.SetHasShield(data.hasShield);
-	p.SetPlayerTeam(isPlayer);
+	if(isPlayer)
+	{
+		p.SetPlayerTeam(TEAM_PLAYER);
+	}
+	else
+	{
+		p.SetPlayerTeam(TEAM_ENEMY);
+	}
 	p.Reset();
 	p.SetCallbackFire([this, isPlayer, data](int sourceIndex, const Plane &p)
 					  { this->SpawnBullet(sourceIndex, p, isPlayer, data); });

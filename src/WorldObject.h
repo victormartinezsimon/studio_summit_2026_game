@@ -53,11 +53,11 @@ public:
 
 public:
 public:
-	bool GetPlayerTeam() const
+	unsigned char  GetPlayerTeam() const
 	{
 		return _playerTeam;
 	}
-	void SetPlayerTeam(bool playerTeam)
+	void SetPlayerTeam(unsigned char  playerTeam)
 	{
 		_playerTeam = playerTeam;
 	}
@@ -78,6 +78,6 @@ protected:
 	unsigned int _width = 0;
 	unsigned int _height = 0;
 
-	bool _playerTeam;
+	unsigned char _playerTeam= 0;
 	int _id = -1;
 };
