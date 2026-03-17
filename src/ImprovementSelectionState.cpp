@@ -32,14 +32,14 @@ void ImprovementSelectionState::Paint()
 
 		if(_currentFrameInputValueNormalized < 0.5f)
 		{
-			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_PLAYER, SCREEN_WIDTH*percentLeft, SCREEN_HEIGHT * 0.4f);
-			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_ENEMY,  SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
+			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR, SCREEN_WIDTH*percentLeft, SCREEN_HEIGHT * 0.4f);
+			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::ENEMY_SELECTOR,  SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
 	
 		}
 		else
 		{
-			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_ENEMY,  SCREEN_WIDTH*percentLeft, SCREEN_HEIGHT * 0.4f);
-			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::IMPROVEMENT_SELECTOR_PLAYER, SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
+			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::ENEMY_SELECTOR,  SCREEN_WIDTH*percentLeft, SCREEN_HEIGHT * 0.4f);
+			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR, SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
 		}
 	}
 

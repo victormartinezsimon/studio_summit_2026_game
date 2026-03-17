@@ -2,8 +2,8 @@
 #include <stdexcept>
 #include <thread>
 
-constexpr uint8_t TRANSPARENT_IDS[] = {  7,6,5,4 };  // your 3 IDs
-constexpr uint8_t TRANSPARENT_COUNT = 4;
+constexpr uint8_t TRANSPARENT_IDS[] = {  7,6,5,4, 1 };  // your 3 IDs
+constexpr uint8_t TRANSPARENT_COUNT = 5;
 
 Painter::Painter()
 {
@@ -155,6 +155,7 @@ void Painter::masked_blit_8(
     uint8x16_t keyv1 = vdupq_n_u8(transparent_ids[1]);
     uint8x16_t keyv2 = vdupq_n_u8(transparent_ids[2]);
     uint8x16_t keyv3 = vdupq_n_u8(transparent_ids[3]);
+    uint8x16_t keyv4 = vdupq_n_u8(transparent_ids[4]);
 #endif
 
 	for (int y = 0; y < h; ++y)
@@ -181,6 +182,7 @@ void Painter::masked_blit_8(
             tmask = vorrq_u8(tmask, vceqq_u8(sv, keyv1));
             tmask = vorrq_u8(tmask, vceqq_u8(sv, keyv2));
             tmask = vorrq_u8(tmask, vceqq_u8(sv, keyv3));
+            tmask = vorrq_u8(tmask, vceqq_u8(sv, keyv4));
 
 			uint8x16_t out = vbslq_u8(tmask, dv, sv); // transparent -> keep dst, else copy src
             vst1q_u8(d + x, out);

@@ -4,7 +4,7 @@
 - ~~Add timer~~
 - Add timer on main menu
 - Redesign selection menu
-- Test with other mask
+-~~ Test with other mask~~
 - 2 obstacles
 - Enemy movement
 - Delay start shooting

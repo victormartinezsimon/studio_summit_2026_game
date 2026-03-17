@@ -5,6 +5,11 @@
 #include "Sprites.h"
 #include "ButtonA.h"
 
+constexpr int TITLE_Y = 70;
+constexpr int START_Y = 153;
+constexpr int SELECTOR_Y = 205;
+
+
 MainMenuState::MainMenuState(Plane *player, PainterManager *painter,ButtonA* buttonAManager) : 
 State(player, painter),_buttonAManager(buttonAManager)
 {
@@ -26,23 +31,23 @@ void MainMenuState::Paint()
 	}
 	{
 		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::TITLE, 
-            SCREEN_WIDTH*0.5f, SCREEN_HEIGHT * 0.3f);
+            SCREEN_WIDTH*0.5f, TITLE_Y);
 	}
 	{
 		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::START_GAME,
-			SCREEN_WIDTH *0.5f, SCREEN_HEIGHT * 0.7f);
+			SCREEN_WIDTH *0.5f, START_Y);
 	}
 
 	{
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::TITLE_PLAYER_POSITION,
-			SCREEN_WIDTH *0.5f, SCREEN_HEIGHT * 0.9f);
+		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
+			SCREEN_WIDTH *0.5f, SELECTOR_Y);
 	}
 	
 }
 void MainMenuState::OnEnter()
 {
-	_buttonAManager->SelectInPosition(MAIN_MENU_TIME_TO_ENTER, {SCREEN_WIDTH * 0.5f - MAIN_MENU_POSITION_WIDTH/2, 
-		SCREEN_WIDTH * 0.5f + MAIN_MENU_POSITION_WIDTH/2}, 
+	_buttonAManager->SelectInPosition(MAIN_MENU_TIME_TO_ENTER, {SCREEN_WIDTH * 0.5f - PLAYER_SELECTOR_WIDTH/2, 
+		SCREEN_WIDTH * 0.5f + PLAYER_SELECTOR_WIDTH/2}, 
 		[this](int selection)
 	{
 		_nextState = STATES::INITIAL_MOVEMENT;
@@ -52,7 +57,7 @@ void MainMenuState::OnEnter()
 	_nextState = STATES::MENU;
 
 	_player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
-	_player->SetPositionY(SCREEN_HEIGHT * POSITION_Y_PLAYER);
+	_player->SetPositionY(POSITION_Y_PLAYER);
 }
 void MainMenuState::OnExit()
 {

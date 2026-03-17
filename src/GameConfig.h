@@ -19,7 +19,7 @@ constexpr unsigned char TEAM_NEUTRAL = 0;
 constexpr float MAIN_MENU_MAX_VALUE = 0.7;
 constexpr float MAIN_MENU_TIME_TO_ENTER = 2;
 
-constexpr float POSITION_Y_PLAYER = 0.9f;
+constexpr float POSITION_Y_PLAYER = 204;
 
 constexpr float INTIAL_ANIMATION_DURATION = 1;
 
