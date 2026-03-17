@@ -13,7 +13,8 @@
 GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	: _inputManager(input),
 	  _painterManager(painterManager), _currentLevel(0), 
-	  _currentStateLogic(State::STATES::MENU),_currentScore(0), _numberManager(_painterManager)
+	  _currentStateLogic(State::STATES::MENU),_currentScore(0), _numberManager(_painterManager),
+	  _alphaManager(_painterManager, &_easingManager)
 {
 	InitializeConstantValues();
 	InitializeImprovementsFunctions();
@@ -103,6 +104,14 @@ void GameManager::InitializeStatesBegin()
 
 void GameManager::Update(const float deltaTime)
 {
+	static bool added = false;
+
+	if(!added)
+	{
+		added = true;
+		_alphaManager.AddUIAlpha(10, SCREEN_WIDTH/2, SCREEN_HEIGHT/2, false,PainterManager::SPRITE_ID::TITLE);
+	}
+
 	_currentFrameInputValue = _inputManager->GetInputValue();
 	_currentFrameInputValueNormalized = _inputManager->NormalizeValue(_currentFrameInputValue);
 
@@ -110,6 +119,8 @@ void GameManager::Update(const float deltaTime)
 	{
 		_currentTimePlaying += deltaTime;
 	}
+
+	_alphaManager.Update(deltaTime);
 
 	MovePlayer();
 	auto nextState = _statesLogic[_currentStateLogic]->Update(deltaTime, _currentFrameInputValueNormalized, _currentFrameInputValue);
@@ -166,6 +177,8 @@ void GameManager::Paint()
 	{
 		_numberManager.PaintNumber(_currentScore, 0, NUMBER_0_HEIGHT, 4, NumberManager::PIVOT::LEFT);
 	}
+
+	_alphaManager.Paint();
 }	
 
 void GameManager::ApplyImprovements(const std::string& playerSelection, const std::string& enemySelection)

@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <thread>
 
-constexpr int ALPHA_INDEX = 8;
+constexpr int ALPHA_INDEX = 9;
 
 Painter::Painter()
 {
@@ -42,68 +42,72 @@ Painter::~Painter()
 {
 }
 
-
-
 void Painter::BeginPaint()
 {
-	//Ensure VPU fifo is empty
-	while(VPUGetFIFONotEmpty(s_platform->vx)) { }
-	//Swap frames
+	// Ensure VPU fifo is empty
+	while (VPUGetFIFONotEmpty(s_platform->vx))
+	{
+	}
+	// Swap frames
 	VPUSwapPages(s_platform->vx, s_platform->sc);
 }
 
 void Painter::EndPaint()
 {
-	//Add a buffer swap commmand
+	// Add a buffer swap commmand
 	VPUSyncSwap(s_platform->vx, 0);
-	//Insert a no-operation command (barrier) that we can wait on
+	// Insert a no-operation command (barrier) that we can wait on
 	VPUNoop(s_platform->vx);
 }
 
 void Painter::PaintBackground()
 {
 	dst = (uint8_t *)s_platform->sc->writepage;
-	VPUClear(s_platform->vx,0x10101010);
+	VPUClear(s_platform->vx, 0x10101010);
 }
 
-void Painter::PaintItem(const uint8_t* sprite, unsigned int width, unsigned int height, unsigned int x, unsigned int y)
+void Painter::PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, unsigned int x, unsigned int y)
 {
 	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, ALPHA_INDEX, allMask);
 }
 
 void Painter::PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, unsigned int x, unsigned int y, int maskType)
 {
-
 	uint8x16_t mask = allMask;
-	if(maskType == 1){mask == halfMask;}
-	if(maskType == 2){mask == quarterMask;}
+	if (maskType == 1)
+	{
+		mask = halfMask;
+	}
+	if (maskType == 2)
+	{
+		mask = quarterMask;
+	}
 
 	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, ALPHA_INDEX, mask);
 }
-
 
 void Painter::init_palette(struct EVideoContext *vctx)
 {
 	VPUSetDefaultPalette(vctx);
 
-	VPUSetPal(vctx, 0, 8,9,12);
-	VPUSetPal(vctx, 1, 29,30,42);
-	VPUSetPal(vctx, 2, 56,57,82);
-	VPUSetPal(vctx, 3, 236,27,17);
-	VPUSetPal(vctx, 4, 212,53,25);
-	VPUSetPal(vctx, 5, 254,205,23);
-	VPUSetPal(vctx, 6, 20,88,165);
-	VPUSetPal(vctx, 7, 26,81,179);
-	VPUSetPal(vctx, 8, 255,0,255);
-	VPUSetPal(vctx, 9, 251,24,252);
-	VPUSetPal(vctx, 10, 243,34,233);
-	VPUSetPal(vctx, 11, 229,77,224);
-	VPUSetPal(vctx, 12, 72,173,231);
-	VPUSetPal(vctx, 13, 178,193,218);
-	VPUSetPal(vctx, 14, 211,224,232);
-	VPUSetPal(vctx, 15, 245,247,249);
+	VPUSetPal(vctx, 0, 10, 12, 29);
+	VPUSetPal(vctx, 1, 81, 55, 85);
+	VPUSetPal(vctx, 2, 222, 48, 21);
+	VPUSetPal(vctx, 3, 252, 199, 27);
+	VPUSetPal(vctx, 4, 17, 84, 182);
+	VPUSetPal(vctx, 5, 164, 18, 165);
+	VPUSetPal(vctx, 6, 202, 64, 182);
+	VPUSetPal(vctx, 7, 211, 10, 210);
+	VPUSetPal(vctx, 8, 228, 1, 228);
+	VPUSetPal(vctx, 9, 255, 0, 255);
+	VPUSetPal(vctx, 10, 53, 156, 226);
+	VPUSetPal(vctx, 11, 168, 168, 171);
+	VPUSetPal(vctx, 12, 200, 204, 190);
+	VPUSetPal(vctx, 13, 212, 214, 221);
+	VPUSetPal(vctx, 14, 229, 231, 233);
+	VPUSetPal(vctx, 15, 254, 255, 255);
 
-	VPUSetPal(vctx, 16, 8,15,42);//background
+	VPUSetPal(vctx, 16, 8, 15, 42); // background
 }
 
 void Painter::masked_blit_8(
@@ -111,12 +115,12 @@ void Painter::masked_blit_8(
 	uint32_t dst_stride,
 	int dst_w,
 	int dst_h,
-	const uint8_t*src,
+	const uint8_t *src,
 	int src_w,
 	int src_h,
 	int dst_x,
 	int dst_y,
-	uint8_t transparent, 
+	uint8_t transparent,
 	uint8x16_t extraAlphaMask)
 {
 	int src_x = 0;
@@ -146,7 +150,6 @@ void Painter::masked_blit_8(
 
 #if defined(__ARM_NEON) || defined(__ARM_NEON__)
 	uint8x16_t keyv = vdupq_n_u8(transparent); // Broadcast the key to 16 bytes
-	keyv = vandq_u8(keyv, extraAlphaMask);
 #endif
 
 	for (int y = 0; y < h; ++y)
@@ -163,6 +166,10 @@ void Painter::masked_blit_8(
 		{
 			uint8x16_t sv = vld1q_u8(s + x);		 // Load source pixels
 			uint8x16_t dv = vld1q_u8(d + x);		 // Load destination pixels
+
+			// Apply extra alpha mask: where mask byte is 0x00, replace src pixel with transparent value
+    		sv = vbslq_u8(extraAlphaMask, sv, keyv); 
+
 			uint8x16_t mask = vceqq_u8(sv, keyv);	 // Compare source pixels with key, result is 0xFF where equal, 0x00 where not
 			uint8x16_t out = vbslq_u8(mask, dv, sv); // If mask bit is 1, select from dv (keep dest), else select from sv (copy src)
 			vst1q_u8(d + x, out);					 // Store result back to destination
