@@ -85,13 +85,13 @@ void BattleState::OnEnter()
     _player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
     _player->SetPositionY(SCREEN_HEIGHT * POSITION_Y_PLAYER);
 
-    _meteorites[0]->SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
+    _meteorites[0].SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
     _meteorites[0].SetPosition(SCREEN_WIDTH, SCREEN_HEIGHT*0.4f);
     _meteorites[0].SetVelocities(-DEFAULT_BULLET_VEL_Y * 0.5,0);
     _meteorites[0].SetMoveLeft(true);
 
-    _meteorites[1]->SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
-    _meteorites[1].SetPosition(meteorites[1].GetWidth(), SCREEN_HEIGHT*0.6f);
+    _meteorites[1].SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
+    _meteorites[1].SetPosition(_meteorites[1].GetWidth(), SCREEN_HEIGHT*0.6f);
     _meteorites[1].SetVelocities(-DEFAULT_BULLET_VEL_Y * 0.55,0);
     _meteorites[1].SetMoveLeft(false);
 
@@ -137,7 +137,7 @@ void BattleState::ManageBulletCollisions(Bullet &bullet)
                 if (!bullet.GetHasPenetration())
                 {
                     _bulletsPool->Release(bullet);
-                    isBulletDestroyed = true;
+                    isDestroyed = true;
                 }
             }
         }
@@ -252,12 +252,12 @@ void BattleState::UpdateMeteorites(float deltaTime)
 
         float posX, posY;
         m.GetPaintPosition(posX, posY);
-        if(posX- m.GetWidth() < 0 )
+        if(posX - m.GetWidth() < 0 && m.GetMoveLeft())
         {   
             m.SetPositionX(m.GetX() + SCREEN_WIDTH);
         }
 
-        if(posX> SCREEN_WIDTH )
+        if(posX> SCREEN_WIDTH && !m.GetMoveLeft())
         {   
             m.SetPositionX(m.GetX() - SCREEN_WIDTH);
         }

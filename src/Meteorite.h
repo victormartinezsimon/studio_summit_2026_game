@@ -25,7 +25,7 @@ public:
 		_moveLeft = value;
 	}
 
-	void GetMoveLeft() const
+	bool GetMoveLeft() const
 	{
 		return _moveLeft;
 	}

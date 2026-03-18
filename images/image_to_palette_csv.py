@@ -40,6 +40,9 @@ def main():
     image_path = sys.argv[1]
     palette_path = sys.argv[2]
     output_path = sys.argv[3]
+
+    print(f"image_path:{sys.argv[1]}, palette_path:{sys.argv[2]}, outputpath: {sys.argv[3]}")
+
     key = os.path.splitext(os.path.basename(image_path))[0].upper()
 
     palette = load_palette(palette_path)

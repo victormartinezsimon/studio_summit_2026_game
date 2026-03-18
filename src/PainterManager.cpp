@@ -20,6 +20,7 @@ PainterManager::PainterManager()
 	_sprites[SPRITE_ID::FAST_SHOTS] = sprite_FAST_SHOT;
 	_sprites[SPRITE_ID::SLOW_SHOTS] = sprite_SLOW;	
 	_sprites[SPRITE_ID::GIVE_SHIELD] = sprite_GIVE_SHIELD;	
+	_sprites[SPRITE_ID::METEORITE] = sprite_METERORITE;	
 
 	_sprites[SPRITE_ID::NUMBER_0] = sprite_NUMBER_0;
 	_sprites[SPRITE_ID::NUMBER_1] = sprite_NUMBER_1;
@@ -51,6 +52,7 @@ PainterManager::PainterManager()
 	_sizes[SPRITE_ID::SLOW_SHOTS] = {SLOW_WIDTH, SLOW_HEIGHT};
 	_sizes[SPRITE_ID::GIVE_SHIELD] = {GIVE_SHIELD_WIDTH, GIVE_SHIELD_HEIGHT};
 
+	_sizes[SPRITE_ID::METEORITE] = {METERORITE_WIDTH, METERORITE_HEIGHT};
 
 	_sizes[SPRITE_ID::NUMBER_0] = {NUMBER_0_WIDTH, NUMBER_0_HEIGHT};
 	_sizes[SPRITE_ID::NUMBER_1] = {NUMBER_1_WIDTH, NUMBER_1_HEIGHT};
