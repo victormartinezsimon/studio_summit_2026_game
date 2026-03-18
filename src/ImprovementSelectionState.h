@@ -6,12 +6,14 @@
 #include "PainterManager.h"
 
 class ButtonA;
+class NumberManager;
 
 class ImprovementSelectionState: public State
 {
     public:
         ImprovementSelectionState(Plane* player, PainterManager* painter, ButtonA* buttonAManager, 
-            std::function<void(const std::string& optionForPlayer,const std::string& optionForEnemy )> callbackSeleccion);
+            std::function<void(const std::string& optionForPlayer,const std::string& optionForEnemy )> callbackSeleccion, 
+             NumberManager* numberManager);
         
     public:    
         STATES Update(const float deltaTime, float currentFrameInputValueNormalized,
@@ -33,4 +35,5 @@ class ImprovementSelectionState: public State
         std::string _rightSelection;
         std::map<std::string, PainterManager::SPRITE_ID> _improvementsUI;
         ButtonA *_buttonAManager;
+        NumberManager* _numberManager;
 };

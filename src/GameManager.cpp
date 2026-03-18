@@ -26,7 +26,7 @@ GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	_statesLogic[State::STATES::INITIAL_MOVEMENT] = new InitialMovementState(&_player, painterManager, &_easingManager, &_enemiesPool);
 	
 	_statesLogic[State::STATES::IMPROVEMENT_SELECTOR] = new ImprovementSelectionState(&_player, painterManager, &_buttonAManager,
-	[this](const std::string& player, const std::string& enemy){ApplyImprovements(player, enemy);});
+	[this](const std::string& player, const std::string& enemy){ApplyImprovements(player, enemy);}, &_numberManager);
 	
 	_statesLogic[State::STATES::BATTLE] = new BattleState(&_player, painterManager, &_enemiesPool, &_bulletsPool,
 		[this](){DamagePlayer();}, 

@@ -4,10 +4,17 @@
 #include "GameConfig.h"
 #include "Sprites.h"
 #include "ButtonA.h"
+#include "NumberManager.h"
 
-ImprovementSelectionState::ImprovementSelectionState(Plane *player, PainterManager *painter,ButtonA* buttonAManager, 
-	std::function<void(const std::string& optionForPlayer,const std::string& optionForEnemy)> callbackSeleccion) : 
-State(player, painter),_callbackSeleccion(callbackSeleccion), _buttonAManager(buttonAManager)
+constexpr int SELECTOR_Y_PLAYER = 190;
+constexpr int SELECTOR_Y_ENEMY = SCREEN_HEIGHT - SELECTOR_Y_PLAYER;
+constexpr float OPTION_LEFT_X = 0.2;
+constexpr float OPTION_RIGHT_X = 0.8;
+
+ImprovementSelectionState::ImprovementSelectionState(Plane *player, PainterManager *painter, ButtonA *buttonAManager,
+													 std::function<void(const std::string &optionForPlayer, const std::string &optionForEnemy)> callbackSeleccion,
+													 NumberManager *numberManager) : State(player, painter), _callbackSeleccion(callbackSeleccion),
+																					 _buttonAManager(buttonAManager), _numberManager(numberManager)
 {
 	InitializeImprovementsUI();
 }
@@ -15,67 +22,92 @@ State(player, painter),_callbackSeleccion(callbackSeleccion), _buttonAManager(bu
 State::STATES ImprovementSelectionState::Update(const float deltaTime, float currentFrameInputValueNormalized, int currentFrameInputValue)
 {
 	_currentFrameInputValueNormalized = currentFrameInputValueNormalized;
-    
+
 	_buttonAManager->Update(deltaTime, currentFrameInputValueNormalized, currentFrameInputValue);
-	
+
 	return _nextState;
 }
 void ImprovementSelectionState::Paint()
 {
-    {
-		float percentLeft = 0.3;
-		float percentRight = 1- percentLeft;
-
-		_painterManager->AddUIToPaint(_improvementsUI[_leftSelection], SCREEN_WIDTH*percentLeft, SCREEN_HEIGHT * 0.4f);
-		_painterManager->AddUIToPaint(_improvementsUI[_rightSelection], SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
-	
-
-		if(_currentFrameInputValueNormalized < 0.5f)
-		{
-			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR, SCREEN_WIDTH*percentLeft, SCREEN_HEIGHT * 0.4f);
-			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::ENEMY_SELECTOR,  SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
-	
-		}
-		else
-		{
-			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::ENEMY_SELECTOR,  SCREEN_WIDTH*percentLeft, SCREEN_HEIGHT * 0.4f);
-			_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR, SCREEN_WIDTH*percentRight, SCREEN_HEIGHT * 0.4f);
-		}
-	}
 
 	{
 		float playerX, playerY;
 		_player->GetPaintPosition(playerX, playerY);
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player->GetWidth(), _player->GetHeight(), playerX, playerY);
 	}
+
+	{
+		float playerX, playerY;
+		_player->GetPaintPosition(playerX, playerY);
+		float posY = _player->GetY();
+		int time = _buttonAManager->GetLeftTime() + 1;
+		_numberManager->PaintNumber(time, playerX, posY, 1, NumberManager::PIVOT::RIGHT);
+	}
+
+	{
+		float playerX, playerY;
+		_player->GetPaintPosition(playerX, playerY);
+
+		float x = SCREEN_WIDTH - playerX - ENEMY_WIDTH; // OK
+		float y = SCREEN_HEIGHT - POSITION_Y_PLAYER;
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY,
+									ENEMY_WIDTH, ENEMY_HEIGHT, x, y);
+	}
+
+	{
+		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
+									  SCREEN_WIDTH * OPTION_LEFT_X, SELECTOR_Y_PLAYER);
+
+		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
+									  SCREEN_WIDTH * OPTION_RIGHT_X, SELECTOR_Y_PLAYER);
+
+		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::ENEMY_SELECTOR,
+									  SCREEN_WIDTH * OPTION_LEFT_X, SELECTOR_Y_ENEMY);
+
+		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::ENEMY_SELECTOR,
+									  SCREEN_WIDTH * OPTION_RIGHT_X, SELECTOR_Y_ENEMY);
+	}
+
+	{
+		_painterManager->AddUIToPaint(_improvementsUI[_leftSelection],
+									  SCREEN_WIDTH * OPTION_LEFT_X,
+									  SCREEN_HEIGHT * 0.5f);
+		_painterManager->AddUIToPaint(_improvementsUI[_rightSelection],
+									  SCREEN_WIDTH * OPTION_RIGHT_X,
+									  SCREEN_HEIGHT * 0.5f);
+	}
 }
 void ImprovementSelectionState::OnEnter()
 {
-	/*
-	_buttonAManager->SelectAfterTime(TIME_TO_SELECT_IMPROVEMENT, 
-		[this](int selection)
-		{
-			_nextState = STATES::INITIAL_MOVEMENT;
-			if(_callbackSeleccion != nullptr)
-			{
-				auto optionForPlayer = _leftSelection;
-				auto optionForEnemy = _rightSelection;
+	auto halfZoneA = SCREEN_WIDTH * OPTION_LEFT_X;
+	std::pair<float, float> zoneA = {halfZoneA - PLAYER_SELECTOR_WIDTH / 2, halfZoneA + PLAYER_SELECTOR_WIDTH / 2};
 
-				if(selection == 1)
-				{
-					optionForPlayer = _rightSelection;
-					optionForEnemy = _leftSelection;
-				}
+	auto halfZoneB = SCREEN_WIDTH * OPTION_RIGHT_X;
+	std::pair<float, float> zoneB = {halfZoneB - PLAYER_SELECTOR_WIDTH / 2, halfZoneB + PLAYER_SELECTOR_WIDTH / 2};
 
-				_callbackSeleccion(optionForPlayer, optionForEnemy);
-			}
-		}
-	);
-	*/
+	_buttonAManager->SelectInPosition(TIME_TO_SELECT_IMPROVEMENT, zoneA, zoneB,
+									  [this](int selection)
+									  {
+										  _nextState = STATES::INITIAL_MOVEMENT;
+										  if (_callbackSeleccion != nullptr)
+										  {
+											  auto optionForPlayer = _leftSelection;
+											  auto optionForEnemy = _rightSelection;
+
+											  if (selection == 1)
+											  {
+												  optionForPlayer = _rightSelection;
+												  optionForEnemy = _leftSelection;
+											  }
+
+											  _callbackSeleccion(optionForPlayer, optionForEnemy);
+										  }
+									  });
+
 	_nextState = STATES::IMPROVEMENT_SELECTOR;
 
 	_player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
-	_player->SetPositionY(SCREEN_HEIGHT * POSITION_Y_PLAYER);
+	_player->SetPositionY(POSITION_Y_PLAYER);
 }
 void ImprovementSelectionState::OnExit()
 {
