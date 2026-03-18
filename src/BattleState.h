@@ -5,6 +5,8 @@
 #include "GameConfig.h"
 #include "Pool.h"
 #include "NumberManager.h"
+#include "Meteorite.h"
+#include <array>
 
 class Plane;
 class Bullet;
@@ -29,9 +31,11 @@ class BattleState: public State
     private:
         void UpdateBullets(float deltaTime);
         void UpdateEnemies(float deltaTime);
+        void UpdateMeteorites(float deltaTime);
         void ManageBulletCollisions(Bullet& bullet);
         bool ManageCollisionBetweenBulletAndEnemy(Bullet& bullet, Plane& enemy);
 	    bool HasCollision(const Bullet& bullet, Plane* plane) const;
+        bool HasCollision(const Bullet& bullet, const Meteorite& meteorite) const;
 	    bool CollsisionDetection(float ax, float ay, float aw, float ah,
 							 float bx, float by, float bw, float bh) const;
         void DamagePlayer();
@@ -45,4 +49,6 @@ class BattleState: public State
         long long* _score;
         float* _timeLeft;
         NumberManager* _numberManager;
+        std::array<Meteorite, TOTAL_METEORITES> _meteorites;
+
 };

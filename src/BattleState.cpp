@@ -20,9 +20,10 @@ State::STATES BattleState::Update(const float deltaTime, float currentFrameInput
     // update player
     _player->Update(deltaTime);
 
+    UpdateMeteorites(deltaTime);
+
     UpdateBullets(deltaTime);
 
-    // update enemies
     UpdateEnemies(deltaTime);
 
     if (_enemiesPool->TotalInUse() == 0)
@@ -34,6 +35,16 @@ State::STATES BattleState::Update(const float deltaTime, float currentFrameInput
 }
 void BattleState::Paint()
 {
+    {
+        for(auto&& m: _meteorites)
+        {
+            float posX, posY;
+            m.GetPaintPosition(posX, posY);
+            _painterManager->AddToPaint(PainterManager::SPRITE_ID::METEORITE, 
+                m.GetWidth(), m.GetHeight(), posX, posY);
+        }
+    }
+
     {
         _bulletsPool->for_each_active([&](const Bullet &bullet)
                                       {
@@ -73,6 +84,17 @@ void BattleState::OnEnter()
 {
     _player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
     _player->SetPositionY(SCREEN_HEIGHT * POSITION_Y_PLAYER);
+
+    _meteorites[0]->SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
+    _meteorites[0].SetPosition(SCREEN_WIDTH, SCREEN_HEIGHT*0.4f);
+    _meteorites[0].SetVelocities(-DEFAULT_BULLET_VEL_Y * 0.5,0);
+    _meteorites[0].SetMoveLeft(true);
+
+    _meteorites[1]->SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
+    _meteorites[1].SetPosition(meteorites[1].GetWidth(), SCREEN_HEIGHT*0.6f);
+    _meteorites[1].SetVelocities(-DEFAULT_BULLET_VEL_Y * 0.55,0);
+    _meteorites[1].SetMoveLeft(false);
+
 }
 void BattleState::OnExit()
 {
@@ -105,17 +127,40 @@ void BattleState::ManageBulletCollisions(Bullet &bullet)
         isDestroyed = true;
     }
 
-    // check collision against enemies
-    _enemiesPool->for_each_active([&](Plane &enemy)
-                                  {
-									bool solution = ManageCollisionBetweenBulletAndEnemy(bullet, enemy);
-									isDestroyed |= solution; });
-
-    if (HasCollision(bullet, _player))
+    if(!isDestroyed)
     {
-        DamagePlayer();
-        _bulletsPool->Release(bullet);
-        isDestroyed = true;
+        //check meteorites
+        for(auto&& m: _meteorites)
+        {
+             if (HasCollision(bullet, m))
+            {
+                if (!bullet.GetHasPenetration())
+                {
+                    _bulletsPool->Release(bullet);
+                    isBulletDestroyed = true;
+                }
+            }
+        }
+    }
+
+    if(!isDestroyed)
+    {
+        // check collision against enemies
+        _enemiesPool->for_each_active([&](Plane &enemy)
+                                    {
+                                        bool solution = ManageCollisionBetweenBulletAndEnemy(bullet, enemy);
+                                        isDestroyed |= solution; });
+    }
+
+    if(!isDestroyed)
+    {
+        //check player
+        if (HasCollision(bullet, _player))
+        {
+            DamagePlayer();
+            _bulletsPool->Release(bullet);
+            isDestroyed = true;
+        }
     }
 
     if (isDestroyed)
@@ -161,6 +206,12 @@ bool BattleState::HasCollision(const Bullet &bullet, Plane *plane) const
     return hasCollsion; 
 }
 
+ bool BattleState::HasCollision(const Bullet& bullet, const Meteorite& meteorite) const
+ {
+    return CollsisionDetection(bullet.GetX(), bullet.GetY(), bullet.GetWidth(), bullet.GetHeight(),
+                               meteorite.GetX(), meteorite.GetY(), meteorite.GetWidth(), meteorite.GetHeight());
+ }
+
 bool BattleState::CollsisionDetection(float ax, float ay, float aw, float ah,
                                       float bx, float by, float bw, float bh) const
 {
@@ -177,6 +228,7 @@ void BattleState::DoExplosion(Bullet &bullet)
 {
     bullet.SetSize(EXPLOSION_SIZE, EXPLOSION_SIZE);
 
+    //check explosion damage enemies
     _enemiesPool->for_each_active([&bullet, this](Plane &enemy)
                                   {
 									  if (HasCollision(bullet, &enemy))
@@ -185,8 +237,29 @@ void BattleState::DoExplosion(Bullet &bullet)
                                           _damageEnemy();
 									  } });
 
+    //check explosion damage player
     if (HasCollision(bullet, _player))
     {
         DamagePlayer();
+    }
+}
+
+void BattleState::UpdateMeteorites(float deltaTime)
+{
+    for(auto& m : _meteorites)
+    {
+        m.Update(deltaTime);
+
+        float posX, posY;
+        m.GetPaintPosition(posX, posY);
+        if(posX- m.GetWidth() < 0 )
+        {   
+            m.SetPositionX(m.GetX() + SCREEN_WIDTH);
+        }
+
+        if(posX> SCREEN_WIDTH )
+        {   
+            m.SetPositionX(m.GetX() - SCREEN_WIDTH);
+        }
     }
 }
