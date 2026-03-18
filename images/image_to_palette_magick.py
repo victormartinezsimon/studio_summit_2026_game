@@ -36,6 +36,9 @@ def main():
     image_path = sys.argv[1]
     palette_path = sys.argv[2]
     output_path = sys.argv[3]
+
+    print(f"image_path:{sys.argv[1]}, palette_path:{sys.argv[2]}, outputpath: {sys.argv[3]}")
+
     key = os.path.splitext(os.path.basename(image_path))[0].upper()
 
     palette = load_palette(palette_path)
@@ -81,7 +84,7 @@ def main():
         f.write(f"static const uint8_t sprite_{key}[{key}_WIDTH * {key}_HEIGHT]={{\n")
         for row in rows:
             f.write(row + ",\n")
-        f.write("}};\n\n")
+        f.write("};\n\n")
 
     print(f"Appended sprite_{key} to {output_path} ({width}x{height}, {len(palette)} palette colors)")
 
