@@ -22,13 +22,17 @@ GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	InitializeStatesBegin();
 
 	_statesLogic[State::STATES::MENU] = new MainMenuState(&_player, painterManager, &_buttonAManager, &_numberManager);
+	
 	_statesLogic[State::STATES::INITIAL_MOVEMENT] = new InitialMovementState(&_player, painterManager, &_easingManager, &_enemiesPool);
+	
 	_statesLogic[State::STATES::IMPROVEMENT_SELECTOR] = new ImprovementSelectionState(&_player, painterManager, &_buttonAManager,
 	[this](const std::string& player, const std::string& enemy){ApplyImprovements(player, enemy);});
+	
 	_statesLogic[State::STATES::BATTLE] = new BattleState(&_player, painterManager, &_enemiesPool, &_bulletsPool,
 		[this](){DamagePlayer();}, 
-		[this](){DamageEnemy();}, 
-		&_currentScore, &_currentTimePlaying, &_numberManager);
+		[this](float x, float y){DamageEnemy(x, y);}, 
+		&_currentScore, &_currentTimePlaying, &_numberManager, &_alphaManager);
+	
 	_statesLogic[_currentStateLogic]->OnEnter();
 }
 
@@ -323,7 +327,7 @@ void GameManager::DamagePlayer()
 }
 
 
-void GameManager::DamageEnemy()
+void GameManager::DamageEnemy(float x, float y)
 {
 	_currentScore += SCORE_PER_KILL;
 }

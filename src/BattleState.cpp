@@ -4,14 +4,17 @@
 #include "GameConfig.h"
 #include "Sprites.h"
 #include "Bullet.h"
+#include "AlphaManager.h"
 
 BattleState::BattleState(Plane *player, PainterManager *painter, Pool<Plane, PLANES_POOL_SIZE> *enemiesPool,
                          Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool, 
-                         std::function<void()> damagePlayerCallback, std::function<void()> damageEnemy,
-                        long long* score, float* time, NumberManager* numberManager) 
+                         std::function<void()> damagePlayerCallback, 
+                         std::function<void(float x, float y)> damageEnemy,
+                         long long* score, float* time, 
+                         NumberManager* numberManager, AlphaManager* alphaManager) 
                          : State(player, painter), _enemiesPool(enemiesPool), _bulletsPool(bulletsPool),
-                         _damagePlayerCallback(damagePlayerCallback), _damageEnemy(damageEnemy),
-                         _score(score), _timeLeft(time), _numberManager(numberManager)
+                         _damagePlayerCallback(damagePlayerCallback), _damageEnemyCallback(damageEnemy),
+                         _score(score), _timeLeft(time), _numberManager(numberManager),_alphaManager(alphaManager)
 {
 }
 
@@ -26,7 +29,7 @@ State::STATES BattleState::Update(const float deltaTime, float currentFrameInput
 
     UpdateEnemies(deltaTime);
 
-    if (_enemiesPool->TotalInUse() == 0)
+    if (_enemiesAlive == 0)
     {
         return STATES::IMPROVEMENT_SELECTOR;
     }
@@ -86,7 +89,6 @@ void BattleState::OnEnter()
     _player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
     _player->SetPositionY( POSITION_Y_PLAYER);
 
-
     _meteorites[0].SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
     _meteorites[0].SetPosition(SCREEN_WIDTH + METERORITE_WIDTH, SCREEN_HEIGHT*0.4f);
     _meteorites[0].SetVelocities(-DEFAULT_BULLET_VEL_Y * 0.5,0);
@@ -96,6 +98,8 @@ void BattleState::OnEnter()
     _meteorites[1].SetPosition(-static_cast<int>(METERORITE_WIDTH), SCREEN_HEIGHT*0.6f);
     _meteorites[1].SetVelocities(DEFAULT_BULLET_VEL_Y * 0.55,0);
     _meteorites[1].SetMoveLeft(false);
+
+    _enemiesAlive = _enemiesPool->TotalInUse();
 
 }
 void BattleState::OnExit()
@@ -187,8 +191,7 @@ bool BattleState::ManageCollisionBetweenBulletAndEnemy(Bullet &bullet, Plane &en
             _bulletsPool->Release(bullet);
             isBulletDestroyed = true;
         }
-        _enemiesPool->Release(enemy);
-        _damageEnemy();
+        ReturnEnemy(enemy);
     }
     return isBulletDestroyed;
 }
@@ -238,8 +241,7 @@ void BattleState::DoExplosion(Bullet &bullet)
                                   {
 									  if (HasCollision(bullet, &enemy))
 									  {
-										  _enemiesPool->Release(enemy);
-                                          _damageEnemy();
+										  ReturnEnemy(enemy);
 									  } });
 
     //check explosion damage player
@@ -268,4 +270,18 @@ void BattleState::UpdateMeteorites(float deltaTime)
             m.SetPositionX( positionX );
         }
     }
+}
+
+void BattleState::ReturnEnemy(Plane& enemy)
+{
+    _enemiesPool->Release(enemy);
+    float x, y;
+    enemy.GetPaintPosition(x, y);
+    int id = _alphaManager->AddAlpha(ALPHA_TIME_DESTROY_PLANE, x, y, false, 
+        ENEMY_WIDTH, ENEMY_HEIGHT, PainterManager::SPRITE_ID::ENEMY);
+    _alphaManager->AddCallback(id, [this]()
+    {
+        _enemiesAlive--;
+    });
+    _damageEnemyCallback(x, y);
 }

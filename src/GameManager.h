@@ -51,7 +51,7 @@ private:
 private:
 	void ConfigurePlane(Plane &p, const float posX, const float posY, const modifiable_data &data, bool isPlayer);
 	void DamagePlayer();
-	void DamageEnemy();
+	void DamageEnemy(float x, float y);
 
 private:
 	void SpawnEnemies();

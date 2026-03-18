@@ -17,7 +17,7 @@ void AlphaManager::Update(const float deltaTime)
     }
 }
 
-bool AlphaManager::AddInternalAlpha(float duration, bool isUI, float startX, float startY,
+int AlphaManager::AddInternalAlpha(float duration, bool isUI, float startX, float startY,
                             float endX, float endY, bool goDown, float width, float height, PainterManager::SPRITE_ID sprite)
 {
     for (int i = 0; i < _inUse.size(); ++i)
@@ -32,6 +32,8 @@ bool AlphaManager::AddInternalAlpha(float duration, bool isUI, float startX, flo
             _alphas[i].isUI = isUI;
             _alphas[i].currentX = startX;
             _alphas[i].currentY = startY;
+            _alphas[i].width = width;
+            _alphas[i].height = height;
 
             if(startX != endX || startY != endY)
             {
@@ -55,25 +57,25 @@ bool AlphaManager::AddInternalAlpha(float duration, bool isUI, float startX, flo
                 }
             }
 
-            return true;
+            return i;
         }
     }
-    return false;
+    return -1;
 }
 
-bool AlphaManager::AddUIAlpha(float duration, float x, float y, bool goDown, PainterManager::SPRITE_ID sprite)
+int AlphaManager::AddUIAlpha(float duration, float x, float y, bool goDown, PainterManager::SPRITE_ID sprite)
 {
     return AddInternalAlpha(duration, true, x, y, x, y, goDown, -1, -1, sprite );
 }
-bool AlphaManager::AddAlpha(float duration, float x, float y, bool goDown, float width, float height, PainterManager::SPRITE_ID sprite)
+int AlphaManager::AddAlpha(float duration, float x, float y, bool goDown, float width, float height, PainterManager::SPRITE_ID sprite)
 {
     return AddInternalAlpha(duration, false, x, y, x, y, goDown, width, height, sprite );
 }
-bool AlphaManager::AddUIAlpha(float duration, float x, float y, float endX, float endY, bool goDown, PainterManager::SPRITE_ID sprite)
+int AlphaManager::AddUIAlpha(float duration, float x, float y, float endX, float endY, bool goDown, PainterManager::SPRITE_ID sprite)
 {
     return AddInternalAlpha(duration, true, x, y, endX, endY, goDown, -1, -1, sprite );
 }
-bool AlphaManager::AddAlpha(float duration, float x, float y,  float endX, float endY, bool goDown, float width, float height, PainterManager::SPRITE_ID sprite)
+int AlphaManager::AddAlpha(float duration, float x, float y,  float endX, float endY, bool goDown, float width, float height, PainterManager::SPRITE_ID sprite)
 {
     return AddInternalAlpha(duration, false, x, y, endX, endY, goDown, width, height, sprite );
 }
@@ -91,6 +93,12 @@ void AlphaManager::FinishAlpha(int id)
     {
         return;
     }
+
+    if(_alphas[id].endCallback)
+    {
+        _alphas[id].endCallback();
+    }
+
     _inUse[id] = false;
     _easingManager->FinishEase(_alphas[id].easeID);
 }
@@ -125,8 +133,15 @@ void AlphaManager::Paint()
 
             if(percent >= 1.0)
             {
-                _inUse[i] = false;
+                FinishAlpha(i);
             }
         }
     }
 }
+
+void AlphaManager::AddCallback(int id, std::function<void()> callback)
+{
+    if(id < 0){return;}
+
+    _alphas[id].endCallback= callback;
+}   

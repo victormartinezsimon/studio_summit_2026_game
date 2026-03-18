@@ -10,6 +10,7 @@
 
 class Plane;
 class Bullet;
+class AlphaManager;
 
 class BattleState: public State
 {
@@ -18,8 +19,9 @@ class BattleState: public State
         BattleState(Plane *player, PainterManager *painter, Pool<Plane, PLANES_POOL_SIZE> *enemiesPool,
                          Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool, 
                          std::function<void()> damagePlayerCallback, 
-                         std::function<void()> damageEnemy,
-                         long long* score, float* time, NumberManager* numberManager);
+                         std::function<void(float x, float y)> damageEnemy,
+                         long long* score, float* time, 
+                         NumberManager* numberManager, AlphaManager* alphaManager);
         
     public:    
         STATES Update(const float deltaTime, float currentFrameInputValueNormalized,
@@ -41,14 +43,17 @@ class BattleState: public State
         void DamagePlayer();
         void DoExplosion(Bullet& bullet);
 
+        void ReturnEnemy(Plane& plane);
+
     private:
         Pool<Plane, PLANES_POOL_SIZE>* _enemiesPool;
         Pool<Bullet, BULLETS_POOL_SIZE>* _bulletsPool;
         std::function<void()> _damagePlayerCallback;
-        std::function<void()> _damageEnemy;
+        std::function<void(float x, float y)> _damageEnemyCallback;
         long long* _score;
         float* _timeLeft;
         NumberManager* _numberManager;
         std::array<Meteorite, TOTAL_METEORITES> _meteorites;
-
+        AlphaManager* _alphaManager;
+        int _enemiesAlive;
 };

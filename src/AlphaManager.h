@@ -1,6 +1,7 @@
 #pragma once
 #include "GameConfig.h"
 #include <array>
+#include <functional>
 #include "PainterManager.h"
 #include "EasingManager.h"
 
@@ -20,6 +21,7 @@ private:
 		int width;
 		int height;
 		int easeID;
+		std::function<void()> endCallback = nullptr;
 	};
 
 public:
@@ -28,17 +30,19 @@ public:
 
 public:
 	void Update(const float deltaTime);
-	bool AddUIAlpha(float duration, float x, float y, bool goDown, PainterManager::SPRITE_ID sprite);
-	bool AddAlpha(float duration, float x, float y, bool goDown, float width, float height, PainterManager::SPRITE_ID sprite);
-	bool AddUIAlpha(float duration, float x, float y, float endX, float endY, bool goDown, PainterManager::SPRITE_ID sprite);
-	bool AddAlpha(float duration, float x, float y,  float endX, float endY, bool goDown, float width, float height, PainterManager::SPRITE_ID sprite);
+	int AddUIAlpha(float duration, float x, float y, bool goDown, PainterManager::SPRITE_ID sprite);
+	int AddAlpha(float duration, float x, float y, bool goDown, float width, float height, PainterManager::SPRITE_ID sprite);
+	int AddUIAlpha(float duration, float x, float y, float endX, float endY, bool goDown, PainterManager::SPRITE_ID sprite);
+	int AddAlpha(float duration, float x, float y,  float endX, float endY, bool goDown, float width, float height, PainterManager::SPRITE_ID sprite);
 	void FinishAll();
 	void FinishAlpha(int id);
 	void Paint();
+	void AddCallback(int id, std::function<void()> callback);
 
 private:
-bool AddInternalAlpha(float duration, bool isUI, float startX, float startY,
-                            float endX, float endY, bool goDown, float width, float height, PainterManager::SPRITE_ID sprite);
+int AddInternalAlpha(float duration, bool isUI, float startX, float startY,
+                            float endX, float endY, bool goDown, float width, float height, 
+							PainterManager::SPRITE_ID sprite);
 
 private:
 	std::array<AlphaData, MAX_ALPHA_VALUES> _alphas;
