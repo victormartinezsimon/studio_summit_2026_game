@@ -51,6 +51,7 @@ void ImprovementSelectionState::Paint()
 }
 void ImprovementSelectionState::OnEnter()
 {
+	/*
 	_buttonAManager->SelectAfterTime(TIME_TO_SELECT_IMPROVEMENT, 
 		[this](int selection)
 		{
@@ -70,7 +71,7 @@ void ImprovementSelectionState::OnEnter()
 			}
 		}
 	);
-	
+	*/
 	_nextState = STATES::IMPROVEMENT_SELECTOR;
 
 	_player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
