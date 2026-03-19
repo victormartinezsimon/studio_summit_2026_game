@@ -9,7 +9,8 @@ REM Resolucion "pixel"
 set PIXEL_W=64
 set PIXEL_H=64
 
-set PALETE_FILE=%OUTPUT_DIR%/Palette.png
+set PALETE_DIR="%OUTPUT_DIR%/Palette/"
+set PALETE_FILE=%PALETE_DIR%/Palette.png
 
 REM Crear carpeta de salida si no existe
 if not exist %OUTPUT_DIR% (
@@ -42,6 +43,11 @@ goto MAIN_MENU
 
 
 :FUNCTION_ONE
+
+if not exist %PALETE_DIR% (
+  mkdir %PALETE_DIR%
+)
+
 cls
 echo ==========================================
 echo              Generate palete
@@ -88,7 +94,7 @@ echo ==========================================
 for %%F in (%INPUT_DIR%\*.png) do (
     echo Processing %%~nxF
 
-    echo Generando CSV para %%~nF...
+    echo Generando img para %%~nF...
     python image_to_palette_png.py "%INPUT_DIR%\%%~nxF" "%PALETE_FILE%" "%OUTPUT_DIR%\%%~nxF"
 )
 
@@ -104,28 +110,14 @@ echo ==========================================
 rem "remove result file"
 del "%OUTPUT_DIR%\sprites.txt"
 
-for /d %%D in ("%INPUT_DIR%\*") do (
-    set "FOLDER_NAME=%%~nxD"
-    
-    :: Split "WxH" into WIDTH and HEIGHT
-    for /f "tokens=1,2 delims=x" %%A in ("!FOLDER_NAME!") do (
-        set "WIDTH=%%A"
-        set "HEIGHT=%%B"
-    )
-    
-    echo Processing: !FOLDER_NAME! ^(WIDTH=!WIDTH! HEIGHT=!HEIGHT!^)
-    set "FOLDER_IN=%INPUT_DIR%\!FOLDER_NAME!"
-    set "FOLDER_OUT=%OUTPUT_DIR%\!FOLDER_NAME!"
-    echo Input !FOLDER_IN!
-    echo Output !FOLDER_OUT!
+for %%F in (%OUTPUT_DIR%\*.png) do (
+  echo Processing %%~nxF
+      echo Processing %%~nxF
 
-    for %%F in (!FOLDER_IN!\*.png) do (
-        echo Processing %%~nxF
-
-        echo Generando CSV para %%~nF...
-        python image_to_palette_magick.py "!FOLDER_OUT!\%%~nxF" "%PALETE_FILE%" "%OUTPUT_DIR%\sprites.txt"
-    )
+      echo Generando CSV para %%~nF...
+      python image_to_palette_magick.py "%OUTPUT_DIR%\%%~nxF" "%PALETE_FILE%" "%OUTPUT_DIR%\sprites.txt"
 )
+
 
 pause
 goto MAIN_MENU

@@ -39,8 +39,6 @@ def main():
     palette_path = sys.argv[2]
     output_path = sys.argv[3]
 
-    print(f"image_path:{image_path}, palette_path:{palette_path}, output_path:{output_path}")
-
     palette = load_palette(palette_path)
     if not palette:
         print("Error: no colors found in palette file.")
