@@ -35,7 +35,9 @@ Painter::Painter()
 	VPUClear(s_platform->vx, 0x00000000);
 
 	halfMask = vreinterpretq_u8_u16(vdupq_n_u16(0x00FF));
+	halfMaskAlt = vreinterpretq_u8_u16(vdupq_n_u16(0xFF00));
 	quarterMask = vreinterpretq_u8_u32(vdupq_n_u32(0x000000FF));
+	quarterMaskAlt = vreinterpretq_u8_u32(vdupq_n_u32(0x00FF0000));
 	allMask = vdupq_n_u8(0xFF);
 }
 
@@ -69,22 +71,25 @@ void Painter::PaintBackground()
 
 void Painter::PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y)
 {
-	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, TRANSPARENT_IDS, TRANSPARENT_COUNT, allMask);
+	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, TRANSPARENT_IDS, TRANSPARENT_COUNT, allMask, allMask);
 }
 
 void Painter::PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y, int maskType)
 {
-	uint8x16_t mask = allMask;
+	uint8x16_t evenMask = allMask;
+	uint8x16_t oddMask = allMask;
 	if (maskType == 1)
 	{
-		mask = halfMask;
+		evenMask = halfMask;
+		oddMask = halfMaskAlt;
 	}
 	if (maskType == 2)
 	{
-		mask = quarterMask;
+		evenMask = quarterMask;
+		oddMask = quarterMaskAlt;
 	}
 
-	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, TRANSPARENT_IDS, TRANSPARENT_COUNT, mask);
+	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, TRANSPARENT_IDS, TRANSPARENT_COUNT, evenMask, oddMask);
 }
 
 void Painter::init_palette(struct EVideoContext *vctx)
@@ -123,7 +128,7 @@ void Painter::masked_blit_8(
 	int dst_y,
 	const uint8_t *transparent_ids,  // <-- array instead of single value
     uint8_t transparent_count,
-	uint8x16_t extraAlphaMask)
+	uint8x16_t evenRowMask, uint8x16_t oddRowMask)
 {
 	int src_x = 0;
 	int src_y = 0;
@@ -161,6 +166,7 @@ void Painter::masked_blit_8(
 	{
 		uint8_t *d = dst + (uint32_t)(dst_y + y) * dst_stride + dst_x;
 		const uint8_t *s = src + (src_y + y) * src_w + src_x;
+		uint8x16_t extraAlphaMask = ((dst_y + y) & 1) ? oddRowMask : evenRowMask;
 		int x = 0;
 
 		// If NEON is available, we can process 16 pixels at a time.

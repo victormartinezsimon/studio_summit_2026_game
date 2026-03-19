@@ -65,7 +65,7 @@ private:
 		int dst_x,
 		int dst_y,
 		const uint8_t *transparent_ids, uint8_t transparent_count,
-		uint8x16_t extraAlphaMask);
+		uint8x16_t evenRowMask, uint8x16_t oddRowMask);
 
 private:
 	SPPlatform *s_platform;
@@ -73,7 +73,9 @@ private:
 	uint8_t *dst;
 	uint8x16_t allMask;
 	uint8x16_t halfMask;
+	uint8x16_t halfMaskAlt;
 	uint8x16_t quarterMask;
+	uint8x16_t quarterMaskAlt;
 };
 
 #endif
