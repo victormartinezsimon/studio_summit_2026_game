@@ -64,3 +64,4 @@ constexpr int SCORE_PER_FINISH_LEVEL = 100;
 constexpr int TOTAL_METEORITES = 2;
 
 constexpr float ALPHA_TIME_DESTROY_PLANE = 0.8;
+constexpr float ALPHA_TIME_ENTER_GAME = 1;
