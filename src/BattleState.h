@@ -53,7 +53,7 @@ class BattleState: public State
         long long* _score;
         float* _timeLeft;
         NumberManager* _numberManager;
-        std::array<Meteorite, TOTAL_METEORITES> _meteorites;
         AlphaManager* _alphaManager;
         int _enemiesAlive;
+        Pool<Meteorite, TOTAL_METEORITES> _meteoritesPool;
 };
