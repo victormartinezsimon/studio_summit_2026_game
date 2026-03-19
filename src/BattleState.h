@@ -47,8 +47,8 @@ class BattleState: public State
 
         void ReturnEnemy(Plane& plane);
 
-        void EndExplosion(Explosion* exp);
-        void ConfigureExplosion(Explosion& exp, const Bullet& bullet);
+        void EndExplosion(Explosion& exp);
+        void ConfigureExplosion(const int id, Explosion& exp, const Bullet& bullet);
 
     private:
         Pool<Plane, PLANES_POOL_SIZE>* _enemiesPool;

@@ -59,17 +59,31 @@ void BattleState::Paint()
 
     {
         _enemiesPool->for_each_active([this](const Plane &p)
-                                      {
-            float posX, posY;
-            p.GetPaintPosition(posX, posY);
-            _painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, 
-                p.GetWidth(), p.GetHeight(), posX, posY); });
+            {
+                float posX, posY;
+                p.GetPaintPosition(posX, posY);
+                _painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, 
+                    p.GetWidth(), p.GetHeight(), posX, posY);
+
+                if(p.GetHasShield())
+                {
+                    _painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY_SHIELD,
+                        SHIELD_ENEMY_WIDTH,SHIELD_ENEMY_HEIGHT, posX, posY );
+                }
+             }
+        );
     }
 
     {
         float playerX, playerY;
         _player->GetPaintPosition(playerX, playerY);
         _painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player->GetWidth(), _player->GetHeight(), playerX, playerY);
+    
+        if(_player->GetHasShield())
+        {
+            _painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SHIELD,
+                SHIELD_PLAYER_WIDTH,SHIELD_PLAYER_HEIGHT, playerX, playerY );
+        }
     }
 
     {
@@ -89,6 +103,7 @@ void BattleState::OnEnter()
     _player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
     _player->SetPositionY( POSITION_Y_PLAYER);
 
+    /*
     for(int metID = 0; metID < TOTAL_METEORITES; ++metID)
     {
         int id = _meteoritesPool.Get();
@@ -97,6 +112,7 @@ void BattleState::OnEnter()
             object.SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
         });
     }
+    */
 
 /*
     _meteorites[0].SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
@@ -118,6 +134,7 @@ void BattleState::OnExit()
 {
     _bulletsPool->ReturnAll();
     _enemiesPool->ReturnAll();
+    _explosionPool.ReturnAll();
 }
 
 void BattleState::UpdatePlayer(float deltaTime)
@@ -152,12 +169,13 @@ void BattleState::UpdateEnemies(float deltaTime)
     _enemiesPool->for_each_active([deltaTime](Plane &enemy)
                                   { enemy.Update(deltaTime); });
 
+    
     _explosionPool.for_each_active([&] (Explosion& exp)
         {
             _enemiesPool->for_each_active([&](Plane& enemy)
             {
                 bool hasCollsion = CollsisionDetection(exp.GetX(), exp.GetY(), exp.GetWidth(), exp.GetHeight(),
-                                _player->GetX(), _player->GetY(), _player->GetWidth(), _player->GetHeight());
+                                enemy.GetX(), enemy.GetY(), enemy.GetWidth(), enemy.GetHeight());
                 if (hasCollsion)
                 {
                     ReturnEnemy(enemy);
@@ -180,7 +198,6 @@ void BattleState::ManageBulletCollisions(Bullet &bullet)
 
     if(!isDestroyed)
     {
-
         _meteoritesPool.for_each_active([&](Meteorite& meteorite)
             {
                 if (HasCollision(bullet, meteorite))
@@ -209,7 +226,16 @@ void BattleState::ManageBulletCollisions(Bullet &bullet)
     if(!isDestroyed && bullet.GetPlayerTeam() == TEAM_ENEMY)
     {
         //check player
-        if (HasCollision(bullet, _player))
+        bool hasShield = _player->GetHasShield();
+        bool hasCollision = HasCollision(bullet, _player);
+
+        if(hasCollision && hasShield)
+        {
+            _player->SetHasShield(false);
+            hasCollision = false;
+        }
+
+        if (hasCollision)
         {
             DamagePlayer();
             _bulletsPool->Release(bullet);
@@ -228,7 +254,16 @@ void BattleState::ManageBulletCollisions(Bullet &bullet)
 bool BattleState::ManageCollisionBetweenBulletAndEnemy(Bullet &bullet, Plane &enemy)
 {
     bool isBulletDestroyed = false;
-    if (HasCollision(bullet, &enemy))
+    bool hasShield = enemy.GetHasShield();
+    bool hasCollision = HasCollision(bullet, &enemy);
+
+    if(hasCollision && hasShield)
+    {
+        enemy.SetHasShield(false);
+        return false;
+    }
+
+    if (hasCollision)
     {
         if (!bullet.GetHasPenetration())
         {
@@ -247,15 +282,8 @@ bool BattleState::HasCollision(const Bullet &bullet, Plane *plane) const
         return false;
     }
    
-    bool hasCollsion = CollsisionDetection(bullet.GetX(), bullet.GetY(), bullet.GetWidth(), bullet.GetHeight(),
+    return CollsisionDetection(bullet.GetX(), bullet.GetY(), bullet.GetWidth(), bullet.GetHeight(),
                                plane->GetX(), plane->GetY(), plane->GetWidth(), plane->GetHeight());
-
-    if (hasCollsion && plane->GetHasShield())
-    {
-        plane->SetHasShield(false);
-        return false;
-    }
-    return hasCollsion; 
 }
 
  bool BattleState::HasCollision(const Bullet& bullet, const Meteorite& meteorite) const
@@ -274,12 +302,6 @@ bool BattleState::CollsisionDetection(float ax, float ay, float aw, float ah,
 void BattleState::DamagePlayer()
 {
     _damagePlayerCallback();
-}
-
-void BattleState::DoExplosion(Bullet &bullet)
-{
-    int id = _explosionPool.Get();
-    _explosionPool.call_for_element(id, [&](Explosion& exp){ConfigureExplosion(exp, bullet);});
 }
 
 void BattleState::UpdateMeteorites(float deltaTime)
@@ -317,15 +339,35 @@ void BattleState::ReturnEnemy(Plane& enemy)
     _damageEnemyCallback(x, y);
 }
 
-void BattleState::EndExplosion(Explosion* exp)
+void BattleState::DoExplosion(Bullet &bullet)
 {
-    _explosionPool.Release(*exp);
+    int id = _explosionPool.Get();
+    _explosionPool.call_for_element(id, [&](Explosion& exp){ConfigureExplosion(id, exp, bullet);});
 }
-void BattleState::ConfigureExplosion(Explosion& exp ,const Bullet& bullet)
+
+void BattleState::EndExplosion(Explosion& exp)
+{
+    _explosionPool.Release(exp);
+}
+void BattleState::ConfigureExplosion(const int id, Explosion& exp ,const Bullet& bullet)
 {
     float x = bullet.GetX();
     float y = bullet.GetY();
-    exp.SetPosition(bullet.GetX(), bullet.GetY());
+    exp.SetPosition(x, y);
+    exp.SetID(id);
     exp.SetSize(EXPLOSION_WIDTH, EXPLOSION_HEIGHT);
-    _alphaManager->AddAlpha(EXPLOSION_DURATION, x, y,true, EXPLOSION_WIDTH, EXPLOSION_HEIGHT, PainterManager::SPRITE_ID::EXPLOSION);
+    exp.SetPlayerTeam(bullet.GetPlayerTeam());
+    
+    auto alphaID =_alphaManager->AddAlpha(EXPLOSION_DURATION, 
+        x - EXPLOSION_WIDTH/2, 
+        y - EXPLOSION_HEIGHT/2, 
+        true, EXPLOSION_WIDTH, EXPLOSION_HEIGHT, 
+        PainterManager::SPRITE_ID::EXPLOSION);
+    
+    _alphaManager->AddCallback(alphaID, 
+        [&]()
+        {
+            EndExplosion(exp);
+        }
+    );
 }

@@ -34,6 +34,7 @@ int AlphaManager::AddInternalAlpha(float duration, bool isUI, float startX, floa
             _alphas[i].currentY = startY;
             _alphas[i].width = width;
             _alphas[i].height = height;
+            _alphas[i].endCallback = nullptr;
 
             if(startX != endX || startY != endY)
             {
@@ -99,6 +100,7 @@ void AlphaManager::FinishAlpha(int id)
         _alphas[id].endCallback();
     }
 
+    _alphas[id].endCallback = nullptr;
     _inUse[id] = false;
     _easingManager->FinishEase(_alphas[id].easeID);
 }
