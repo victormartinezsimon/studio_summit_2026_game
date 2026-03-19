@@ -122,29 +122,23 @@ void BattleState::OnEnter()
     _player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
     _player->SetPositionY( POSITION_Y_PLAYER);
 
-    /*
-    for(int metID = 0; metID < TOTAL_METEORITES; ++metID)
+    int id0 = _meteoritesPool.Get();
+    _meteoritesPool.call_for_element(id0, [](Meteorite& object)
     {
-        int id = _meteoritesPool.Get();
-        _meteoritesPool.call_for_element(id, [](WorldObject& object)
-        {
-            object.SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
-        });
-    }
-    */
+        object.SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
+        object.SetPosition(SCREEN_WIDTH + METERORITE_WIDTH, SCREEN_HEIGHT*0.4f);
+        object.SetVelocities(-DEFAULT_BULLET_VEL_Y * 0.5,0);
+        object.SetMoveLeft(true);
+    });
 
-/*
-    _meteorites[0].SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
-    _meteorites[0].SetPosition(SCREEN_WIDTH + METERORITE_WIDTH, SCREEN_HEIGHT*0.4f);
-    _meteorites[0].SetVelocities(-DEFAULT_BULLET_VEL_Y * 0.5,0);
-    _meteorites[0].SetMoveLeft(true);
-
-    _meteorites[1].SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
-    _meteorites[1].SetPosition(-static_cast<int>(METERORITE_WIDTH), SCREEN_HEIGHT*0.6f);
-    _meteorites[1].SetVelocities(DEFAULT_BULLET_VEL_Y * 0.55,0);
-    _meteorites[1].SetMoveLeft(false);
-*/
-
+    int id1 = _meteoritesPool.Get();
+    _meteoritesPool.call_for_element(id1, [](Meteorite& object)
+    {
+        object.SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
+        object.SetPosition(-static_cast<int>(METERORITE_WIDTH), SCREEN_HEIGHT*0.6f);
+        object.SetVelocities(DEFAULT_BULLET_VEL_Y * 0.55,0);
+        object.SetMoveLeft(false);
+    });
 
     _enemiesAlive = _enemiesPool->TotalInUse();
 
