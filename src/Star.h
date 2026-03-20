@@ -47,6 +47,7 @@ public:
 		case Type::MID: return PainterManager::SPRITE_ID::MID_STAR;
 		case Type::FAR: return PainterManager::SPRITE_ID::FAR_STAR;
 		}
+		return PainterManager::SPRITE_ID::FAR_STAR;
 	}
 
 private:

@@ -13,6 +13,9 @@
 #include "State.h"
 #include "NumberManager.h"
 #include "AlphaManager.h"
+#include "Spawner.h"
+#include "Star.h"
+#include <random>
 
 class InputManager;
 
@@ -43,6 +46,8 @@ private:
 	void InitializeImprovementsFunctions();
 	void InitializeRandomImprovements();
 	void InitializeStatesBegin();
+	void InitializeStates();
+	void ConfigureStar(Star& star);
 
 private:
 	void GetMinMaxXPosiblePosition(float &minX, float &maxX) const;
@@ -82,8 +87,10 @@ private:
 	ButtonA _buttonAManager;
 	NumberManager _numberManager;
 	AlphaManager _alphaManager;
+	Spawner<Star, TOTAL_STARS> _spawnerStars;
 	float _currentFrameInputValueNormalized;
 	int _currentFrameInputValue;
+	std::mt19937 _generator;
 
 private:
 	int _currentLevel = 0;
@@ -95,7 +102,7 @@ private:
 	std::array<std::string, TOTAL_DEFINED_IMPROVEMENTS> _randomImprovements;
 
 private:
-	std::map<State::STATES, State *> _statesLogic;
+	std::map<State::STATES, State*> _statesLogic;
 	State::STATES _currentStateLogic;
 	State::STATES _oldStateLogic;
 	std::map<State::STATES, std::function<void()>> _statesBeginFunction;

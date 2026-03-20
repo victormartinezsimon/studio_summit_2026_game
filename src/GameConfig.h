@@ -24,7 +24,7 @@ constexpr float POSITION_Y_PLAYER = 204;
 constexpr float INTIAL_ANIMATION_DURATION = 1;
 
 constexpr float DEFAULT_BULLET_VEL_X = 0;
-constexpr float DEFAULT_BULLET_VEL_Y = 50;
+constexpr float DEFAULT_BULLET_VEL_Y = 70;
 constexpr float DEFAULT_FIRE_RATE = 2;
 constexpr int DEFAULT_BULLETS_ORIGIN = 1;
 constexpr bool DEFAULT_BULLET_HAS_PENETRATION = false;
@@ -78,6 +78,10 @@ constexpr float TIME_SPAWN_METEORITE = 3;
 
 constexpr int TOTAL_STARS = 50;
 constexpr float TIME_SPAWN_STAR = 0.7;
-constexpr float VELOCITY_START_FAR = 0.2;
-constexpr float VELOCITY_START_MID = 0.5;
-constexpr float VELOCITY_START_NEAR = 1.2;
+constexpr float VELOCITY_STAR_FAR = 0.2;
+constexpr float VELOCITY_STAR_MID = 0.5;
+constexpr float VELOCITY_STAR_NEAR = 1.2;
+constexpr float MIN_HEIGHT_STAR = -0.5;
+constexpr float MAX_HEIGHT_STAR = 1.5;
+constexpr float MIN_VELOCITY_STAR = 80;
+constexpr float MAX_VELOCITY_STAR = 180;

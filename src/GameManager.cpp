@@ -9,31 +9,38 @@
 #include "ImprovementSelectionState.h"
 #include "InitialMovementState.h"
 #include "BattleState.h"
+#include "Star.h"
 
 GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	: _inputManager(input),
 	  _painterManager(painterManager), _currentLevel(0), 
 	  _currentStateLogic(State::STATES::MENU),_currentScore(0), _numberManager(_painterManager),
-	  _alphaManager(_painterManager, &_easingManager)
+	  _alphaManager(_painterManager, &_easingManager), _spawnerStars(TIME_SPAWN_STAR, painterManager), _generator(std::random_device{}())
 {
 	InitializeConstantValues();
 	InitializeImprovementsFunctions();
 	InitializeRandomImprovements();
 	InitializeStatesBegin();
+	InitializeStates();
+	
+	_spawnerStars.SetCallbackConfiguration([this](Star& star){ConfigureStar(star);});
 
-	_statesLogic[State::STATES::MENU] = new MainMenuState(&_player, painterManager, &_buttonAManager, &_numberManager, &_alphaManager);
+	_statesLogic[_currentStateLogic]->OnEnter();
+}
+
+void GameManager::InitializeStates()
+{
+	_statesLogic[State::STATES::MENU] = new MainMenuState(&_player, _painterManager, &_buttonAManager, &_numberManager, &_alphaManager);
 	
-	_statesLogic[State::STATES::INITIAL_MOVEMENT] = new InitialMovementState(&_player, painterManager, &_easingManager, &_enemiesPool);
+	_statesLogic[State::STATES::INITIAL_MOVEMENT] = new InitialMovementState(&_player, _painterManager, &_easingManager, &_enemiesPool);
 	
-	_statesLogic[State::STATES::IMPROVEMENT_SELECTOR] = new ImprovementSelectionState(&_player, painterManager, &_buttonAManager,
+	_statesLogic[State::STATES::IMPROVEMENT_SELECTOR] = new ImprovementSelectionState(&_player, _painterManager, &_buttonAManager,
 	[this](const std::string& player, const std::string& enemy){ApplyImprovements(player, enemy);}, &_numberManager);
 	
-	_statesLogic[State::STATES::BATTLE] = new BattleState(&_player, painterManager, &_enemiesPool, &_bulletsPool,
+	_statesLogic[State::STATES::BATTLE] = new BattleState(&_player, _painterManager, &_enemiesPool, &_bulletsPool,
 		[this](){DamagePlayer();}, 
 		[this](float x, float y){DamageEnemy(x, y);}, 
 		&_currentScore, &_currentTimePlaying, &_numberManager, &_alphaManager);
-	
-	_statesLogic[_currentStateLogic]->OnEnter();
 }
 
 void GameManager::InitializeConstantValues()
@@ -87,8 +94,7 @@ void GameManager::InitializeRandomImprovements()
 		++index;
 	}
 
-	std::mt19937 rng(std::random_device{}());
-    std::shuffle(_randomImprovements.begin(), _randomImprovements.end(), rng);
+    std::shuffle(_randomImprovements.begin(), _randomImprovements.end(), _generator);
 }
 
 void GameManager::InitializeStatesBegin()
@@ -119,8 +125,10 @@ void GameManager::Update(const float deltaTime)
 	}
 
 	_alphaManager.Update(deltaTime);
+	_spawnerStars.Update(deltaTime);
 
 	MovePlayer();
+	
 	auto nextState = _statesLogic[_currentStateLogic]->Update(deltaTime, _currentFrameInputValueNormalized, _currentFrameInputValue);
 
 	if(_currentTimePlaying >= MAX_SECS_PLAYING)
@@ -163,8 +171,9 @@ void GameManager::Update(const float deltaTime)
 void GameManager::Paint()
 {
 	_painterManager->ClearListPaint();
-	_statesLogic[_oldStateLogic]->Paint();
+	_spawnerStars.Paint();
 	_alphaManager.Paint();
+	_statesLogic[_oldStateLogic]->Paint();
 }	
 
 void GameManager::ApplyImprovements(const std::string& playerSelection, const std::string& enemySelection)
@@ -330,4 +339,41 @@ void GameManager::DamagePlayer()
 void GameManager::DamageEnemy(float x, float y)
 {
 	_currentScore += SCORE_PER_KILL;
+}
+
+void GameManager::ConfigureStar(Star& star)
+{
+	std::uniform_real_distribution<float> velocityDist(MIN_VELOCITY_STAR, MAX_VELOCITY_STAR);
+    float velocity = velocityDist(_generator);
+
+    std::uniform_real_distribution<float> heightDist(MIN_HEIGHT_STAR, MAX_HEIGHT_STAR);
+    float height = heightDist(_generator);
+
+	std::uniform_int_distribution<int> typeDist(0, 2);
+	int type = typeDist(_generator);
+
+	switch (type)
+	{
+	case 0:
+		star.SetSize(NEAR_STAR_WIDHT, NEAR_STAR_HEIGHT);
+		star.SetPosition(-static_cast<int>(NEAR_STAR_WIDHT), SCREEN_HEIGHT*height);
+		star.SetTypeStar(Star::Type::NEAR);
+		velocity *= VELOCITY_STAR_NEAR;
+		break;
+	case 1:
+		star.SetSize(MID_STAR_WIDHT, MID_STAR_HEIGHT);
+		star.SetPosition(-static_cast<int>(MID_STAR_WIDHT), SCREEN_HEIGHT*height);
+		star.SetTypeStar(Star::Type::MID);
+		velocity *= VELOCITY_STAR_MID;
+		break;
+	case 2:
+		star.SetSize(FAR_STAR_WIDHT, FAR_STAR_HEIGHT);
+		star.SetPosition(-static_cast<int>(FAR_STAR_WIDHT), SCREEN_HEIGHT*height);
+		star.SetTypeStar(Star::Type::FAR);
+		velocity *= VELOCITY_STAR_FAR;
+		break;
+	}
+
+	star.SetVelocities(velocity, velocity*0.5);
+	star.SetMoveLeft(false);
 }
