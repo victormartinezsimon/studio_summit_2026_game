@@ -55,6 +55,15 @@ void ImprovementSelectionState::Paint()
 	}
 
 	{
+		_painterManager->AddUIToPaint(_improvementsUI[_leftSelection],
+									  SCREEN_WIDTH * OPTION_LEFT_X,
+									  SCREEN_HEIGHT * 0.5f);
+		_painterManager->AddUIToPaint(_improvementsUI[_rightSelection],
+									  SCREEN_WIDTH * OPTION_RIGHT_X,
+									  SCREEN_HEIGHT * 0.5f);
+	}
+
+	{
 		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
 									  SCREEN_WIDTH * OPTION_LEFT_X, SELECTOR_Y_PLAYER);
 
@@ -66,15 +75,6 @@ void ImprovementSelectionState::Paint()
 
 		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::ENEMY_SELECTOR,
 									  SCREEN_WIDTH * OPTION_RIGHT_X, SELECTOR_Y_ENEMY);
-	}
-
-	{
-		_painterManager->AddUIToPaint(_improvementsUI[_leftSelection],
-									  SCREEN_WIDTH * OPTION_LEFT_X,
-									  SCREEN_HEIGHT * 0.5f);
-		_painterManager->AddUIToPaint(_improvementsUI[_rightSelection],
-									  SCREEN_WIDTH * OPTION_RIGHT_X,
-									  SCREEN_HEIGHT * 0.5f);
 	}
 }
 void ImprovementSelectionState::OnEnter()

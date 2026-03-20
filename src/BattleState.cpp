@@ -40,35 +40,6 @@ State::STATES BattleState::Update(const float deltaTime, float currentFrameInput
 }
 void BattleState::Paint()
 {
-    {
-        _spawnerMeteorites.Paint();
-    }
-    
-    {
-        _bulletsPool->for_each_active([&](const Bullet &bullet)
-                                      {
-            float posX, posY;
-            bullet.GetPaintPosition(posX, posY);
-            _painterManager->AddToPaint(PainterManager::SPRITE_ID::BULLET, 
-                bullet.GetWidth(), bullet.GetHeight(), posX, posY); });
-    }
-
-    {
-        _enemiesPool->for_each_active([this](const Plane &p)
-            {
-                float posX, posY;
-                p.GetPaintPosition(posX, posY);
-                _painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, 
-                    p.GetWidth(), p.GetHeight(), posX, posY);
-
-                if(p.GetHasShield())
-                {
-                    _painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY_SHIELD,
-                        SHIELD_ENEMY_WIDTH,SHIELD_ENEMY_HEIGHT, posX, posY );
-                }
-             }
-        );
-    }
 
     {
         float playerX, playerY;
@@ -102,6 +73,36 @@ void BattleState::Paint()
     }
 
     {
+        _spawnerMeteorites.Paint();
+    }
+    
+    {
+        _bulletsPool->for_each_active([&](const Bullet &bullet)
+                                      {
+            float posX, posY;
+            bullet.GetPaintPosition(posX, posY);
+            _painterManager->AddToPaint(PainterManager::SPRITE_ID::BULLET, 
+                bullet.GetWidth(), bullet.GetHeight(), posX, posY); });
+    }
+
+    {
+        _enemiesPool->for_each_active([this](const Plane &p)
+            {
+                float posX, posY;
+                p.GetPaintPosition(posX, posY);
+                _painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, 
+                    p.GetWidth(), p.GetHeight(), posX, posY);
+
+                if(p.GetHasShield())
+                {
+                    _painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY_SHIELD,
+                        SHIELD_ENEMY_WIDTH,SHIELD_ENEMY_HEIGHT, posX, posY );
+                }
+             }
+        );
+    }
+
+    {
         long long value = *_score;
         _numberManager->PaintNumber(value, SCREEN_WIDTH, NUMBER_0_HEIGHT, 3, NumberManager::PIVOT::RIGHT);
     }
@@ -110,7 +111,6 @@ void BattleState::Paint()
         float value = *_timeLeft;
         _numberManager->PaintNumber(MAX_SECS_PLAYING - value,0, NUMBER_0_HEIGHT, 3, NumberManager::PIVOT::LEFT);
     }
-
 }
 
 void BattleState::OnEnter()

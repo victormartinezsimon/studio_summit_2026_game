@@ -171,9 +171,9 @@ void GameManager::Update(const float deltaTime)
 void GameManager::Paint()
 {
 	_painterManager->ClearListPaint();
-	_spawnerStars.Paint();
-	_alphaManager.Paint();
 	_statesLogic[_oldStateLogic]->Paint();
+	_alphaManager.Paint();
+	_spawnerStars.Paint();
 }	
 
 void GameManager::ApplyImprovements(const std::string& playerSelection, const std::string& enemySelection)

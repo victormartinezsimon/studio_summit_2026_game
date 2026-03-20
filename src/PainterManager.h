@@ -1,7 +1,8 @@
 #pragma once
-#include <vector>
 #include <map>
 #include <stdint.h>//uing8_t
+#include <array>
+#include "GameConfig.h"
 
 class Painter;
 
@@ -46,7 +47,8 @@ public:
 
 private:
 	Painter* _painter;
-	std::vector<data> _toPaint;//TODO change to array
 	std::map<SPRITE_ID, const uint8_t*> _sprites;
 	std::map<SPRITE_ID, std::pair<int, int>> _sizes;
+	std::array<data, MAX_PAINTED_OBJECTS> _toPaint;
+	int _currentIndexToPaint;
 };
