@@ -36,20 +36,32 @@ class BattleState: public State
         void UpdateBullets(float deltaTime);
         void UpdateEnemies(float deltaTime);
         void UpdateMeteorites(float deltaTime);
+    
+    private:
         void ManageBulletCollisions(Bullet& bullet);
-        bool ManageCollisionBetweenBulletAndEnemy(Bullet& bullet, Plane& enemy);
-	    bool HasCollision(const Bullet& bullet, Plane* plane) const;
+        bool ManagePlaneCollisions(Plane& plane);
+
+        bool ManageBulletPlaneCollision(const Bullet& bullet, const Plane& plane);
+        bool ManageExplosionPlaneCollision(const Explosion& explosion, const Plane& plane);
+        bool ManageMeteoriteBulletCollision(const Meteorite& meteorite, const Bullet& plane);
+    
+    private:
+	    bool HasCollision(const Bullet& bullet, const Plane& plane) const;
         bool HasCollision(const Bullet& bullet, const Meteorite& meteorite) const;
 	    bool CollsisionDetection(float ax, float ay, float aw, float ah,
 							 float bx, float by, float bw, float bh) const;
+        
+    private:    
         void DamagePlayer();
+        void ReturnEnemy(Plane& plane);
         void DoExplosion(Bullet& bullet);
 
-        void ReturnEnemy(Plane& plane);
-
+    private:
         void EndExplosion(Explosion& exp);
         void ConfigureExplosion(const int id, Explosion& exp, const Bullet& bullet);
         bool TryDestroyBullet(Bullet& bullet);
+
+        
 
     private:
         Pool<Plane, PLANES_POOL_SIZE>* _enemiesPool;

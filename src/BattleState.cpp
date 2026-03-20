@@ -154,16 +154,11 @@ void BattleState::UpdatePlayer(float deltaTime)
 {
     _player->Update(deltaTime);
 
-    _explosionPool.for_each_active([&] (Explosion& exp)
-        {
-            bool hasCollsion = CollsisionDetection(exp.GetX(), exp.GetY(), exp.GetWidth(), exp.GetHeight(),
-                               _player->GetX(), _player->GetY(), _player->GetWidth(), _player->GetHeight());
-            if (hasCollsion)
-            {
-                DamagePlayer();
-            }
-        }
-    );
+    bool someCollision = ManagePlaneCollisions(*_player);
+    if(someCollision)
+    {
+        DamagePlayer();
+    }
 }
 
 void BattleState::UpdateBullets(float deltaTime)
@@ -171,8 +166,6 @@ void BattleState::UpdateBullets(float deltaTime)
     _bulletsPool->for_each_active([deltaTime](Bullet &bullet)
                                   { bullet.Update(deltaTime); });
 
-    // check if it should be deleted any bullet
-    
     _bulletsPool->for_each_active([this, deltaTime](Bullet &bullet)
                                   { ManageBulletCollisions(bullet); });
                                   
@@ -183,21 +176,48 @@ void BattleState::UpdateEnemies(float deltaTime)
                                   { enemy.Update(deltaTime); });
 
     
-    _explosionPool.for_each_active([&] (Explosion& exp)
+    //check collision
+    _enemiesPool->for_each_active([deltaTime](Plane &enemy)
+    { 
+        bool someCollision = ManagePlaneCollisions(enemy);
+        if(someCollision)
         {
-            _enemiesPool->for_each_active([&](Plane& enemy)
+            ReturnEnemy(enemy);
+        }
+        
+    });
+
+}
+
+ bool BattleState::ManagePlaneCollisions(Plane& plane)
+ {
+    bool someCollision = false;
+
+    //check explosion
+     _explosionPool.for_each_active([&] (Explosion& exp)
+        {
+            if(someCollision){return;}
+            bool explosionCollision = ManageExplosionPlaneCollision(explosion, enemy);
+            if(explosionCollision)
             {
-                bool hasCollsion = CollsisionDetection(exp.GetX(), exp.GetY(), exp.GetWidth(), exp.GetHeight(),
-                                enemy.GetX(), enemy.GetY(), enemy.GetWidth(), enemy.GetHeight());
-                if (hasCollsion)
-                {
-                    ReturnEnemy(enemy);
-                }
+                someCollision = true;
             }
-            );
         }
     );
-}
+
+    //check explosion
+    _bulletsPool->for_each_active([deltaTime,this](Bullet &bullet)
+    {
+        if(someCollision){return;}
+        bool bulletCollision = ManageBulletPlaneCollision(bullet, enemy);
+        if(bulletCollision)
+        {
+            someCollision = true;
+        }
+    });
+
+    return someCollision;
+ }
 
 void BattleState::ManageBulletCollisions(Bullet &bullet)
 {
@@ -212,53 +232,15 @@ void BattleState::ManageBulletCollisions(Bullet &bullet)
     //check meteorites
     if(!isDestroyed)
     {
+        
         _meteoritesPool.for_each_active([&](Meteorite& meteorite)
             {
-                if (HasCollision(bullet, meteorite))
-                {
-                    if(TryDestroyBullet(bullet))
-                    {
-                        isDestroyed = true;
-                    }
-                }
+                if(isDestroyed){return;}
+                isDestroyed = ManageMeteoriteBulletCollision(meteorite, bullet);
             }
         );
     }
-
-    //check enemies
-    if(!isDestroyed && bullet.GetPlayerTeam() == TEAM_PLAYER)
-    {
-        // check collision against enemies
-        _enemiesPool->for_each_active([&](Plane &enemy)
-                                    {
-                                        if(isDestroyed){return;}//only affect one enemy
-                                        bool solution = ManageCollisionBetweenBulletAndEnemy(bullet, enemy);
-                                        isDestroyed |= solution; 
-                                    });
-    }
     
-    //check player
-    if(!isDestroyed && bullet.GetPlayerTeam() == TEAM_ENEMY)
-    {
-        //check player
-        bool hasShield = _player->GetHasShield();
-        bool hasCollision = HasCollision(bullet, _player);
-
-        if(hasCollision && hasShield)
-        {
-            _player->SetHasShield(false);
-            hasCollision = false;
-            isDestroyed = true;
-        }
-
-        if (hasCollision)
-        {
-            DamagePlayer();
-            _bulletsPool->Release(bullet);
-            isDestroyed = true;
-        }
-    }
-   
     //manage explosion
     if (isDestroyed)
     {
@@ -269,32 +251,44 @@ void BattleState::ManageBulletCollisions(Bullet &bullet)
     }
 }
 
-bool BattleState::ManageCollisionBetweenBulletAndEnemy(Bullet &bullet, Plane &enemy)
-{
-    bool isBulletDestroyed = false;
-    bool hasShield = enemy.GetHasShield();
-    bool hasCollision = HasCollision(bullet, &enemy);
+ bool BattleState::ManageBulletPlaneCollision(const Bullet& bullet, const Plane& plane)
+ {
+    bool hasShield = plane.GetHasShield();
+    bool hasCollision = HasCollision(bullet, plane);
 
     if(hasCollision && hasShield)
     {
-        enemy.SetHasShield(false);
-        if (TryDestroyBullet(bullet))
-        {
-            isBulletDestroyed = true;
-        }
-        hasCollision = false;
+        plane.SetHasShield(false);
+        TryDestroyBullet(bullet);
+        return false;
     }
 
-    if (hasCollision)
+    if( hasCollision )
     {
-        if (TryDestroyBullet(bullet))
+        bool bulletDestroyed = TryDestroyBullet(bullet);
+        if (bulletDestroyed && bullet.GetHasExplostion())
         {
-            isBulletDestroyed = true;
+            DoExplosion(bullet);
         }
-        ReturnEnemy(enemy);
     }
-    return isBulletDestroyed;
+    return hasCollision;
+ }
+
+bool BattleState::ManageExplosionPlaneCollision(const Explosion& explosion, const Plane& plane)
+{
+    bool hasCollsion = CollsisionDetection(exp.GetX(), exp.GetY(), exp.GetWidth(), exp.GetHeight(),
+                    enemy.GetX(), enemy.GetY(), enemy.GetWidth(), enemy.GetHeight());
+    return hasCollision;
 }
+
+bool BattleState::ManageMeteoriteBulletCollision(const Meteorite& meteorite, const Bullet& bullet)
+{
+    if (HasCollision(bullet, meteorite))
+    {
+        return TryDestroyBullet(bullet);
+    }
+}
+
 
 bool BattleState::TryDestroyBullet(Bullet& bullet)
 {
@@ -307,7 +301,7 @@ bool BattleState::TryDestroyBullet(Bullet& bullet)
 }
 
 
-bool BattleState::HasCollision(const Bullet &bullet, Plane *plane) const
+bool BattleState::HasCollision(const Bullet &bullet, const Plane& plane) const
 {
     if (bullet.GetPlayerTeam() == plane->GetPlayerTeam())
     {
@@ -315,7 +309,7 @@ bool BattleState::HasCollision(const Bullet &bullet, Plane *plane) const
     }
    
     return CollsisionDetection(bullet.GetX(), bullet.GetY(), bullet.GetWidth(), bullet.GetHeight(),
-                               plane->GetX(), plane->GetY(), plane->GetWidth(), plane->GetHeight());
+                               plane.GetX(), plane.GetY(), plane.GetWidth(), plane.GetHeight());
 }
 
  bool BattleState::HasCollision(const Bullet& bullet, const Meteorite& meteorite) const
@@ -363,6 +357,7 @@ void BattleState::UpdateMeteorites(float deltaTime)
 void BattleState::ReturnEnemy(Plane& enemy)
 {
     _enemiesPool->Release(enemy);
+
     float x, y;
     enemy.GetPaintPosition(x, y);
     int id = _alphaManager->AddAlpha(ALPHA_TIME_DESTROY_PLANE, x, y, false, 
