@@ -43,6 +43,7 @@ public:
 	void FinishAll();
 	void FinishEase(int id);
 	void FinishWithoutCallback(int id);
+	void ClearAll();
 
 private:
 	void GetValues(int id, float& x, float& y)const;

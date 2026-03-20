@@ -124,6 +124,15 @@ void EasingManager::FinishWithoutCallback(int id)
     _eases[id].acumTime = _eases[id].duration;
 }
 
+void EasingManager::ClearAll()
+{
+    for (int i = 0; i < _inUse.size(); ++i)
+    {
+        FinishWithoutCallback(i);
+    }
+}
+
+
 
 float EasingManager::inOutSine(float progress, float startValue, float endValue) const
 {
