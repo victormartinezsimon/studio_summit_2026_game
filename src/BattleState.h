@@ -8,6 +8,8 @@
 #include "Meteorite.h"
 #include <array>
 #include "Explosion.h"
+#include "Spawner.h"
+#include <random>
 
 class Plane;
 class Bullet;
@@ -61,7 +63,8 @@ class BattleState: public State
         void ConfigureExplosion(const int id, Explosion& exp, const Bullet& bullet);
         bool TryDestroyBullet(const Bullet& bullet);
 
-        
+    private:
+        void ConfigureMeteoriteSpawn(Meteorite& meteorite);
 
     private:
         Pool<Plane, PLANES_POOL_SIZE>* _enemiesPool;
@@ -73,6 +76,9 @@ class BattleState: public State
         NumberManager* _numberManager;
         AlphaManager* _alphaManager;
         int _enemiesAlive;
-        Pool<Meteorite, TOTAL_METEORITES> _meteoritesPool;
+       // Pool<Meteorite, TOTAL_METEORITES> _meteoritesPool;
         Pool<Explosion, TOTAL_EXPLOSIONS> _explosionPool;
+
+        Spawner<Meteorite, TOTAL_METEORITES> _spawnerMeteorites;
+        std::mt19937 _generator;
 };

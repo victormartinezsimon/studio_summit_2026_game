@@ -61,7 +61,6 @@ constexpr int SCORE_PER_KILL = 50;
 constexpr int SCORE_PER_PLAYER_HIT = 10;
 constexpr int SCORE_PER_FINISH_LEVEL = 100;
 
-constexpr int TOTAL_METEORITES = 2;
 constexpr int TOTAL_EXPLOSIONS = 10;
 constexpr int EXPLOSION_DURATION = 2;
 
@@ -69,3 +68,10 @@ constexpr float ALPHA_TIME_DESTROY_PLANE = 0.8;
 constexpr float ALPHA_TIME_ENTER_GAME = 1;
 
 constexpr float TIME_INMORTAL = 2;
+
+constexpr int TOTAL_METEORITES = 6;
+constexpr float MIN_VELOCITY_METEORITE = 0.3;
+constexpr float MAX_VELOCITY_METEORITE = 0.7;
+constexpr float MIN_HEIGHT_METEORITE = 0.3;
+constexpr float MAX_HEIGHT_METEORITE = 0.7;
+constexpr float TIME_SPAWN_METEORITE = 3;

@@ -14,8 +14,10 @@ BattleState::BattleState(Plane *player, PainterManager *painter, Pool<Plane, PLA
                          NumberManager* numberManager, AlphaManager* alphaManager) 
                          : State(player, painter), _enemiesPool(enemiesPool), _bulletsPool(bulletsPool),
                          _damagePlayerCallback(damagePlayerCallback), _damageEnemyCallback(damageEnemy),
-                         _score(score), _timeLeft(time), _numberManager(numberManager),_alphaManager(alphaManager)
+                         _score(score), _timeLeft(time), _numberManager(numberManager),_alphaManager(alphaManager),
+                         _generator(std::random_device{}()), _spawnerMeteorites(TIME_SPAWN_METEORITE, painter)
 {
+    _spawnerMeteorites.SetCallbackConfiguration([this](Meteorite& m){ConfigureMeteoriteSpawn(m);});
 }
 
 State::STATES BattleState::Update(const float deltaTime, float currentFrameInputValueNormalized, int currentFrameInputValue)
@@ -39,13 +41,7 @@ State::STATES BattleState::Update(const float deltaTime, float currentFrameInput
 void BattleState::Paint()
 {
     {
-        _meteoritesPool.for_each_active([&](const Meteorite& m)
-        {
-            float posX, posY;
-            m.GetPaintPosition(posX, posY);
-            _painterManager->AddToPaint(PainterManager::SPRITE_ID::METEORITE, 
-                m.GetWidth(), m.GetHeight(), posX, posY);
-        });
+        _spawnerMeteorites.Paint(PainterManager::SPRITE_ID::METEORITE);
     }
     
     {
@@ -122,25 +118,8 @@ void BattleState::OnEnter()
     _player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
     _player->SetPositionY( POSITION_Y_PLAYER);
 
-    int id0 = _meteoritesPool.Get();
-    _meteoritesPool.call_for_element(id0, [](Meteorite& object)
-    {
-        object.SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
-        object.SetPosition(SCREEN_WIDTH + METERORITE_WIDTH, SCREEN_HEIGHT*0.4f);
-        object.SetVelocities(-DEFAULT_BULLET_VEL_Y * 0.5,0);
-        object.SetMoveLeft(true);
-    });
-
-    int id1 = _meteoritesPool.Get();
-    _meteoritesPool.call_for_element(id1, [](Meteorite& object)
-    {
-        object.SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
-        object.SetPosition(-static_cast<int>(METERORITE_WIDTH), SCREEN_HEIGHT*0.6f);
-        object.SetVelocities(DEFAULT_BULLET_VEL_Y * 0.55,0);
-        object.SetMoveLeft(false);
-    });
-
     _enemiesAlive = _enemiesPool->TotalInUse();
+    _spawnerMeteorites.Reset();
 
 }
 void BattleState::OnExit()
@@ -232,8 +211,7 @@ void BattleState::ManageBulletCollisions(Bullet &bullet)
     //check meteorites
     if(!isDestroyed)
     {
-        
-        _meteoritesPool.for_each_active([&](Meteorite& meteorite)
+        _spawnerMeteorites.for_each_active([&](Meteorite& meteorite)
             {
                 if(isDestroyed){return;}
                 isDestroyed = ManageMeteoriteBulletCollision(meteorite, bullet);
@@ -336,23 +314,7 @@ void BattleState::DamagePlayer()
 
 void BattleState::UpdateMeteorites(float deltaTime)
 {
-    _meteoritesPool.for_each_active([&](Meteorite& m)
-    {
-        m.Update(deltaTime);
-
-        float posX, posY;
-        m.GetPaintPosition(posX, posY);
-        if(posX + m.GetWidth() < 0 && m.GetMoveLeft())
-        {   
-            m.SetPositionX( SCREEN_WIDTH + m.GetWidth() / 2);
-        }
-
-        if(posX > SCREEN_WIDTH && !m.GetMoveLeft())
-        {   
-            float positionX = -static_cast<int>(m.GetWidth()) / 2;
-            m.SetPositionX( positionX );
-        }
-    });
+    _spawnerMeteorites.Update(deltaTime);
 }
 
 void BattleState::ReturnEnemy(Plane& enemy)
@@ -401,4 +363,33 @@ void BattleState::ConfigureExplosion(const int id, Explosion& exp ,const Bullet&
             EndExplosion(exp);
         }
     );
+}
+
+void BattleState::ConfigureMeteoriteSpawn(Meteorite& meteorite)
+{
+    meteorite.SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
+
+    bool goingLeft = _generator()% 2;   
+
+    std::uniform_real_distribution<float> velocityDist(MIN_VELOCITY_METEORITE, MAX_VELOCITY_METEORITE);
+    float velocity = velocityDist(_generator);
+
+    std::uniform_real_distribution<float> heightDist(MIN_HEIGHT_METEORITE, MAX_HEIGHT_METEORITE);
+    float height = heightDist(_generator);
+
+
+    if(goingLeft)
+    {
+        meteorite.SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
+        meteorite.SetPosition(SCREEN_WIDTH + METERORITE_WIDTH, SCREEN_HEIGHT*height);
+        meteorite.SetVelocities(-DEFAULT_BULLET_VEL_Y * velocity, 0);
+        meteorite.SetMoveLeft(true);
+    }
+    else
+    {
+        meteorite.SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
+        meteorite.SetPosition(-static_cast<int>(METERORITE_WIDTH), SCREEN_HEIGHT*height);
+        meteorite.SetVelocities(DEFAULT_BULLET_VEL_Y * velocity,0);
+        meteorite.SetMoveLeft(false);
+    }
 }
