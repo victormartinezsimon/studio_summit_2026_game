@@ -177,7 +177,7 @@ void BattleState::UpdateEnemies(float deltaTime)
 
     
     //check collision
-    _enemiesPool->for_each_active([deltaTime](Plane &enemy)
+    _enemiesPool->for_each_active([&](Plane &enemy)
     { 
         bool someCollision = ManagePlaneCollisions(enemy);
         if(someCollision)
@@ -194,10 +194,10 @@ void BattleState::UpdateEnemies(float deltaTime)
     bool someCollision = false;
 
     //check explosion
-     _explosionPool.for_each_active([&] (Explosion& exp)
+     _explosionPool.for_each_active([&] (Explosion& explosion)
         {
             if(someCollision){return;}
-            bool explosionCollision = ManageExplosionPlaneCollision(explosion, enemy);
+            bool explosionCollision = ManageExplosionPlaneCollision(explosion, plane);
             if(explosionCollision)
             {
                 someCollision = true;
@@ -206,10 +206,10 @@ void BattleState::UpdateEnemies(float deltaTime)
     );
 
     //check explosion
-    _bulletsPool->for_each_active([deltaTime,this](Bullet &bullet)
+    _bulletsPool->for_each_active([this, &someCollision, &plane](Bullet &bullet)
     {
         if(someCollision){return;}
-        bool bulletCollision = ManageBulletPlaneCollision(bullet, enemy);
+        bool bulletCollision = ManageBulletPlaneCollision(bullet, plane);
         if(bulletCollision)
         {
             someCollision = true;
@@ -251,7 +251,7 @@ void BattleState::ManageBulletCollisions(Bullet &bullet)
     }
 }
 
- bool BattleState::ManageBulletPlaneCollision(const Bullet& bullet, const Plane& plane)
+ bool BattleState::ManageBulletPlaneCollision(const Bullet& bullet, Plane& plane)
  {
     bool hasShield = plane.GetHasShield();
     bool hasCollision = HasCollision(bullet, plane);
@@ -276,8 +276,8 @@ void BattleState::ManageBulletCollisions(Bullet &bullet)
 
 bool BattleState::ManageExplosionPlaneCollision(const Explosion& explosion, const Plane& plane)
 {
-    bool hasCollsion = CollsisionDetection(exp.GetX(), exp.GetY(), exp.GetWidth(), exp.GetHeight(),
-                    enemy.GetX(), enemy.GetY(), enemy.GetWidth(), enemy.GetHeight());
+    bool hasCollision = CollsisionDetection(explosion.GetX(), explosion.GetY(), explosion.GetWidth(), explosion.GetHeight(),
+                    plane.GetX(), plane.GetY(), plane.GetWidth(), plane.GetHeight());
     return hasCollision;
 }
 
@@ -287,10 +287,11 @@ bool BattleState::ManageMeteoriteBulletCollision(const Meteorite& meteorite, con
     {
         return TryDestroyBullet(bullet);
     }
+    return false;
 }
 
 
-bool BattleState::TryDestroyBullet(Bullet& bullet)
+bool BattleState::TryDestroyBullet(const Bullet& bullet)
 {
     if (!bullet.GetHasPenetration())
     {
@@ -303,7 +304,7 @@ bool BattleState::TryDestroyBullet(Bullet& bullet)
 
 bool BattleState::HasCollision(const Bullet &bullet, const Plane& plane) const
 {
-    if (bullet.GetPlayerTeam() == plane->GetPlayerTeam())
+    if (bullet.GetPlayerTeam() == plane.GetPlayerTeam())
     {
         return false;
     }
@@ -369,7 +370,7 @@ void BattleState::ReturnEnemy(Plane& enemy)
     _damageEnemyCallback(x, y);
 }
 
-void BattleState::DoExplosion(Bullet &bullet)
+void BattleState::DoExplosion(const Bullet &bullet)
 {
     int id = _explosionPool.Get();
     _explosionPool.call_for_element(id, [&](Explosion& exp){ConfigureExplosion(id, exp, bullet);});

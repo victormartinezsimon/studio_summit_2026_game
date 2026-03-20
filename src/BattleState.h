@@ -41,7 +41,7 @@ class BattleState: public State
         void ManageBulletCollisions(Bullet& bullet);
         bool ManagePlaneCollisions(Plane& plane);
 
-        bool ManageBulletPlaneCollision(const Bullet& bullet, const Plane& plane);
+        bool ManageBulletPlaneCollision(const Bullet& bullet, Plane& plane);
         bool ManageExplosionPlaneCollision(const Explosion& explosion, const Plane& plane);
         bool ManageMeteoriteBulletCollision(const Meteorite& meteorite, const Bullet& plane);
     
@@ -54,12 +54,12 @@ class BattleState: public State
     private:    
         void DamagePlayer();
         void ReturnEnemy(Plane& plane);
-        void DoExplosion(Bullet& bullet);
+        void DoExplosion(const Bullet& bullet);
 
     private:
         void EndExplosion(Explosion& exp);
         void ConfigureExplosion(const int id, Explosion& exp, const Bullet& bullet);
-        bool TryDestroyBullet(Bullet& bullet);
+        bool TryDestroyBullet(const Bullet& bullet);
 
         
 
