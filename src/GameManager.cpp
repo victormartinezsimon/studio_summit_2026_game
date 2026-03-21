@@ -374,8 +374,19 @@ void GameManager::ConfigureStar(Star& star)
     std::uniform_real_distribution<float> heightDist(MIN_HEIGHT_STAR, MAX_HEIGHT_STAR);
     float height = heightDist(_generator);
 
-	std::uniform_int_distribution<int> typeDist(0, 2);
-	int type = typeDist(_generator);
+	std::uniform_int_distribution<int> typeDist(0, 9);
+
+	int typeValue = typeDist(_generator);
+
+	int type = 0;//0 1 2 3 4
+	if(typeValue >= 5 && typeValue < 8)
+	{
+		type = 1;//5 6 7
+	}
+	else
+	{
+		type = 2;//8 9
+	}
 
 	switch (type)
 	{
