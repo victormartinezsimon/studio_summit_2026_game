@@ -40,7 +40,7 @@ int AlphaManager::AddInternalAlpha(float duration, bool isUI, float startX, floa
             {
                 //add ease
                 int id = _easingManager->AddEase(duration, startX, startY, endX, endY, 
-                    EasingManager::EASE_TYPES::INOUTCUBE,
+                    Ease::EASE_TYPES::INOUTCUBE,
                     [this, i, endX, endY]
                     {
                         _alphas[i].currentX = endX;

@@ -334,7 +334,7 @@ void BattleState::ReturnEnemy(Plane& enemy)
 {
     _enemiesPool->Release(enemy);
 
-    _easingManager->FinishWithoutCallback(enemy.GetRandomMovementID());
+    _easingManager->KillEase(enemy.GetRandomMovementID());
 
     float x, y;
     enemy.GetPaintPosition(x, y);
@@ -420,14 +420,14 @@ void BattleState::ConfigureMeteoriteSpawn(Meteorite& meteorite)
 
     std::uniform_int_distribution<int> typeDist(0, 3);
 	int type = typeDist(_generator);
-    EasingManager::EASE_TYPES easeType = EasingManager::EASE_TYPES::INOUTQUINT;
+    Ease::EASE_TYPES easeType = Ease::EASE_TYPES::INOUTQUINT;
 
     switch (type)
     {
-        case 0: easeType = EasingManager::EASE_TYPES::INOUTSINE; break;
-        case 1: easeType = EasingManager::EASE_TYPES::INOUTCUBE; break;
-        case 2: easeType = EasingManager::EASE_TYPES::INOUTQUINT; break;
-        case 3: easeType = EasingManager::EASE_TYPES::INOUTCIRC; break;
+        case 0: easeType = Ease::EASE_TYPES::INOUTSINE; break;
+        case 1: easeType = Ease::EASE_TYPES::INOUTCUBE; break;
+        case 2: easeType = Ease::EASE_TYPES::INOUTQUINT; break;
+        case 3: easeType = Ease::EASE_TYPES::INOUTCIRC; break;
     }
 
     int easeID = _easingManager->AddEase(duration, plane.GetX(), plane.GetY(), newX, newY, easeType,

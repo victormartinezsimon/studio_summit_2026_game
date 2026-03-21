@@ -40,13 +40,13 @@ void InitialMovementState::OnEnter()
 
 	_player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
 	_player->SetPositionY(POSITION_Y_PLAYER);
-	_easingManager->ClearAll();
+	_easingManager->KillAll();
 
 	_enemiesPool->for_each_active(
 		[this](Plane &p)
 		{
 			_easingManager->AddEase(INTIAL_ANIMATION_DURATION, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
-				 p.GetX(), p.GetY(), EasingManager::EASE_TYPES::INOUTCUBE, 
+				 p.GetX(), p.GetY(), Ease::EASE_TYPES::INOUTCUBE, 
 				 [this] 
 				 {
 					_nextState = STATES::BATTLE;

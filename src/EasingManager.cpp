@@ -2,181 +2,59 @@
 #include "GameConfig.h"
 #include <cmath>
 
-EasingManager::EasingManager()
-{
-    _inUse.fill(false);
-}
-
 void EasingManager::Update(const float deltaTime)
 {
-    for (int i = 0; i < _eases.size(); ++i)
+
+    _poolEases.for_each_active([&](Ease& ease)
     {
-        if (_inUse[i])
+        bool finished = ease.Update(deltaTime);
+        if(finished)
         {
-            _eases[i].acumTime += deltaTime;
-
-            float x, y;
-            GetValues(i, x, y);
-
-            if (_eases[i].acumTime > _eases[i].duration)
-            {
-                FinishEase(i);
-            }
-            else
-            {
-                if(_eases[i].tickCallback)
-                {
-                    _eases[i].tickCallback(x, y);
-                }
-            }
+            _poolEases.Release(ease);
         }
-    }
+    });
+
 }
 
 int EasingManager::AddEase(float duration, float startX, float startY, 
-		float endX, float endY, EASE_TYPES type)
+		float endX, float endY, Ease::EASE_TYPES type)
 {
     return AddEase(duration, startX, startY, endX, endY, type, nullptr, nullptr);
 }
 
 int EasingManager::AddEase(float duration, float startX, float startY,
-                            float endX, float endY, EASE_TYPES type, std::function<void()> endCallback,
+                            float endX, float endY, Ease::EASE_TYPES type, std::function<void()> endCallback,
                             std::function<void(float currentX, float currentY)> tickCallback)
 {
-    for (int i = 0; i < _inUse.size(); ++i)
+
+    int easeID = _poolEases.Get();
+
+    _poolEases.call_for_element(easeID, [&](Ease& ease)
     {
-        if (!_inUse[i])
-        {
-            _inUse[i] = true;
-            _eases[i].acumTime = 0;
-            _eases[i].duration = duration;
-            _eases[i].endCallback = endCallback;
-            _eases[i].startX = startX;
-            _eases[i].startY = startY;
-            _eases[i].endX = endX;
-            _eases[i].endY = endY;
-            _eases[i].type = type;
-            _eases[i].tickCallback = tickCallback;
-            return i;
-        }
-    }
-    endCallback();//just in case    
-    return -1;
-}
+        ease.BuildEase(duration, startX, startY, endX, endY, type, endCallback, tickCallback);
+    });
 
-void EasingManager::GetValues(int id, float &x, float &y) const
-{
-    float progress = (_eases[id].acumTime / _eases[id].duration) * 100.0f;
-
-    switch (_eases[id].type)
+    if(easeID == -1)
     {
-    case EASE_TYPES::INOUTCIRC:
-        x = inOutCirc(progress, _eases[id].startX, _eases[id].endX);
-        y = inOutCirc(progress, _eases[id].startY, _eases[id].endY);
-        break;
-
-        case EASE_TYPES::INOUTSINE:
-        x = inOutSine(progress, _eases[id].startX, _eases[id].endX);
-        y = inOutSine(progress, _eases[id].startY, _eases[id].endY);
-        break;
-
-        case EASE_TYPES::INOUTCUBE:
-        x = inOutCube(progress, _eases[id].startX, _eases[id].endX);
-        y = inOutCube(progress, _eases[id].startY, _eases[id].endY);
-        break;
-
-        case EASE_TYPES::INOUTQUINT:
-        x = inOutQuint(progress, _eases[id].startX, _eases[id].endX);
-        y = inOutQuint(progress, _eases[id].startY, _eases[id].endY);
-        break;
-
-        case EASE_TYPES::PINGPONG:
-        x = pingPong(progress, _eases[id].startX, _eases[id].endX);
-        y = pingPong(progress, _eases[id].startY, _eases[id].endY);
-        break;
-    break;
+        endCallback();//just in case    
     }
+    return easeID;
 }
-
 void EasingManager::FinishAll()
 {
-    for (int i = 0; i < _inUse.size(); ++i)
-    {
-        FinishEase(i);
-    }
+    _poolEases.for_each_active([](Ease& ease){ease.EndEase();});
+    _poolEases.ReturnAll();
 }
 void EasingManager::FinishEase(int id)
 {
-    if(!_inUse[id]){return;}
-   _eases[id].acumTime = _eases[id].duration;
-    _inUse[id] = false;
-
-    if(_eases[id].endCallback)
-    {
-        _eases[id].endCallback();
-    }
+     _poolEases.call_for_element(id, [](Ease& ease){ease.EndEase();});
 }
-
-void EasingManager::FinishWithoutCallback(int id)
+void EasingManager::KillEase(int id)
 {
-    if(!_inUse[id]){return;}
-    _inUse[id] = false;
-    _eases[id].acumTime = _eases[id].duration;
+    _poolEases.call_for_element(id, [](Ease& ease){ease.KillEase();});
 }
-
-void EasingManager::ClearAll()
+void EasingManager::KillAll()
 {
-    for (int i = 0; i < _inUse.size(); ++i)
-    {
-        FinishWithoutCallback(i);
-    }
-}
-
-
-
-float EasingManager::inOutSine(float progress, float startValue, float endValue) const
-{
-    float change = endValue - startValue;
-    return -change / 2.0 * (cos(M_PI * progress / 100.0) - 1.0) + startValue;
-}
-float EasingManager::inOutCube(float progress, float startValue, float endValue) const
-{
-    float change = endValue - startValue;
-    double t = progress / 50.0;
-    if (t < 1.0)
-        return change / 2.0 * t * t * t + startValue;
-    t -= 2.0;
-    return change / 2.0 * (t * t * t + 2.0) + startValue;
-}
-float EasingManager::inOutQuint(float progress, float startValue, float endValue) const
-{
-    float change = endValue - startValue;
-    float t = progress / 50.0;
-    if (t < 1.0)
-        return change / 2.0 * t * t * t * t * t + startValue;
-    t -= 2.0;
-    return change / 2.0 * (t * t * t * t * t + 2.0) + startValue;
-}
-float EasingManager::inOutCirc(float progress, float startValue, float endValue) const
-{
-    double change = endValue - startValue;
-    double t = progress / 50.0;
-    if (t < 1.0)
-        return -change / 2.0 * (sqrt(1.0 - t * t) - 1.0) + startValue;
-    t -= 2.0;
-    return change / 2.0 * (sqrt(1.0 - t * t) + 1.0) + startValue;
-}
-
-float EasingManager::pingPong(float progress, float startValue, float endValue) const
-{
-    // Normalize progress to [0, 1] using ping-pong logic
-    // progress mod 2: [0,1] goes forward, [1,2] goes backward
-    float t = std::fmod(progress, 2.0f);
-    if (t > 1.0f)
-        t = 2.0f - t;
-
-    // Apply a smooth ease-in-out (cubic)
-    t = t * t * (3.0f - 2.0f * t);
-
-    return startValue + t * (endValue - startValue);
+    _poolEases.for_each_active([](Ease& ease){ease.KillEase();});
+    _poolEases.ReturnAll();
 }
