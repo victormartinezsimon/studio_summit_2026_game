@@ -20,6 +20,7 @@ class MainMenuState: public State
 
     private:
         void StartGame();
+        void ExitGame();
 
     private:
         STATES _nextState;

@@ -23,16 +23,17 @@ int main(int argc, char **argv)
 
 	auto lastTime = std::chrono::high_resolution_clock::now();
 
-	while (true)
+	bool ended = false;
+
+	while (!ended)
 	{
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		deltaTime = std::chrono::duration<float>(currentTime - lastTime).count(); // seconds
     	lastTime = currentTime;
 
-		gm->Update(deltaTime);
+		ended = gm->Update(deltaTime);
 		gm->Paint();
 		painterManager->Paint();
-		//printf("Total Frames: %f\n", 1.0f/deltaTime);
 	}
 
 	delete inputManager;

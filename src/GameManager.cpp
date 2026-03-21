@@ -122,7 +122,7 @@ void GameManager::InitializeStatesBegin()
 	};
 }
 
-void GameManager::Update(const float deltaTime)
+bool GameManager::Update(const float deltaTime)
 {
 	_lastDeltaTime = deltaTime;
 	_currentFrameInputValue = _inputManager->GetInputValue();
@@ -135,10 +135,16 @@ void GameManager::Update(const float deltaTime)
 
 	_alphaManager.Update(deltaTime);
 	_spawnerStars.Update(deltaTime);
-
+	_easingManager.Update(deltaTime);
+	
 	MovePlayer();
 	
 	auto nextState = _statesLogic[_currentStateLogic]->Update(deltaTime, _currentFrameInputValueNormalized, _currentFrameInputValue);
+
+	if(nextState == State::STATES::EXIT)
+	{
+		return true;
+	}
 
 	if(_currentTimePlaying >= MAX_SECS_PLAYING)
 	{
@@ -176,6 +182,7 @@ void GameManager::Update(const float deltaTime)
 		_statesLogic[nextState]->OnEnter();
 		_currentStateLogic = nextState;
 	}
+	return false;
 }
 
 void GameManager::Paint()

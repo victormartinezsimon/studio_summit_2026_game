@@ -23,8 +23,6 @@ BattleState::BattleState(Plane *player, PainterManager *painter, Pool<Plane, PLA
 
 State::STATES BattleState::Update(const float deltaTime, float currentFrameInputValueNormalized, int currentFrameInputValue)
 {
-    _easingManager->Update(deltaTime);
-    
     // update player
     UpdatePlayer(deltaTime);
 

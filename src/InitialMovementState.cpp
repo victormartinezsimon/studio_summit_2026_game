@@ -13,8 +13,6 @@ State(player, painter), _easingManager(easingManager), _enemiesPool(enemiesPool)
 
 State::STATES InitialMovementState::Update(const float deltaTime, float _currentFrameInputValueNormalized, int _currentFrameInputValue)
 {
-    _easingManager->Update(deltaTime);
-	
 	return _nextState;
 }
 void InitialMovementState::Paint()

@@ -10,6 +10,8 @@
 constexpr int TITLE_Y = 70;
 constexpr int START_Y = 153;
 constexpr int SELECTOR_Y = 205;
+constexpr float START_GAME_X = 0.2 * SCREEN_WIDTH;
+constexpr float EXIT_GAME_X = 0.8 * SCREEN_WIDTH;
 
 MainMenuState::MainMenuState(Plane *player, PainterManager *painter, ButtonA *buttonAManager,
 							 NumberManager *numberManager, AlphaManager *alphaManager) : State(player, painter), _buttonAManager(buttonAManager), _numberManager(numberManager), _alphaManager(alphaManager), _startingGame(false)
@@ -46,7 +48,12 @@ void MainMenuState::Paint()
 
 	{
 		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
-									  SCREEN_WIDTH * 0.5f, SELECTOR_Y);
+									  START_GAME_X, SELECTOR_Y);
+	}
+
+	{
+		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
+									  EXIT_GAME_X, SELECTOR_Y);
 	}
 	
 	{
@@ -62,10 +69,19 @@ void MainMenuState::Paint()
 }
 void MainMenuState::OnEnter()
 {
-	_buttonAManager->SelectInPosition(MAIN_MENU_TIME_TO_ENTER, {SCREEN_WIDTH * 0.5f - PLAYER_SELECTOR_WIDTH / 2, SCREEN_WIDTH * 0.5f + PLAYER_SELECTOR_WIDTH / 2},
+	_buttonAManager->SelectInPosition(MAIN_MENU_TIME_TO_ENTER, 
+		{START_GAME_X - PLAYER_SELECTOR_WIDTH / 2, START_GAME_X + PLAYER_SELECTOR_WIDTH / 2},
+		{EXIT_GAME_X - PLAYER_SELECTOR_WIDTH / 2, EXIT_GAME_X + PLAYER_SELECTOR_WIDTH / 2},
 									  [this](int selection)
 									  {
+										if(selection == 0)
+										{
 										  StartGame();
+										}
+										else
+										{
+											ExitGame();
+										}
 									  });
 
 	_nextState = STATES::MENU;
@@ -84,4 +100,9 @@ void MainMenuState::StartGame()
 	_alphaManager->AddCallback(id, [this]()
 							   { _nextState = STATES::INITIAL_MOVEMENT; });
 	_startingGame = true;
+}
+
+void MainMenuState::ExitGame()
+{
+	_nextState = STATES::EXIT;
 }
