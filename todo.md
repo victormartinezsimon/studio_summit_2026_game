@@ -12,6 +12,6 @@
 - ~~Move alpha manager and Easing manager to pool~~
 - ~~Remove vector in painter manager~~
 - ~~Highscore screen with a way to come back~~
-- Text missing: title, "return to menu", [+, -(for letters?)], Regenerate title
+- Text missing: ~~title~~, ~~"return to menu"~~, [+, -(for letters?)], ~~numbers~~
 - Test palette before scale to test if there are less green colors
 - Sound
