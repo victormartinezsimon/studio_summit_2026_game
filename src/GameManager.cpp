@@ -16,7 +16,8 @@ GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	: _inputManager(input),
 	  _painterManager(painterManager), _currentLevel(0), 
 	  _currentStateLogic(State::STATES::MENU),_currentScore(0), _numberManager(_painterManager),
-	  _alphaManager(_painterManager, &_easingManager), _spawnerStars(TIME_SPAWN_STAR, painterManager)
+	  _alphaManager(_painterManager, &_easingManager), _spawnerStars(TIME_SPAWN_STAR, painterManager),
+	  _spawnerMeteorites(TIME_SPAWN_METEORITE, painterManager)
 {
 	InitializeConstantValues();
 	InitializeImprovementsFunctions();
@@ -25,6 +26,7 @@ GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	InitializeStates();
 	
 	_spawnerStars.SetCallbackConfiguration([this](Star& star){ConfigureStar(star);});
+    _spawnerMeteorites.SetCallbackConfiguration([this](Meteorite& m){ConfigureMeteoriteSpawn(m);});
 
 	_statesBeginFunction[_currentStateLogic]();
 	_statesLogic[_currentStateLogic]->OnEnter();
@@ -46,7 +48,7 @@ void GameManager::InitializeStates()
 		&_easingManager, &_randomManager, &_buttonAManager,&_enemiesPool, &_bulletsPool,
 		[this](){DamagePlayer();}, 
 		[this](float x, float y){DamageEnemy(x, y);}, 
-		&_currentScore, &_currentTimePlaying);
+		&_currentScore, &_currentTimePlaying, &_spawnerMeteorites);
 	
 	_statesLogic[State::STATES::END_GAME] = new EndGameState(&_player, _painterManager, &_numberManager, &_alphaManager, 
 		&_easingManager, &_randomManager, &_buttonAManager);
@@ -144,6 +146,7 @@ bool GameManager::Update(const float deltaTime)
 	_alphaManager.Update(deltaTime);
 	_spawnerStars.Update(deltaTime);
 	_easingManager.Update(deltaTime);
+	_spawnerMeteorites.Update(deltaTime);
 	
 	MovePlayer();
 	
@@ -184,6 +187,7 @@ bool GameManager::Update(const float deltaTime)
 		{
 			_currentScore = 0;
 			_currentTimePlaying = 0;
+			InitializeConstantValues();
 		}
 
 		_statesBeginFunction[nextState]();
@@ -203,6 +207,7 @@ void GameManager::Paint()
 	_statesLogic[_oldStateLogic]->Paint();
 	_alphaManager.Paint();
 	_spawnerStars.Paint();
+	_spawnerMeteorites.Paint();
 }	
 
 void GameManager::ApplyImprovements(const std::string& playerSelection, const std::string& enemySelection)
@@ -412,4 +417,28 @@ void GameManager::ConfigureStar(Star& star)
 
 	star.SetVelocities(velocity, velocity*0.5);
 	star.SetMoveLeft(false);
+}
+
+void GameManager::ConfigureMeteoriteSpawn(Meteorite& meteorite)
+{
+    meteorite.SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
+
+    bool goingLeft = _randomManager.GetNextIntValue() % 2;
+    float velocity = _randomManager.GetValue(MIN_VELOCITY_METEORITE, MAX_VELOCITY_METEORITE);
+    float height =  _randomManager.GetValue(MIN_HEIGHT_METEORITE, MAX_HEIGHT_METEORITE);
+
+    if(goingLeft)
+    {
+        meteorite.SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
+        meteorite.SetPosition(SCREEN_WIDTH + METEORITE_WIDTH, SCREEN_HEIGHT*height);
+        meteorite.SetVelocities(-DEFAULT_BULLET_VEL_Y * velocity, 0);
+        meteorite.SetMoveLeft(true);
+    }
+    else
+    {
+        meteorite.SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
+        meteorite.SetPosition(-static_cast<int>(METEORITE_WIDTH), SCREEN_HEIGHT*height);
+        meteorite.SetVelocities(DEFAULT_BULLET_VEL_Y * velocity,0);
+        meteorite.SetMoveLeft(false);
+    }
 }

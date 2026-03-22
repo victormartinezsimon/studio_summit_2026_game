@@ -16,22 +16,19 @@ BattleState::BattleState(
         Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool, 
         std::function<void()> damagePlayerCallback, 
         std::function<void(float x, float y)> damageEnemy,
-        long long* score, float* time
+        long long* score, float* time, Spawner<Meteorite, TOTAL_METEORITES>* spawnerMeteorites
 ) 
                          : State(player, painter, numberManager, alphaManager, 
 			easingManager, randomManager, buttonAManager), _enemiesPool(enemiesPool), _bulletsPool(bulletsPool),
                          _damagePlayerCallback(damagePlayerCallback), _damageEnemyCallback(damageEnemy),
-                         _score(score), _timeLeft(time), _spawnerMeteorites(TIME_SPAWN_METEORITE, painter)
+                         _score(score), _timeLeft(time), _spawnerMeteorites(spawnerMeteorites)
 {
-    _spawnerMeteorites.SetCallbackConfiguration([this](Meteorite& m){ConfigureMeteoriteSpawn(m);});
 }
 
 State::STATES BattleState::Update(const float deltaTime, float currentFrameInputValueNormalized, int currentFrameInputValue)
 {
     // update player
     UpdatePlayer(deltaTime);
-
-    UpdateMeteorites(deltaTime);
 
     UpdateBullets(deltaTime);
 
@@ -79,10 +76,6 @@ void BattleState::Paint()
     }
 
     {
-        _spawnerMeteorites.Paint();
-    }
-    
-    {
         _bulletsPool->for_each_active([&](const Bullet &bullet)
                                       {
             float posX, posY;
@@ -125,7 +118,6 @@ void BattleState::OnEnter()
     _player->SetPositionY( POSITION_Y_PLAYER);
 
     _enemiesAlive = _enemiesPool->TotalInUse();
-    _spawnerMeteorites.Reset();
     _explosionPool.ReturnAll();
 
     if(_currentLevel > 1)
@@ -226,7 +218,7 @@ void BattleState::ManageBulletCollisions(Bullet &bullet)
     //check meteorites
     if(!isDestroyed)
     {
-        _spawnerMeteorites.for_each_active([&](Meteorite& meteorite)
+        _spawnerMeteorites->for_each_active([&](Meteorite& meteorite)
             {
                 if(isDestroyed){return;}
                 isDestroyed = ManageMeteoriteBulletCollision(meteorite, bullet);
@@ -327,11 +319,6 @@ void BattleState::DamagePlayer()
     _player->SetTimeInmortal(TIME_INMORTAL);
 }
 
-void BattleState::UpdateMeteorites(float deltaTime)
-{
-    _spawnerMeteorites.Update(deltaTime);
-}
-
 void BattleState::ReturnEnemy(Plane& enemy)
 {
     _enemiesPool->Release(enemy);
@@ -391,30 +378,6 @@ void BattleState::ConfigureExplosion(const int id, Explosion& exp ,const Bullet&
             EndExplosion(exp);
         }
     );
-}
-
-void BattleState::ConfigureMeteoriteSpawn(Meteorite& meteorite)
-{
-    meteorite.SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
-
-    bool goingLeft = _randomManager->GetNextIntValue() % 2;
-    float velocity = _randomManager->GetValue(MIN_VELOCITY_METEORITE, MAX_VELOCITY_METEORITE);
-    float height =  _randomManager->GetValue(MIN_HEIGHT_METEORITE, MAX_HEIGHT_METEORITE);
-
-    if(goingLeft)
-    {
-        meteorite.SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
-        meteorite.SetPosition(SCREEN_WIDTH + METEORITE_WIDTH, SCREEN_HEIGHT*height);
-        meteorite.SetVelocities(-DEFAULT_BULLET_VEL_Y * velocity, 0);
-        meteorite.SetMoveLeft(true);
-    }
-    else
-    {
-        meteorite.SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
-        meteorite.SetPosition(-static_cast<int>(METEORITE_WIDTH), SCREEN_HEIGHT*height);
-        meteorite.SetVelocities(DEFAULT_BULLET_VEL_Y * velocity,0);
-        meteorite.SetMoveLeft(false);
-    }
 }
 
  void BattleState::ConfigureRandomMovement(Plane& plane)

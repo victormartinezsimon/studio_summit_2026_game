@@ -28,7 +28,8 @@ class BattleState: public State
         Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool, 
         std::function<void()> damagePlayerCallback, 
         std::function<void(float x, float y)> damageEnemy,
-        long long* score, float* time
+        long long* score, float* time,
+        Spawner<Meteorite, TOTAL_METEORITES>* spawnerMeteorites
         );
         
     public:    
@@ -42,7 +43,6 @@ class BattleState: public State
         void UpdatePlayer(float deltaTime);
         void UpdateBullets(float deltaTime);
         void UpdateEnemies(float deltaTime);
-        void UpdateMeteorites(float deltaTime);
     
     private:
         void ManageBulletCollisions(Bullet& bullet);
@@ -69,7 +69,6 @@ class BattleState: public State
         bool TryDestroyBullet(const Bullet& bullet);
 
     private:
-        void ConfigureMeteoriteSpawn(Meteorite& meteorite);
         void ConfigureRandomMovement(Plane& plane);
 
     private:
@@ -87,6 +86,6 @@ class BattleState: public State
         float* _timeLeft;
         int _enemiesAlive;
         Pool<Explosion, TOTAL_EXPLOSIONS> _explosionPool;
-        Spawner<Meteorite, TOTAL_METEORITES> _spawnerMeteorites;
         int _currentLevel;
+        Spawner<Meteorite, TOTAL_METEORITES>* _spawnerMeteorites;
 };
