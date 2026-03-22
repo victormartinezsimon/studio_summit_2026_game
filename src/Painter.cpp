@@ -2,8 +2,7 @@
 #include <stdexcept>
 #include <thread>
 
-constexpr uint8_t TRANSPARENT_IDS[] = {  6,5,4,3 };  // your 3 IDs
-constexpr uint8_t TRANSPARENT_COUNT = 4;
+constexpr int TRANSPARENT_KEY = 4;
 
 Painter::Painter()
 {
@@ -71,7 +70,7 @@ void Painter::PaintBackground()
 
 void Painter::PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y)
 {
-	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, TRANSPARENT_IDS, TRANSPARENT_COUNT, allMask, allMask);
+	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, TRANSPARENT_KEY, allMask, allMask);
 }
 
 void Painter::PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y, int maskType)
@@ -89,29 +88,28 @@ void Painter::PaintItem(const uint8_t *sprite, unsigned int width, unsigned int 
 		oddMask = quarterMaskAlt;
 	}
 
-	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, TRANSPARENT_IDS, TRANSPARENT_COUNT, evenMask, oddMask);
+	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, TRANSPARENT_KEY, evenMask, oddMask);
 }
 
 void Painter::init_palette(struct EVideoContext *vctx)
 {
 	VPUSetDefaultPalette(vctx);
 
-	VPUSetPal(vctx,0,35,43,41);
-	VPUSetPal(vctx,1,112,113,114);
-	VPUSetPal(vctx,2,216,52,22);
-	VPUSetPal(vctx,3,38,184,23);
-	VPUSetPal(vctx,4,11,210,4);
-	VPUSetPal(vctx,5,1,234,1);
-	VPUSetPal(vctx,6,0,255,0);
-	VPUSetPal(vctx,7,225,181,29);
-	VPUSetPal(vctx,8,21,66,191);
-	VPUSetPal(vctx,9,168,43,149);
-	VPUSetPal(vctx,10,46,170,211);
-	VPUSetPal(vctx,11,152,153,154);
-	VPUSetPal(vctx,12,195,204,197);
-	VPUSetPal(vctx,13,210,211,217);
-	VPUSetPal(vctx,14,232,233,237);
-	VPUSetPal(vctx,15,255,255,255);
+	VPUSetPal(vctx,0,30,13,26);
+	VPUSetPal(vctx,1,246,9,20);
+	VPUSetPal(vctx,2,236,22,30);
+	VPUSetPal(vctx,3,218,65,17);
+	VPUSetPal(vctx,4,0,255,0);
+	VPUSetPal(vctx,5,254,198,25);
+	VPUSetPal(vctx,6,27,45,212);
+	VPUSetPal(vctx,7,13,62,230);
+	VPUSetPal(vctx,8,15,58,232);
+	VPUSetPal(vctx,9,14,80,203);
+	VPUSetPal(vctx,10,35,173,246);
+	VPUSetPal(vctx,11,218,217,179);
+	VPUSetPal(vctx,12,217,216,217);
+	VPUSetPal(vctx,13,238,238,241);
+	VPUSetPal(vctx,14,255,255,255);
 
 	VPUSetPal(vctx, 16, 8, 15, 42); // background
 
@@ -131,8 +129,7 @@ void Painter::masked_blit_8(
 	int src_h,
 	int dst_x,
 	int dst_y,
-	const uint8_t *transparent_ids,  // <-- array instead of single value
-    uint8_t transparent_count,
+	const uint8_t transparent_key, 
 	uint8x16_t evenRowMask, uint8x16_t oddRowMask)
 {
 	int src_x = 0;
@@ -161,10 +158,7 @@ void Painter::masked_blit_8(
 		return;
 
 #if defined(__ARM_NEON) || defined(__ARM_NEON__)
-	uint8x16_t keyv0 = vdupq_n_u8(transparent_ids[0]);
-    uint8x16_t keyv1 = vdupq_n_u8(transparent_ids[1]);
-    uint8x16_t keyv2 = vdupq_n_u8(transparent_ids[2]);
-    uint8x16_t keyv3 = vdupq_n_u8(transparent_ids[3]);
+	uint8x16_t keyv0 = vdupq_n_u8(transparent_key);
 #endif
 
 	for (int y = 0; y < h; ++y)
@@ -189,9 +183,6 @@ void Painter::masked_blit_8(
 
             // Build transparency mask: 0xFF where pixel matches ANY transparent id
             uint8x16_t tmask = vceqq_u8(sv, keyv0);
-            tmask = vorrq_u8(tmask, vceqq_u8(sv, keyv1));
-            tmask = vorrq_u8(tmask, vceqq_u8(sv, keyv2));
-            tmask = vorrq_u8(tmask, vceqq_u8(sv, keyv3));
 
 			uint8x16_t out = vbslq_u8(tmask, dv, sv); // transparent -> keep dst, else copy src
             vst1q_u8(d + x, out);
@@ -201,11 +192,8 @@ void Painter::masked_blit_8(
 		for (; x < w; ++x)
 		{
 			uint8_t px = s[x];
-			bool is_transparent = false;
-            for (int i = 0; i < transparent_count; ++i)
-                is_transparent |= (px == transparent_ids[i]);
-            if (!is_transparent)
-                d[x] = px;
+			if (px != TRANSPARENT_KEY)
+				d[x] = px;
 		}
 	}
 }

@@ -64,7 +64,7 @@ private:
 		int src_h,
 		int dst_x,
 		int dst_y,
-		const uint8_t *transparent_ids, uint8_t transparent_count,
+		const uint8_t transparent_id,
 		uint8x16_t evenRowMask, uint8x16_t oddRowMask);
 
 private:
