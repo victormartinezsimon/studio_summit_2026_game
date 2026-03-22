@@ -23,7 +23,10 @@ public:
 		{
 			_timeSpawn = 0;
 			int id = _objects.Get();
-			_objects.call_for_element(id, [&](T& obj){_configureCallback(obj);});
+			if(id != -1)
+			{
+				_objects.call_for_element(id, [&](T& obj){_configureCallback(obj);});
+			}
 		}
 		_objects.for_each_active([&](T& obj){UpdateObject(deltaTime, obj);});
 	}

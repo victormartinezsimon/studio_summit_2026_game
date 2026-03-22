@@ -267,44 +267,49 @@ void GameManager::SpawnBullet(int sourceIndex, const Plane &p, bool forPlayer, c
 	for (int bulletPerShot = 0; bulletPerShot < totalBulletsPerShot; ++bulletPerShot)
 	{
 		auto id = _bulletsPool.Get();
-		float velocityBulletX = 0;
-		if (bulletPerShot == 1)
+
+		if(id != -1)
 		{
-			velocityBulletX = data.velocityBulletY * 0.5;
+			float velocityBulletX = 0;
+			if (bulletPerShot == 1)
+			{
+				velocityBulletX = data.velocityBulletY * 0.5;
+			}
+			if (bulletPerShot == 2)
+			{
+				velocityBulletX = -data.velocityBulletY * 0.5;
+			}
+
+			_bulletsPool.call_for_element(id, [this, sourceIndex, p, forPlayer, data, velocityBulletX](Bullet &bullet)
+										{
+				bullet.SetSize(BULLET_WIDTH, BULLET_HEIGHT);
+
+				float positionX = p.GetX();
+				if (sourceIndex == 1)
+				{
+					positionX = p.GetX() - p.GetWidth() / 2;
+				}
+
+				if (sourceIndex == 2)
+				{
+					positionX = p.GetX() + p.GetWidth() / 2;
+				}
+
+				bullet.SetPosition(positionX, p.GetY());
+				bullet.SetVelocity(velocityBulletX, data.velocityBulletY);
+				bullet.SetSize(BULLET_WIDTH, BULLET_HEIGHT);
+				if(forPlayer)
+				{
+					bullet.SetPlayerTeam(TEAM_PLAYER);
+				}
+				else
+				{
+					bullet.SetPlayerTeam(TEAM_ENEMY);
+				}
+				bullet.SetHasPenetration(data.bulletHasPenetration);
+				bullet.SetHasExplostion(data.bulletHasExplosion); 
+			});
 		}
-		if (bulletPerShot == 2)
-		{
-			velocityBulletX = -data.velocityBulletY * 0.5;
-		}
-
-		_bulletsPool.call_for_element(id, [this, sourceIndex, p, forPlayer, data, velocityBulletX](Bullet &bullet)
-									  {
-			bullet.SetSize(BULLET_WIDTH, BULLET_HEIGHT);
-
-			float positionX = p.GetX();
-			if (sourceIndex == 1)
-			{
-				positionX = p.GetX() - p.GetWidth() / 2;
-			}
-
-			if (sourceIndex == 2)
-			{
-				positionX = p.GetX() + p.GetWidth() / 2;
-			}
-
-			bullet.SetPosition(positionX, p.GetY());
-			bullet.SetVelocity(velocityBulletX, data.velocityBulletY);
-			bullet.SetSize(BULLET_WIDTH, BULLET_HEIGHT);
-			if(forPlayer)
-			{
-				bullet.SetPlayerTeam(TEAM_PLAYER);
-			}
-			else
-			{
-				bullet.SetPlayerTeam(TEAM_ENEMY);
-			}
-			bullet.SetHasPenetration(data.bulletHasPenetration);
-			bullet.SetHasExplostion(data.bulletHasExplosion); });
 	}
 }
 void GameManager::StartLevel()
@@ -355,10 +360,12 @@ void GameManager::SpawnRowEnemies(int enemiesToSpawn, float posY)
 		currentPositionX += ENEMY_WIDTH + holeDistance;
 
 		auto id = _enemiesPool.Get();
-
-		float delay =_randomManager.GetValue(MIN_SHOOTING_DELAY, MAX_SHOOTING_DELAY, 100.0f);
-		_enemiesPool.call_for_element(id, [posX, posY, this, delay](Plane &enemy)
+		if(id != -1)
+		{
+			float delay =_randomManager.GetValue(MIN_SHOOTING_DELAY, MAX_SHOOTING_DELAY, 100.0f);
+			_enemiesPool.call_for_element(id, [posX, posY, this, delay](Plane &enemy)
 									  { ConfigurePlane(enemy, posX, posY, enemyData, false, delay); });
+		}
 	}
 }
 

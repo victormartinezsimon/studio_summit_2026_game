@@ -29,10 +29,13 @@ int EasingManager::AddEase(float duration, float startX, float startY,
 
     int easeID = _poolEases.Get();
 
-    _poolEases.call_for_element(easeID, [&](Ease& ease)
+    if(easeID != -1)
     {
-        ease.BuildEase(duration, startX, startY, endX, endY, type, endCallback, tickCallback);
-    });
+        _poolEases.call_for_element(easeID, [&](Ease& ease)
+        {
+            ease.BuildEase(duration, startX, startY, endX, endY, type, endCallback, tickCallback);
+        });
+    }
 
     if(easeID == -1)
     {

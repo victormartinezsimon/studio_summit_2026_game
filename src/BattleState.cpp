@@ -339,7 +339,10 @@ void BattleState::ReturnEnemy(Plane& enemy)
 void BattleState::DoExplosion(const Bullet &bullet)
 {
     int id = _explosionPool.Get();
-    _explosionPool.call_for_element(id, [&](Explosion& exp){ConfigureExplosion(id, exp, bullet);});
+    if(id != -1)
+    {
+        _explosionPool.call_for_element(id, [&](Explosion& exp){ConfigureExplosion(id, exp, bullet);});
+    }
 }
 
 void BattleState::EndExplosion(Explosion& exp)

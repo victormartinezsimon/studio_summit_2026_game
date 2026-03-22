@@ -24,10 +24,14 @@ int AlphaManager::AddInternalAlpha(float duration, bool isUI, float startX, floa
 {
 
     int poolID = _alphaPool.Get();
-    _alphaPool.call_for_element(poolID, [&](Alpha& alpha)
+    
+    if(poolID != -1)
     {
-        alpha.ConfigureAlpha(duration,isUI, startX, startY, width, height, sprite);
-    });
+        _alphaPool.call_for_element(poolID, [&](Alpha& alpha)
+        {
+            alpha.ConfigureAlpha(duration,isUI, startX, startY, width, height, sprite);
+        });
+    }
 
 
     if(poolID != -1)
