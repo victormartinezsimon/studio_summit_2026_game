@@ -10,7 +10,8 @@
 constexpr int TITLE_Y = 70;
 constexpr int START_Y = 153;
 constexpr int SELECTOR_Y = 205;
-constexpr float START_GAME_X = 0.2 * SCREEN_WIDTH;
+constexpr float START_GAME_SELECTOR_X = 0.2 * SCREEN_WIDTH;
+constexpr float START_GAME_X = START_GAME_SELECTOR_X;
 constexpr float EXIT_GAME_X = 0.8 * SCREEN_WIDTH;
 
 MainMenuState::MainMenuState(Plane *player, PainterManager *painter, ButtonA *buttonAManager,
@@ -53,7 +54,7 @@ void MainMenuState::Paint()
 
 	{
 		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
-									  START_GAME_X, SELECTOR_Y);
+									  START_GAME_SELECTOR_X, SELECTOR_Y);
 	}
 
 	{
