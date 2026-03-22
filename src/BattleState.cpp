@@ -389,8 +389,8 @@ void BattleState::ConfigureExplosion(const int id, Explosion& exp ,const Bullet&
     float minY = SCREEN_HEIGHT * MIN_Y_ENEMY;
     float maxY = SCREEN_HEIGHT * MAX_Y_ENEMY;
 
-    float nextX = _randomManager->GetValue(minX, maxX);
-    float nextY = _randomManager->GetValue(minY, maxY);
+    float nextX = _randomManager->GetValue(minX, maxX, 100.0f);
+    float nextY = _randomManager->GetValue(minY, maxY, 100.0f);
 
     int movementType = _randomManager->GetValue(0,3);
 
@@ -404,7 +404,7 @@ void BattleState::ConfigureExplosion(const int id, Explosion& exp ,const Bullet&
         case 3: easeType = Ease::EASE_TYPES::INOUTCIRC; break;
     }
 
-    float duration = _randomManager->GetValue(MIN_DURATION_MOVEMENT_ENEMY, MAX_DURATION_MOVEMENT_ENEMY);
+    float duration = _randomManager->GetValue(MIN_DURATION_MOVEMENT_ENEMY, MAX_DURATION_MOVEMENT_ENEMY, 100.0f);
 
     int easeID = _easingManager->AddEase(duration, plane.GetX(), plane.GetY(), nextX, nextY, easeType,
         [&](){ ConfigureRandomMovement(plane); },

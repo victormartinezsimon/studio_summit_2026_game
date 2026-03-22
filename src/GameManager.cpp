@@ -104,8 +104,8 @@ void GameManager::InitializeRandomImprovements()
 		_randomImprovements[index] = key;
 		++index;
 	}
-
-    std::shuffle(_randomImprovements.begin(), _randomImprovements.end(), _randomManager.GetGenerator());
+	std::mt19937 generator(std::random_device{}());
+    std::shuffle(_randomImprovements.begin(), _randomImprovements.end(), generator);
 }
 
 void GameManager::InitializeStatesBegin()
@@ -356,7 +356,7 @@ void GameManager::SpawnRowEnemies(int enemiesToSpawn, float posY)
 
 		auto id = _enemiesPool.Get();
 
-		float delay =_randomManager.GetValue(MIN_SHOOTING_DELAY, MAX_SHOOTING_DELAY);
+		float delay =_randomManager.GetValue(MIN_SHOOTING_DELAY, MAX_SHOOTING_DELAY, 100.0f);
 		_enemiesPool.call_for_element(id, [posX, posY, this, delay](Plane &enemy)
 									  { ConfigurePlane(enemy, posX, posY, enemyData, false, delay); });
 	}
@@ -379,15 +379,16 @@ void GameManager::DamageEnemy(float x, float y)
 
 void GameManager::ConfigureStar(Star& star)
 {
-    float velocity = _randomManager.GetValue(MIN_VELOCITY_STAR, MAX_VELOCITY_STAR);
-    float y = _randomManager.GetValue(MIN_HEIGHT_STAR, MAX_HEIGHT_STAR) * SCREEN_HEIGHT;
+    float velocity = _randomManager.GetValue(MIN_VELOCITY_STAR, MAX_VELOCITY_STAR, 100.0f);
+    float y = _randomManager.GetValue(MIN_HEIGHT_STAR, MAX_HEIGHT_STAR, 100.0f) * SCREEN_HEIGHT;
+
 	int typeValue = _randomManager.GetValue(0,9);
 	float x =-static_cast<int>(MID_STAR_WIDTH);
 
 	if( y < 0)
 	{
-		x = _randomManager.GetValue(0, SCREEN_WIDTH);
-		y = 0;
+		x = _randomManager.GetValue(0, SCREEN_WIDTH * 0.5, 100.0f);
+		//y = 0;
 	}
 
 	int type = 0;//0 1 2 3 4
@@ -431,8 +432,8 @@ void GameManager::ConfigureMeteoriteSpawn(Meteorite& meteorite)
     meteorite.SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
 
     bool goingLeft = _randomManager.GetNextIntValue() % 2;
-    float velocity = _randomManager.GetValue(MIN_VELOCITY_METEORITE, MAX_VELOCITY_METEORITE);
-    float height =  _randomManager.GetValue(MIN_HEIGHT_METEORITE, MAX_HEIGHT_METEORITE);
+    float velocity = _randomManager.GetValue(MIN_VELOCITY_METEORITE, MAX_VELOCITY_METEORITE, 100.0f);
+    float height =  _randomManager.GetValue(MIN_HEIGHT_METEORITE, MAX_HEIGHT_METEORITE, 100.0f);
 
     if(goingLeft)
     {

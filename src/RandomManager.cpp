@@ -7,7 +7,7 @@ RandomManager::RandomManager()
     srand (time(NULL));
 }
 
-float RandomManager::GetValue(float min, float max, float precision = 1000.0f)
+float RandomManager::GetValue(float min, float max, float precision )
 {
     int newMin = static_cast<int>(min * precision);
     int newMax = static_cast<int>(max *precision);
@@ -16,6 +16,10 @@ float RandomManager::GetValue(float min, float max, float precision = 1000.0f)
 
 int RandomManager::GetValue(int min, int max)
 {
+    if(min == max){return min;}
+    if(min > max){return GetValue(max, min);}
+    
+    max = max+1;
     return min + rand() % (max - min);
 }
 

@@ -78,16 +78,6 @@ private:
             return true;
         }
 
-		if (posY < 0 )
-		{
-			return true;
-		}
-
-		if(posY > SCREEN_HEIGHT)
-		{
-			return true;
-		}
-
 		return false;
 	}
 
