@@ -21,12 +21,15 @@ class BattleState: public State
 {
     public:
         
-        BattleState(Plane *player, PainterManager *painter, Pool<Plane, PLANES_POOL_SIZE> *enemiesPool,
-                         Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool, 
-                         std::function<void()> damagePlayerCallback, 
-                         std::function<void(float x, float y)> damageEnemy,
-                         long long* score, float* time, 
-                         NumberManager* numberManager, AlphaManager* alphaManager, EasingManager* easingManager, RandomManager* randomManager);
+        BattleState(Plane *player, PainterManager *painter, 
+        NumberManager* numberManager, AlphaManager* alphaManager,
+        EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager,
+        Pool<Plane, PLANES_POOL_SIZE> *enemiesPool,
+        Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool, 
+        std::function<void()> damagePlayerCallback, 
+        std::function<void(float x, float y)> damageEnemy,
+        long long* score, float* time
+        );
         
     public:    
         STATES Update(const float deltaTime, float currentFrameInputValueNormalized,
@@ -82,12 +85,8 @@ class BattleState: public State
         std::function<void(float x, float y)> _damageEnemyCallback;
         long long* _score;
         float* _timeLeft;
-        NumberManager* _numberManager;
-        AlphaManager* _alphaManager;
         int _enemiesAlive;
         Pool<Explosion, TOTAL_EXPLOSIONS> _explosionPool;
-        EasingManager* _easingManager;
-        RandomManager* _randomManager;
         Spawner<Meteorite, TOTAL_METEORITES> _spawnerMeteorites;
         int _currentLevel;
 };

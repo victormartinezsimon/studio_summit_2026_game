@@ -9,7 +9,10 @@ class Plane;
 class InitialMovementState: public State
 {
     public:
-        InitialMovementState(Plane* player, PainterManager* painter, EasingManager* easingManager, Pool<Plane, PLANES_POOL_SIZE>* enemiesPool);
+        InitialMovementState(Plane *player, PainterManager *painter, 
+        NumberManager* numberManager, AlphaManager* alphaManager,
+        EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager,
+         Pool<Plane, PLANES_POOL_SIZE>* enemiesPool);
         
     public:    
         STATES Update(const float deltaTime, float _currentFrameInputValueNormalized,
@@ -20,6 +23,5 @@ class InitialMovementState: public State
 
     private:
         STATES _nextState;
-        EasingManager* _easingManager;
         Pool<Plane, PLANES_POOL_SIZE>* _enemiesPool;
 };

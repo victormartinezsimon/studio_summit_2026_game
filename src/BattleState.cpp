@@ -8,17 +8,20 @@
 #include "EasingManager.h"
 #include "RandomManager.h"
 
-BattleState::BattleState(Plane *player, PainterManager *painter, Pool<Plane, PLANES_POOL_SIZE> *enemiesPool,
-                         Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool, 
-                         std::function<void()> damagePlayerCallback, 
-                         std::function<void(float x, float y)> damageEnemy,
-                         long long* score, float* time, 
-                         NumberManager* numberManager, AlphaManager* alphaManager, EasingManager* easingManager, RandomManager* randomManager) 
-                         : State(player, painter), _enemiesPool(enemiesPool), _bulletsPool(bulletsPool),
+BattleState::BattleState(
+        Plane *player, PainterManager *painter, 
+        NumberManager* numberManager, AlphaManager* alphaManager,
+        EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager,
+        Pool<Plane, PLANES_POOL_SIZE> *enemiesPool,
+        Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool, 
+        std::function<void()> damagePlayerCallback, 
+        std::function<void(float x, float y)> damageEnemy,
+        long long* score, float* time
+) 
+                         : State(player, painter, numberManager, alphaManager, 
+			easingManager, randomManager, buttonAManager), _enemiesPool(enemiesPool), _bulletsPool(bulletsPool),
                          _damagePlayerCallback(damagePlayerCallback), _damageEnemyCallback(damageEnemy),
-                         _score(score), _timeLeft(time), _numberManager(numberManager),_alphaManager(alphaManager),
-                         _spawnerMeteorites(TIME_SPAWN_METEORITE, painter), _easingManager(easingManager),
-                         _randomManager(randomManager)
+                         _score(score), _timeLeft(time), _spawnerMeteorites(TIME_SPAWN_METEORITE, painter)
 {
     _spawnerMeteorites.SetCallbackConfiguration([this](Meteorite& m){ConfigureMeteoriteSpawn(m);});
 }

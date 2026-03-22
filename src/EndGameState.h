@@ -8,8 +8,9 @@ class AlphaManager;
 class EndGameState: public State
 {
     public:
-        EndGameState(Plane* player, PainterManager* painter, ButtonA* buttonAManager, 
-            NumberManager* numberManager, AlphaManager* alphaManager);
+        EndGameState(Plane *player, PainterManager *painter, 
+        NumberManager* numberManager, AlphaManager* alphaManager,
+        EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager);
         
     public:    
         STATES Update(const float deltaTime, float _currentFrameInputValueNormalized,
@@ -23,8 +24,5 @@ class EndGameState: public State
 
     private:
         STATES _nextState;
-        ButtonA *_buttonAManager;
-        NumberManager* _numberManager;
-        AlphaManager* _alphaManager;
         float _score;
 };

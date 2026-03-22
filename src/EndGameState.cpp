@@ -13,9 +13,11 @@ constexpr int SELECTOR_Y = 205;
 constexpr int SCORE_Y = 150;
 constexpr int SELECTOR_X = SCREEN_WIDTH/2;
 
-EndGameState::EndGameState(Plane *player, PainterManager *painter, ButtonA *buttonAManager,
-							 NumberManager *numberManager, AlphaManager *alphaManager) : State(player, painter), 
-							 _buttonAManager(buttonAManager), _numberManager(numberManager), _alphaManager(alphaManager)
+EndGameState::EndGameState(Plane *player, PainterManager *painter, 
+        NumberManager* numberManager, AlphaManager* alphaManager,
+        EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager) : 
+		State(player, painter, numberManager, alphaManager, 
+			easingManager, randomManager, buttonAManager)
 {
 }
 

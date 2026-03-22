@@ -32,19 +32,24 @@ GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 
 void GameManager::InitializeStates()
 {
-	_statesLogic[State::STATES::MENU] = new MainMenuState(&_player, _painterManager, &_buttonAManager, &_numberManager, &_alphaManager);
+	_statesLogic[State::STATES::MENU] = new MainMenuState(&_player, _painterManager, &_numberManager, &_alphaManager, 
+		&_easingManager, &_randomManager, &_buttonAManager);
 	
-	_statesLogic[State::STATES::INITIAL_MOVEMENT] = new InitialMovementState(&_player, _painterManager, &_easingManager, &_enemiesPool);
+	_statesLogic[State::STATES::INITIAL_MOVEMENT] = new InitialMovementState(&_player, _painterManager, &_numberManager, &_alphaManager, 
+		&_easingManager, &_randomManager, &_buttonAManager, &_enemiesPool);
 	
-	_statesLogic[State::STATES::IMPROVEMENT_SELECTOR] = new ImprovementSelectionState(&_player, _painterManager, &_buttonAManager,
-	[this](const std::string& player, const std::string& enemy){ApplyImprovements(player, enemy);}, &_numberManager, &_alphaManager);
+	_statesLogic[State::STATES::IMPROVEMENT_SELECTOR] = new ImprovementSelectionState(&_player, _painterManager, &_numberManager, &_alphaManager, 
+		&_easingManager, &_randomManager, &_buttonAManager,
+	[this](const std::string& player, const std::string& enemy){ApplyImprovements(player, enemy);});
 	
-	_statesLogic[State::STATES::BATTLE] = new BattleState(&_player, _painterManager, &_enemiesPool, &_bulletsPool,
+	_statesLogic[State::STATES::BATTLE] = new BattleState(&_player, _painterManager, &_numberManager, &_alphaManager, 
+		&_easingManager, &_randomManager, &_buttonAManager,&_enemiesPool, &_bulletsPool,
 		[this](){DamagePlayer();}, 
 		[this](float x, float y){DamageEnemy(x, y);}, 
-		&_currentScore, &_currentTimePlaying, &_numberManager, &_alphaManager, &_easingManager, &_randomManager);
+		&_currentScore, &_currentTimePlaying);
 	
-	_statesLogic[State::STATES::END_GAME] = new EndGameState(&_player, _painterManager, &_buttonAManager, &_numberManager, &_alphaManager);
+	_statesLogic[State::STATES::END_GAME] = new EndGameState(&_player, _painterManager, &_numberManager, &_alphaManager, 
+		&_easingManager, &_randomManager, &_buttonAManager);
 }
 
 void GameManager::InitializeConstantValues()

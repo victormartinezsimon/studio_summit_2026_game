@@ -6,8 +6,12 @@
 #include "EasingManager.h"
 
 
-InitialMovementState::InitialMovementState(Plane* player, PainterManager* painter, EasingManager* easingManager, Pool<Plane, PLANES_POOL_SIZE>* enemiesPool) : 
-State(player, painter), _easingManager(easingManager), _enemiesPool(enemiesPool)
+InitialMovementState::InitialMovementState(Plane *player, PainterManager *painter, 
+        NumberManager* numberManager, AlphaManager* alphaManager,
+        EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager,
+		 Pool<Plane, PLANES_POOL_SIZE>* enemiesPool) : 
+State(player, painter, numberManager, alphaManager, 
+			easingManager, randomManager, buttonAManager), _enemiesPool(enemiesPool)
 {
 }
 

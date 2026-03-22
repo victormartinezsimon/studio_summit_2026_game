@@ -14,8 +14,11 @@ constexpr float START_GAME_SELECTOR_X = 0.2 * SCREEN_WIDTH;
 constexpr float START_GAME_X = START_GAME_SELECTOR_X;
 constexpr float EXIT_GAME_X = 0.8 * SCREEN_WIDTH;
 
-MainMenuState::MainMenuState(Plane *player, PainterManager *painter, ButtonA *buttonAManager,
-							 NumberManager *numberManager, AlphaManager *alphaManager) : State(player, painter), _buttonAManager(buttonAManager), _numberManager(numberManager), _alphaManager(alphaManager), _startingGame(false)
+MainMenuState::MainMenuState(Plane *player, PainterManager *painter, 
+        NumberManager* numberManager, AlphaManager* alphaManager,
+        EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager) 
+		: State(player, painter, numberManager, alphaManager, 
+			easingManager, randomManager, buttonAManager), _startingGame(false)
 {
 }
 
