@@ -20,11 +20,6 @@
 #define VIDEO_MODE EVM_320_240
 #define VIDEO_COLOR ECM_8bit_Indexed
 
-#define SPRITE_W 32
-#define SPRITE_H 32
-#define SPRITE_COUNT 4
-#define TRANSPARENT_KEY 0
-
 struct Sprite
 {
 	int x;

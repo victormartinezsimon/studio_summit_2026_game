@@ -162,11 +162,11 @@ void BattleState::UpdateBullets(float deltaTime)
 }
 void BattleState::UpdateEnemies(float deltaTime)
 {
-    /*
+    
     _enemiesPool->for_each_active([deltaTime](Plane &enemy)
                                   { enemy.Update(deltaTime); });
 
-    */
+    
     //check collision
     _enemiesPool->for_each_active([&](Plane &enemy)
     { 
@@ -392,7 +392,7 @@ void BattleState::ConfigureExplosion(const int id, Explosion& exp ,const Bullet&
 
 void BattleState::ConfigureMeteoriteSpawn(Meteorite& meteorite)
 {
-    meteorite.SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
+    meteorite.SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
 
     bool goingLeft = _generator()% 2;   
 
@@ -405,15 +405,15 @@ void BattleState::ConfigureMeteoriteSpawn(Meteorite& meteorite)
 
     if(goingLeft)
     {
-        meteorite.SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
-        meteorite.SetPosition(SCREEN_WIDTH + METERORITE_WIDTH, SCREEN_HEIGHT*height);
+        meteorite.SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
+        meteorite.SetPosition(SCREEN_WIDTH + METEORITE_WIDTH, SCREEN_HEIGHT*height);
         meteorite.SetVelocities(-DEFAULT_BULLET_VEL_Y * velocity, 0);
         meteorite.SetMoveLeft(true);
     }
     else
     {
-        meteorite.SetSize(METERORITE_WIDTH, METERORITE_HEIGHT);
-        meteorite.SetPosition(-static_cast<int>(METERORITE_WIDTH), SCREEN_HEIGHT*height);
+        meteorite.SetSize(METEORITE_WIDTH, METEORITE_HEIGHT);
+        meteorite.SetPosition(-static_cast<int>(METEORITE_WIDTH), SCREEN_HEIGHT*height);
         meteorite.SetVelocities(DEFAULT_BULLET_VEL_Y * velocity,0);
         meteorite.SetMoveLeft(false);
     }

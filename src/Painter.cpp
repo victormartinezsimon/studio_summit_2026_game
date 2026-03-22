@@ -99,7 +99,7 @@ void Painter::init_palette(struct EVideoContext *vctx)
 	VPUSetPal(vctx,1,246,9,20);
 	VPUSetPal(vctx,2,236,22,30);
 	VPUSetPal(vctx,3,218,65,17);
-	VPUSetPal(vctx,4,0,255,0);
+	//VPUSetPal(vctx,4,0,255,0);
 	VPUSetPal(vctx,5,254,198,25);
 	VPUSetPal(vctx,6,27,45,212);
 	VPUSetPal(vctx,7,13,62,230);
