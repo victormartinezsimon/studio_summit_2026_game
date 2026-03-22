@@ -380,8 +380,15 @@ void GameManager::DamageEnemy(float x, float y)
 void GameManager::ConfigureStar(Star& star)
 {
     float velocity = _randomManager.GetValue(MIN_VELOCITY_STAR, MAX_VELOCITY_STAR);
-    float height = _randomManager.GetValue(MIN_HEIGHT_STAR, MAX_HEIGHT_STAR);
+    float y = _randomManager.GetValue(MIN_HEIGHT_STAR, MAX_HEIGHT_STAR) * SCREEN_HEIGHT;
 	int typeValue = _randomManager.GetValue(0,9);
+	float x =-static_cast<int>(MID_STAR_WIDTH);
+
+	if( y < 0)
+	{
+		x = _randomManager.GetValue(0, SCREEN_WIDTH);
+		y = 0;
+	}
 
 	int type = 0;//0 1 2 3 4
 	if(typeValue >= 5 && typeValue < 8)
@@ -397,19 +404,19 @@ void GameManager::ConfigureStar(Star& star)
 	{
 	case 0:
 		star.SetSize(NEAR_STAR_WIDTH, NEAR_STAR_HEIGHT);
-		star.SetPosition(-static_cast<int>(NEAR_STAR_WIDTH), SCREEN_HEIGHT*height);
+		star.SetPosition(x, y);
 		star.SetTypeStar(Star::Type::NEAR);
 		velocity *= VELOCITY_STAR_NEAR;
 		break;
 	case 1:
 		star.SetSize(MID_STAR_WIDTH, MID_STAR_HEIGHT);
-		star.SetPosition(-static_cast<int>(MID_STAR_WIDTH), SCREEN_HEIGHT*height);
+		star.SetPosition(x, y);
 		star.SetTypeStar(Star::Type::MID);
 		velocity *= VELOCITY_STAR_MID;
 		break;
 	case 2:
 		star.SetSize(FAR_STAR_WIDTH, FAR_STAR_HEIGHT);
-		star.SetPosition(-static_cast<int>(FAR_STAR_WIDTH), SCREEN_HEIGHT*height);
+		star.SetPosition(x, y);
 		star.SetTypeStar(Star::Type::FAR);
 		velocity *= VELOCITY_STAR_FAR;
 		break;

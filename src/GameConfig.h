@@ -82,8 +82,8 @@ constexpr float TIME_SPAWN_STAR = 0.1;
 constexpr float VELOCITY_STAR_FAR = 0.2;
 constexpr float VELOCITY_STAR_MID = 0.5;
 constexpr float VELOCITY_STAR_NEAR = 1.2;
-constexpr float MIN_HEIGHT_STAR = -3.5;
-constexpr float MAX_HEIGHT_STAR = 0.8;
+constexpr float MIN_HEIGHT_STAR = -0.5;
+constexpr float MAX_HEIGHT_STAR = 0.5;
 constexpr float MIN_VELOCITY_STAR = 80;
 constexpr float MAX_VELOCITY_STAR = 150;
 

@@ -8,12 +8,8 @@ class RandomManager
 {
     public:
         RandomManager();
-        float GetValue(float min, float max);
+        float GetValue(float min, float max, float precision);
         int GetValue(int min, int max);
         int GetNextIntValue();
         float GetNextFloatValue();
-        std::default_random_engine& GetGenerator();
-
-    private:
-    std::default_random_engine _generator;
 };

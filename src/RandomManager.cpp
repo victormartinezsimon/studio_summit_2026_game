@@ -1,29 +1,30 @@
 #include "RandomManager.h"
-RandomManager::RandomManager():_generator(std::random_device{}()){}
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
 
-float RandomManager::GetValue(float min, float max)
+RandomManager::RandomManager()
 {
-    std::uniform_real_distribution<float> distribution(min, max);
-    return distribution(_generator);
+    srand (time(NULL));
+}
+
+float RandomManager::GetValue(float min, float max, float precision = 1000.0f)
+{
+    int newMin = static_cast<int>(min * precision);
+    int newMax = static_cast<int>(max *precision);
+    return GetValue(newMin, newMax) / precision;
 }
 
 int RandomManager::GetValue(int min, int max)
 {
-    std::uniform_int_distribution<int> distribution(min, max);
-    return distribution(_generator);
+    return min + rand() % (max - min);
 }
 
 int RandomManager::GetNextIntValue()
 {
-    return static_cast<int>(_generator());
+    return rand();
 }
 
 float RandomManager::GetNextFloatValue()
 {
-    return static_cast<float>(_generator());
-}
-
-std::default_random_engine& RandomManager::GetGenerator()
-{
-    return _generator;
+    return static_cast<float>(rand());
 }
