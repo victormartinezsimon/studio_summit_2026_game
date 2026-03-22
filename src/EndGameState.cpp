@@ -11,7 +11,7 @@ constexpr int FINAL_SCORE_Y = FINAL_SCORE_HEIGHT/2 + 10;
 constexpr int RETURN_Y = 153;
 constexpr int SELECTOR_Y = 205;
 constexpr int SCORE_Y = 150;
-constexpr int SELECTOR_X = RETURN_WIDTH/2;
+constexpr int SELECTOR_X = SCREEN_WIDTH/2;
 
 EndGameState::EndGameState(Plane *player, PainterManager *painter, ButtonA *buttonAManager,
 							 NumberManager *numberManager, AlphaManager *alphaManager) : State(player, painter), 
@@ -58,7 +58,7 @@ void EndGameState::Paint()
 
 	{
 		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::RETURN_MENU,
-									  RETURN_WIDTH/2, RETURN_Y);
+									  SELECTOR_X, RETURN_Y);
 	}
 
 	
