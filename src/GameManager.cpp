@@ -16,7 +16,7 @@ GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	: _inputManager(input),
 	  _painterManager(painterManager), _currentLevel(0), 
 	  _currentStateLogic(State::STATES::MENU),_currentScore(0), _numberManager(_painterManager),
-	  _alphaManager(_painterManager, &_easingManager), _spawnerStars(TIME_SPAWN_STAR, painterManager),
+	  _alphaManager(_painterManager), _spawnerStars(TIME_SPAWN_STAR, painterManager),
 	  _spawnerMeteorites(TIME_SPAWN_METEORITE, painterManager)
 {
 	InitializeImprovementsFunctions();
@@ -144,9 +144,9 @@ bool GameManager::Update(const float deltaTime)
 		_currentTimePlaying += deltaTime;
 	}
 
+	_easingManager.Update(deltaTime);
 	_alphaManager.Update(deltaTime);
 	_spawnerStars.Update(deltaTime);
-	_easingManager.Update(deltaTime);
 	_spawnerMeteorites.Update(deltaTime);
 	
 	MovePlayer();
@@ -391,6 +391,8 @@ void GameManager::DamagePlayer()
 void GameManager::DamageEnemy(float x, float y)
 {
 	_currentScore += SCORE_PER_KILL;
+
+	//add alpha and easing
 }
 
 void GameManager::ConfigureStar(Star& star)

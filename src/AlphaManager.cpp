@@ -1,7 +1,7 @@
 #include "AlphaManager.h"
 
-AlphaManager::AlphaManager(PainterManager *painterManager, EasingManager* easingManager) 
-: _painterManager(painterManager),_easingManager(easingManager){}
+AlphaManager::AlphaManager(PainterManager *painterManager) 
+: _painterManager(painterManager){}
 
 void AlphaManager::Update(const float deltaTime)
 {
@@ -12,7 +12,6 @@ void AlphaManager::Update(const float deltaTime)
         if(finished)
         {
             int easeID = alpha.GetEaseID();
-            _easingManager->KillEase(easeID);
             _alphaPool.Release(alpha);
         }
     });
@@ -20,7 +19,7 @@ void AlphaManager::Update(const float deltaTime)
 }
 
 int AlphaManager::AddInternalAlpha(float duration, bool isUI, float startX, float startY,
-                            float endX, float endY, float width, float height, PainterManager::SPRITE_ID sprite)
+                            float width, float height, PainterManager::SPRITE_ID sprite)
 {
 
     int poolID = _alphaPool.Get();
@@ -33,40 +32,16 @@ int AlphaManager::AddInternalAlpha(float duration, bool isUI, float startX, floa
         });
     }
 
-
-    if(poolID != -1)
-    {
-        if(startX != endX || startY != endY)
-        {
-            int easeID = _easingManager->AddEase(duration, startX, startY, endX, endY, Ease::EASE_TYPES::INOUTCIRC,
-                        [&](bool normalEnded){_alphaPool.call_for_element(poolID, [&](Alpha& a){a.SetPosition(endX, endY);});},
-                        [&](const float x, const float y){_alphaPool.call_for_element(poolID, [&](Alpha& a){a.SetPosition(x, y);});}
-                        );
-            if(easeID != -1)
-            {
-                _alphaPool.call_for_element(poolID, [&](Alpha& alpha){alpha.SetEaseID(easeID);});
-            }
-        }
-    }
-
     return poolID;
 }
 
 int AlphaManager::AddUIAlpha(float duration, float x, float y, PainterManager::SPRITE_ID sprite)
 {
-    return AddInternalAlpha(duration, true, x, y, x, y, -1, -1, sprite );
+    return AddInternalAlpha(duration, true, x, y,  -1, -1, sprite );
 }
 int AlphaManager::AddAlpha(float duration, float x, float y, float width, float height, PainterManager::SPRITE_ID sprite)
 {
-    return AddInternalAlpha(duration, false, x, y, x, y, width, height, sprite );
-}
-int AlphaManager::AddUIAlpha(float duration, float x, float y, float endX, float endY, PainterManager::SPRITE_ID sprite)
-{
-    return AddInternalAlpha(duration, true, x, y, endX, endY, -1, -1, sprite );
-}
-int AlphaManager::AddAlpha(float duration, float x, float y,  float endX, float endY, float width, float height, PainterManager::SPRITE_ID sprite)
-{
-    return AddInternalAlpha(duration, false, x, y, endX, endY, width, height, sprite );
+    return AddInternalAlpha(duration, false, x, y,  width, height, sprite );
 }
 
 void AlphaManager::FinishAll()
