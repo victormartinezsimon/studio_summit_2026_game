@@ -7,10 +7,10 @@
 #include "NumberManager.h"
 #include "AlphaManager.h"
 
-constexpr int FINAL_SCORE_Y = FINAL_SCORE_HEIGHT/2 + 10;
+constexpr int FINAL_SCORE_Y = FINAL_SCORE_HEIGHT/2 - 16;
 constexpr int RETURN_Y = 153;
 constexpr int SELECTOR_Y = 205;
-constexpr int SCORE_Y = 150;
+constexpr int SCORE_Y = 120;
 constexpr int SELECTOR_X = SCREEN_WIDTH/2;
 
 EndGameState::EndGameState(Plane *player, PainterManager *painter, 
