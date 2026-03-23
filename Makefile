@@ -36,11 +36,13 @@ endif
 
 ifdef DEBUG
 	OPT_FLAGS := -O0 -g
+	PROFILING_FLAG := -DPROFILING_ENABLED
 else
 	OPT_FLAGS := -Ofast -flto
+	PROFILING_FLAG :=
 endif
 
-ARM_GCC_OPTS += -std=c++20 $(OPT_FLAGS) -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard
+ARM_GCC_OPTS += -std=c++20 $(OPT_FLAGS) $(PROFILING_FLAG) -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard
 ARM_CC_OPTS  += $(OPT_FLAGS) -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard
 ARM_GCC_LIBS += -lgcc -lc -lm
 
