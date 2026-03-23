@@ -107,6 +107,7 @@ void GameManager::InitializeRandomImprovements()
 	}
 	std::mt19937 generator(std::random_device{}());
     std::shuffle(_randomImprovements.begin(), _randomImprovements.end(), generator);
+	_randomImprovements[0] = std::string(IMPROVEMENT_GIVE_SHIELD);
 }
 
 void GameManager::InitializeStatesBegin()
@@ -171,14 +172,16 @@ bool GameManager::Update(const float deltaTime)
 
 		if(nextState == State::STATES::IMPROVEMENT_SELECTOR)
 		{
-			if(_totalImprovementSelected >= TOTAL_IMPROVEMENTS_TO_SELECT || _totalImprovementSelected > LEVELS_WITH_IMPROVEMENT_SELECTION.size())
+			if(_totalImprovementSelected >= LEVELS_WITH_IMPROVEMENT_SELECTION.size() || _totalImprovementSelected >= TOTAL_IMPROVEMENTS_TO_SELECT)
 			{
 				nextState = State::STATES::INITIAL_MOVEMENT;
 			}
-
-			if(LEVELS_WITH_IMPROVEMENT_SELECTION[_totalImprovementSelected] != _currentLevel)
+			else
 			{
-				nextState = State::STATES::INITIAL_MOVEMENT;
+				if(LEVELS_WITH_IMPROVEMENT_SELECTION[_totalImprovementSelected] != _currentLevel)
+				{
+					nextState = State::STATES::INITIAL_MOVEMENT;
+				}
 			}
 		}
 
