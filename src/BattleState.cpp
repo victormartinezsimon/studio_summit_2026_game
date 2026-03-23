@@ -114,11 +114,14 @@ void BattleState::Paint()
 
 void BattleState::OnEnter()
 {
+    _easingManager->KillAll();
+	_alphaManager->FinishAll();
+    _explosionPool.ReturnAll();
+
     _player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
     _player->SetPositionY( POSITION_Y_PLAYER);
 
     _enemiesAlive = _enemiesPool->TotalInUse();
-    _explosionPool.ReturnAll();
 
     if(_currentLevel >= MIN_LEVEL_WITH_MOVEMENT)
     {

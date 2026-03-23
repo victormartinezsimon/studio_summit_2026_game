@@ -82,6 +82,8 @@ void ImprovementSelectionState::Paint()
 }
 void ImprovementSelectionState::OnEnter()
 {
+	_easingManager->KillAll();
+
 	auto halfZoneA = SCREEN_WIDTH * OPTION_LEFT_X;
 	std::pair<float, float> zoneA = {halfZoneA - PLAYER_SELECTOR_WIDTH / 2, halfZoneA + PLAYER_SELECTOR_WIDTH / 2};
 
