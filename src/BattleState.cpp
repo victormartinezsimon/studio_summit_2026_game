@@ -169,8 +169,7 @@ void BattleState::UpdateEnemies(float deltaTime)
         if(someCollision)
         {
             ReturnEnemy(enemy);
-        }
-        
+        }   
     });
 
 }
@@ -245,7 +244,7 @@ void BattleState::ManageBulletCollisions(Bullet &bullet)
     {
         plane.SetHasShield(false);
         TryDestroyBullet(bullet, false);
-        return true;
+        return false;//TODO: Review this, as we are setting as the bullet did not collide, bu we destoy it
     }
 
     if( hasCollision )
