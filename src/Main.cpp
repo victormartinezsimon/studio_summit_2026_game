@@ -9,6 +9,8 @@
 #include "InputManager.h"
 #include "GameManager.h"
 #include "PainterManager.h"
+#include "SoundManager.h"
+#include "Painter.h"
 
 int main(int argc, char **argv)
 {
@@ -19,11 +21,17 @@ int main(int argc, char **argv)
 	PainterManager* painterManager = new PainterManager();
 	GameManager *gm = new GameManager(inputManager, painterManager);
 
+	struct SPPlatform* platform = painterManager->GetPainter()->GetPlatform();
+
+	SoundManager* soundManager = new SoundManager(platform);
+
 	float deltaTime = 0;
 
 	auto lastTime = std::chrono::high_resolution_clock::now();
 
 	bool ended = false;
+
+	soundManager->start();
 
 	while (!ended)
 	{
@@ -35,8 +43,10 @@ int main(int argc, char **argv)
 		gm->Paint();
 		painterManager->Paint();
 	}
+	soundManager->stop();
 
 	delete inputManager;
 	delete painterManager;
 	delete gm;
+	delete soundManager;
 }

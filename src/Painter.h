@@ -28,7 +28,7 @@ struct Sprite
 	int vy;
 };
 
-static struct SPPlatform *s_platform = NULL;
+static struct SPPlatform *s_platform;
 static struct SPSizeAlloc frameBufferA;
 static struct SPSizeAlloc frameBufferB;
 
@@ -46,6 +46,9 @@ public:
 	void PaintBackground();
 	void PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y);
 	void PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y, int maskType);
+
+public:
+ struct SPPlatform* GetPlatform(){return s_platform;}
 
 private:
 	void init_palette(struct EVideoContext *vctx);

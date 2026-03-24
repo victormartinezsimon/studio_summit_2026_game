@@ -1,5 +1,5 @@
 #include "SoundManager.h"
-#include "space_chours.h"
+#include "space_chorus.h"
 
 SoundManager::SoundManager(struct SPPlatform* platform)
 	: m_platform(platform)
@@ -47,7 +47,7 @@ void SoundManager::playThread()
 {
 	m_ctx = xmp_create_context();
 
-	if (xmp_load_module_from_memory(m_ctx, space_chours_data, space_chours_size) < 0)
+	if (xmp_load_module_from_memory(m_ctx, space_chorus_mod, space_chorus_mod_len) < 0)
 	{
 		printf("Error: cannot load embedded module\n");
 		xmp_free_context(m_ctx);

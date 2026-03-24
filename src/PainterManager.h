@@ -37,6 +37,8 @@ public:
 public:
 	void Paint() const;
 
+	Painter* GetPainter(){return _painter;}
+
 public:
 	void ClearListPaint();
 	void AddToPaint(SPRITE_ID id, unsigned int width, unsigned int height, int x, int y);
