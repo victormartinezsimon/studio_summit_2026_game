@@ -392,22 +392,28 @@ void GameManager::DamageEnemy(float x, float y)
 {
 	_currentScore += SCORE_PER_KILL;
 
-	/*
-	//add alpha and easing
-	float duration = 0.5f;
-	int alphaID = _alphaManager.AddAlpha(duration, SCREEN_WIDTH/2, SCREEN_HEIGHT/2, NUMBER_0_WIDTH, NUMBER_0_HEIGHT, PainterManager::SPRITE_ID::NUMBER_0);
-
-	int easeID = _easingManager.AddEase(duration, SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 0,0, Ease::EASE_TYPES::INOUTCIRC, 
-		[](bool forced){},
-		[&](float x, float y, Ease& ease)
-		{
-			int idAlpha = ease.GetReferenceID();
-			_alphaManager.CallFunctionInPool(idAlpha, [&](Alpha& alpha){alpha.SetPosition(x, y);});
-		}
-	);
 	
-	_easingManager.SetReferenceIDToEase(easeID, alphaID);
-	*/
+	float currentX = SCORE_POSITION_X - NUMBER_0_WIDTH;
+	float currentY = NUMBER_POSITION_Y - NUMBER_0_HEIGHT/2;
+
+	for(auto spriteID : {PainterManager::SPRITE_ID::NUMBER_0, PainterManager::SPRITE_ID::NUMBER_5})
+	{
+		int alphaID = _alphaManager.AddAlpha(DURATION_EASING_SCORE, 
+			currentX, currentY, NUMBER_0_WIDTH, NUMBER_0_HEIGHT, 
+			spriteID);
+
+		int easeID = _easingManager.AddEase(DURATION_EASING_SCORE, currentX, currentY, 
+			currentX, currentY - NUMBER_0_HEIGHT, Ease::EASE_TYPES::INOUTCIRC, 
+			[](bool forced){},
+			[&](float x, float y, Ease& ease)
+			{
+				int idAlpha = ease.GetReferenceID();
+				_alphaManager.CallFunctionInPool(idAlpha, [&](Alpha& alpha){alpha.SetPosition(x, y);});
+			}
+		);
+		_easingManager.SetReferenceIDToEase(easeID, alphaID);
+		currentX -= NUMBER_0_WIDTH;
+	}
 }
 
 void GameManager::ConfigureStar(Star& star)

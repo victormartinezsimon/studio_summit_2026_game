@@ -101,12 +101,12 @@ void BattleState::Paint()
 
     {
         long long value = *_score;
-        _numberManager->PaintNumber(value, SCREEN_WIDTH, SCREEN_HEIGHT - NUMBER_0_HEIGHT, 3, NumberManager::PIVOT::RIGHT);
+        _numberManager->PaintNumber(value, SCORE_POSITION_X, NUMBER_POSITION_Y, 3, NumberManager::PIVOT::RIGHT);
     }
 
     {
-        float value = *_timeLeft;
-        _numberManager->PaintNumber(MAX_SECS_PLAYING - value,0, SCREEN_HEIGHT - NUMBER_0_HEIGHT, 3, NumberManager::PIVOT::LEFT);
+        float value = MAX_SECS_PLAYING - (*_timeLeft);
+        _numberManager->PaintNumber(value, TIME_POSITION_X, NUMBER_POSITION_Y, 3, NumberManager::PIVOT::LEFT);
     }
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include <string_view>
 #include <array>
+#include "Sprites.h"
 
 constexpr int MAX_SECS_PLAYING = 120;
 
@@ -100,3 +101,9 @@ constexpr float MIN_DURATION_MOVEMENT_ENEMY = 2;
 constexpr float MAX_DURATION_MOVEMENT_ENEMY = 5;
 
 constexpr int MIN_LEVEL_WITH_MOVEMENT = 2;
+
+constexpr int NUMBER_POSITION_Y = SCREEN_HEIGHT - NUMBER_0_HEIGHT;
+constexpr int SCORE_POSITION_X = SCREEN_WIDTH;
+constexpr int TIME_POSITION_X = 0;
+
+constexpr float DURATION_EASING_SCORE = 0.5f;
