@@ -223,7 +223,9 @@ bool GameManager::Update(const float deltaTime)
 		_currentStateLogic = nextState;
 	}
 	PROFILE_END(7);
-	
+
+
+	PROFILE_END_FRAME();
 	return false;
 }
 
