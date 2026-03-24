@@ -11,6 +11,7 @@
 #include "EndGameState.h"
 #include "BattleState.h"
 #include "Star.h"
+#include "Profiler.h"
 
 GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	: _inputManager(input),
@@ -135,23 +136,42 @@ void GameManager::InitializeStatesBegin()
 
 bool GameManager::Update(const float deltaTime)
 {
+	PROFILE_BEGIN_FRAME();
+
+	PROFILE_BEGIN(0, "INPUT");
 	_lastDeltaTime = deltaTime;
 	_currentFrameInputValue = _inputManager->GetInputValue();
 	_currentFrameInputValueNormalized = _inputManager->NormalizeValue(_currentFrameInputValue);
+	PROFILE_END(0);
 
 	if(_currentStateLogic == State::STATES::BATTLE)
 	{
 		_currentTimePlaying += deltaTime;
 	}
 
+	PROFILE_BEGIN(1, "update easing");
 	_easingManager.Update(deltaTime);
+	PROFILE_END(1);
+
+	PROFILE_BEGIN(2, "update alphamanager");
 	_alphaManager.Update(deltaTime);
+	PROFILE_END(2);
+
+	PROFILE_BEGIN(3, "update spawner starts");
 	_spawnerStars.Update(deltaTime);
+	PROFILE_END(3);
+
+	PROFILE_BEGIN(4, "update spawner meteorites");
 	_spawnerMeteorites.Update(deltaTime);
-	
+	PROFILE_END(4);
+
+	PROFILE_BEGIN(5, "move player");
 	MovePlayer();
-	
+	PROFILE_END(5);
+
+	PROFILE_BEGIN(6, "update state");
 	auto nextState = _statesLogic[_currentStateLogic]->Update(deltaTime, _currentFrameInputValueNormalized, _currentFrameInputValue);
+	PROFILE_END(6);
 
 	if(nextState == State::STATES::EXIT)
 	{
@@ -165,6 +185,7 @@ bool GameManager::Update(const float deltaTime)
 	}
 
 	_oldStateLogic = _currentStateLogic;
+	PROFILE_BEGIN(7, "TRY CHANGE STATE");
 	if(nextState != _currentStateLogic)
 	{
 		_statesLogic[_currentStateLogic]->OnExit();
@@ -201,6 +222,8 @@ bool GameManager::Update(const float deltaTime)
 		_statesLogic[nextState]->OnEnter();
 		_currentStateLogic = nextState;
 	}
+	PROFILE_END(7);
+	
 	return false;
 }
 
