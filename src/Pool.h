@@ -78,6 +78,10 @@ public:
 	void call_for_element(int id, std::function<void(T&)> func) 
 	{
 		if(id == -1){return;}
+		if(id > _poolElements.size())
+		{
+			return;
+		}
 		func(_poolElements[id]);
 	}	
 

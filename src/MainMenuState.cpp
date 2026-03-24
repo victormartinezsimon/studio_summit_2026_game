@@ -10,11 +10,15 @@
 constexpr int TITLE_Y = 70;
 constexpr int START_Y = 153;
 constexpr int SELECTOR_Y = 205;
-constexpr float START_GAME_X = 0.2 * SCREEN_WIDTH;
+constexpr float START_GAME_SELECTOR_X = 0.2 * SCREEN_WIDTH;
+constexpr float START_GAME_X = START_GAME_SELECTOR_X;
 constexpr float EXIT_GAME_X = 0.8 * SCREEN_WIDTH;
 
-MainMenuState::MainMenuState(Plane *player, PainterManager *painter, ButtonA *buttonAManager,
-							 NumberManager *numberManager, AlphaManager *alphaManager) : State(player, painter), _buttonAManager(buttonAManager), _numberManager(numberManager), _alphaManager(alphaManager), _startingGame(false)
+MainMenuState::MainMenuState(Plane *player, PainterManager *painter, 
+        NumberManager* numberManager, AlphaManager* alphaManager,
+        EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager) 
+		: State(player, painter, numberManager, alphaManager, 
+			easingManager, randomManager, buttonAManager), _startingGame(false)
 {
 }
 
@@ -47,8 +51,13 @@ void MainMenuState::Paint()
 	}
 
 	{
+		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::TITLE,
+									  SCREEN_WIDTH * 0.5f, TITLE_Y);
+	}
+
+	{
 		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
-									  START_GAME_X, SELECTOR_Y);
+									  START_GAME_SELECTOR_X, SELECTOR_Y);
 	}
 
 	{
@@ -58,13 +67,15 @@ void MainMenuState::Paint()
 	
 	{
 		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::START_GAME,
-									  SCREEN_WIDTH * 0.5f, START_Y);
+									  START_GAME_X, START_Y);
 	}
 
 	{
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::TITLE,
-									  SCREEN_WIDTH * 0.5f, TITLE_Y);
+		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::EXIT_GAME,
+									  EXIT_GAME_X, START_Y);
 	}
+
+	
 	
 }
 void MainMenuState::OnEnter()
@@ -96,9 +107,11 @@ void MainMenuState::OnExit()
 
 void MainMenuState::StartGame()
 {
+	_alphaManager->FinishAll();
+	_easingManager->KillAll();
+
 	int id = _alphaManager->AddUIAlpha(ALPHA_TIME_ENTER_GAME, SCREEN_WIDTH * 0.5f, TITLE_Y, PainterManager::SPRITE_ID::TITLE);
-	_alphaManager->AddCallback(id, [this]()
-							   { _nextState = STATES::INITIAL_MOVEMENT; });
+	_alphaManager->AddCallback(id, [this]() { _nextState = STATES::INITIAL_MOVEMENT; });
 	_startingGame = true;
 }
 

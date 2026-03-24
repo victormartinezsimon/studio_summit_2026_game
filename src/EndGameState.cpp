@@ -7,15 +7,17 @@
 #include "NumberManager.h"
 #include "AlphaManager.h"
 
-constexpr int FINAL_SCORE_Y = FINAL_SCORE_HEIGHT/2 + 10;
+constexpr int FINAL_SCORE_Y = FINAL_SCORE_HEIGHT;
 constexpr int RETURN_Y = 153;
 constexpr int SELECTOR_Y = 205;
-constexpr int SCORE_Y = 100;
-constexpr int SELECTOR_X = RETURN_WIDTH/2;
+constexpr int SCORE_Y = 110;
+constexpr int SELECTOR_X = SCREEN_WIDTH/2;
 
-EndGameState::EndGameState(Plane *player, PainterManager *painter, ButtonA *buttonAManager,
-							 NumberManager *numberManager, AlphaManager *alphaManager) : State(player, painter), 
-							 _buttonAManager(buttonAManager), _numberManager(numberManager), _alphaManager(alphaManager)
+EndGameState::EndGameState(Plane *player, PainterManager *painter, 
+        NumberManager* numberManager, AlphaManager* alphaManager,
+        EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager) : 
+		State(player, painter, numberManager, alphaManager, 
+			easingManager, randomManager, buttonAManager)
 {
 }
 
@@ -58,14 +60,14 @@ void EndGameState::Paint()
 
 	{
 		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::RETURN_MENU,
-									  RETURN_WIDTH/2, RETURN_Y);
+									  SELECTOR_X, RETURN_Y);
 	}
-
-	
-	
 }
 void EndGameState::OnEnter()
 {
+	_alphaManager->FinishAll();
+	_easingManager->KillAll();
+
 	_buttonAManager->SelectInPosition(END_GAME_TIME_TO_MAIN_MENU, {SELECTOR_X- PLAYER_SELECTOR_WIDTH / 2, SELECTOR_X + PLAYER_SELECTOR_WIDTH / 2},
 									  [this](int selection)
 									  {

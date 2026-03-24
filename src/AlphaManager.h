@@ -3,7 +3,6 @@
 #include <array>
 #include <functional>
 #include "PainterManager.h"
-#include "EasingManager.h"
 #include "Pool.h"
 #include "Alpha.h"
 
@@ -11,27 +10,25 @@ class AlphaManager
 {
 
 public:
-	AlphaManager(PainterManager* painterManager, EasingManager* easingManager);
+	AlphaManager(PainterManager* painterManager);
 
 
 public:
 	void Update(const float deltaTime);
 	int AddUIAlpha(float duration, float x, float y, PainterManager::SPRITE_ID sprite);
 	int AddAlpha(float duration, float x, float y, float width, float height, PainterManager::SPRITE_ID sprite);
-	int AddUIAlpha(float duration, float x, float y, float endX, float endY, PainterManager::SPRITE_ID sprite);
-	int AddAlpha(float duration, float x, float y,  float endX, float endY, float width, float height, PainterManager::SPRITE_ID sprite);
 	void FinishAll();
 	void FinishAlpha(int id);
 	void Paint();
 	void AddCallback(int id, std::function<void()> callback);
+	void CallFunctionInPool(int id, std::function<void(Alpha& alpha)> function);
 
 private:
 int AddInternalAlpha(float duration, bool isUI, float startX, float startY,
-                            float endX, float endY, float width, float height, 
+                            float width, float height, 
 							PainterManager::SPRITE_ID sprite);
 
 private:
 	Pool<Alpha, MAX_ALPHA_VALUES> _alphaPool;
 	PainterManager* _painterManager;
-	EasingManager* _easingManager;
 };

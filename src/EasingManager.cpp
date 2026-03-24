@@ -4,13 +4,13 @@
 
 void EasingManager::Update(const float deltaTime)
 {
-
     _poolEases.for_each_active([&](Ease& ease)
     {
         bool finished = ease.Update(deltaTime);
         if(finished)
         {
             _poolEases.Release(ease);
+            ease.CallEndCallback(true);
         }
     });
 
@@ -23,38 +23,41 @@ int EasingManager::AddEase(float duration, float startX, float startY,
 }
 
 int EasingManager::AddEase(float duration, float startX, float startY,
-                            float endX, float endY, Ease::EASE_TYPES type, std::function<void()> endCallback,
-                            std::function<void(float currentX, float currentY)> tickCallback)
+                            float endX, float endY, Ease::EASE_TYPES type, std::function<void(bool)> endCallback,
+                            std::function<void(float currentX, float currentY, Ease& ease)> tickCallback)
 {
 
     int easeID = _poolEases.Get();
 
-    _poolEases.call_for_element(easeID, [&](Ease& ease)
+    if(easeID != -1)
     {
-        ease.BuildEase(duration, startX, startY, endX, endY, type, endCallback, tickCallback);
-    });
+        _poolEases.call_for_element(easeID, [&](Ease& ease)
+        {
+            ease.BuildEase(duration, startX, startY, endX, endY, type, endCallback, tickCallback);
+        });
+    }
 
     if(easeID == -1)
     {
-        endCallback();//just in case    
+        endCallback( false );//just in case    
     }
     return easeID;
 }
-void EasingManager::FinishAll()
-{
-    _poolEases.for_each_active([](Ease& ease){ease.EndEase();});
-    _poolEases.ReturnAll();
-}
-void EasingManager::FinishEase(int id)
-{
-     _poolEases.call_for_element(id, [](Ease& ease){ease.EndEase();});
-}
 void EasingManager::KillEase(int id)
 {
-    _poolEases.call_for_element(id, [](Ease& ease){ease.KillEase();});
+    _poolEases.call_for_element(id, [&](Ease& ease)
+    {
+        ease.KillEase(); 
+        _poolEases.Release(ease);
+    });
 }
 void EasingManager::KillAll()
 {
     _poolEases.for_each_active([](Ease& ease){ease.KillEase();});
     _poolEases.ReturnAll();
+}
+
+void EasingManager::SetReferenceIDToEase(int easeID, int referenceID)
+{
+    _poolEases.call_for_element(easeID, [&](Ease& ease){ease.SetReferenceID(referenceID);});
 }

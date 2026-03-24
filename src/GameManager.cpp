@@ -3,7 +3,6 @@
 #include "Plane.h"
 #include "Bullet.h"
 #include "Sprites.h"
-#include "Profiler.h"
 #include <ctime>
 #include <random>
 #include "MainMenuState.h"
@@ -17,12 +16,10 @@ GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	: _inputManager(input),
 	  _painterManager(painterManager), _currentLevel(0), 
 	  _currentStateLogic(State::STATES::MENU),_currentScore(0), _numberManager(_painterManager),
-	  _alphaManager(_painterManager, &_easingManager), _spawnerStars(TIME_SPAWN_STAR, painterManager),
+	  _alphaManager(_painterManager), _spawnerStars(TIME_SPAWN_STAR, painterManager),
 	  _spawnerMeteorites(TIME_SPAWN_METEORITE, painterManager)
 {
-	InitializeConstantValues();
 	InitializeImprovementsFunctions();
-	InitializeRandomImprovements();
 	InitializeStatesBegin();
 	InitializeStates();
 	
@@ -74,6 +71,9 @@ void GameManager::InitializeConstantValues()
 	enemyData.bulletHasExplosion = DEFAULT_BULLET_HAS_EXPLOSION;
 	enemyData.hasShield = DEFAULT_HAS_SHIELD;
 	enemyData.bulletsPerShot = DEFAULT_BULLETS_PER_SHOT;
+
+	_totalImprovementSelected = 0;
+	InitializeRandomImprovements();
 }
 
 void GameManager::InitializeImprovementsFunctions()
@@ -118,9 +118,9 @@ void GameManager::InitializeStatesBegin()
 	};
 	_statesBeginFunction[State::STATES::IMPROVEMENT_SELECTOR] = [this]()
 	{
-		int levelToCheck = _currentLevel -1;
-		auto leftImprovement = _randomImprovements[levelToCheck * 2];
-		auto rightImprovement = _randomImprovements[levelToCheck * 2 + 1];
+		auto leftImprovement = _randomImprovements[_totalImprovementSelected * 2];
+		auto rightImprovement = _randomImprovements[_totalImprovementSelected * 2 + 1];
+		++_totalImprovementSelected;
 		static_cast<ImprovementSelectionState*>(_statesLogic[State::STATES::IMPROVEMENT_SELECTOR])->Configure(leftImprovement, rightImprovement);
 	};
 	_statesBeginFunction[State::STATES::INITIAL_MOVEMENT] = [this]()
@@ -135,47 +135,26 @@ void GameManager::InitializeStatesBegin()
 
 bool GameManager::Update(const float deltaTime)
 {
-	PROFILE_BEGIN_FRAME();
-
 	_lastDeltaTime = deltaTime;
-
-	PROFILE_BEGIN(0, "Input");
 	_currentFrameInputValue = _inputManager->GetInputValue();
 	_currentFrameInputValueNormalized = _inputManager->NormalizeValue(_currentFrameInputValue);
-	PROFILE_END(0);
 
 	if(_currentStateLogic == State::STATES::BATTLE)
 	{
 		_currentTimePlaying += deltaTime;
 	}
 
-	PROFILE_BEGIN(1, "AlphaManager");
-	_alphaManager.Update(deltaTime);
-	PROFILE_END(1);
-
-	PROFILE_BEGIN(2, "SpawnerStars");
-	_spawnerStars.Update(deltaTime);
-	PROFILE_END(2);
-
-	PROFILE_BEGIN(3, "EasingManager");
 	_easingManager.Update(deltaTime);
-	PROFILE_END(3);
-
-	PROFILE_BEGIN(4, "SpawnerMeteorites");
+	_alphaManager.Update(deltaTime);
+	_spawnerStars.Update(deltaTime);
 	_spawnerMeteorites.Update(deltaTime);
-	PROFILE_END(4);
-
-	PROFILE_BEGIN(5, "MovePlayer");
+	
 	MovePlayer();
-	PROFILE_END(5);
-
-	PROFILE_BEGIN(6, "StateUpdate");
+	
 	auto nextState = _statesLogic[_currentStateLogic]->Update(deltaTime, _currentFrameInputValueNormalized, _currentFrameInputValue);
-	PROFILE_END(6);
 
 	if(nextState == State::STATES::EXIT)
 	{
-		PROFILE_END_FRAME();
 		return true;
 	}
 
@@ -192,11 +171,16 @@ bool GameManager::Update(const float deltaTime)
 
 		if(nextState == State::STATES::IMPROVEMENT_SELECTOR)
 		{
-			int levelToCheck = _currentLevel;
-
-			if(levelToCheck >= TOTAL_IMPROVEMENTS_TO_SELECT)
+			if(_totalImprovementSelected >= LEVELS_WITH_IMPROVEMENT_SELECTION.size() || _totalImprovementSelected >= TOTAL_IMPROVEMENTS_TO_SELECT)
 			{
 				nextState = State::STATES::INITIAL_MOVEMENT;
+			}
+			else
+			{
+				if(LEVELS_WITH_IMPROVEMENT_SELECTION[_totalImprovementSelected] != _currentLevel)
+				{
+					nextState = State::STATES::INITIAL_MOVEMENT;
+				}
 			}
 		}
 
@@ -209,6 +193,7 @@ bool GameManager::Update(const float deltaTime)
 		{
 			_currentScore = 0;
 			_currentTimePlaying = 0;
+			_currentLevel = 0;
 			InitializeConstantValues();
 		}
 
@@ -216,24 +201,22 @@ bool GameManager::Update(const float deltaTime)
 		_statesLogic[nextState]->OnEnter();
 		_currentStateLogic = nextState;
 	}
-
-	PROFILE_END_FRAME();
 	return false;
 }
 
 void GameManager::Paint()
 {
-	PROFILE_BEGIN(7, \"Paint\");
 	_painterManager->ClearListPaint();
 
+	#ifndef FINAL_BUILD
 	int frameRate = 1 / _lastDeltaTime;
-	_numberManager.PaintNumber(frameRate, 0, SCREEN_HEIGHT - NUMBER_0_HEIGHT, 2, NumberManager::PIVOT::LEFT);
+	_numberManager.PaintNumber(frameRate, SCREEN_WIDTH, NUMBER_0_HEIGHT, 2, NumberManager::PIVOT::RIGHT);
+	#endif
 	
 	_statesLogic[_oldStateLogic]->Paint();
 	_alphaManager.Paint();
-	_spawnerStars.Paint();
 	_spawnerMeteorites.Paint();
-	PROFILE_END(7);
+	_spawnerStars.Paint();
 }	
 
 void GameManager::ApplyImprovements(const std::string& playerSelection, const std::string& enemySelection)
@@ -408,6 +391,29 @@ void GameManager::DamagePlayer()
 void GameManager::DamageEnemy(float x, float y)
 {
 	_currentScore += SCORE_PER_KILL;
+
+	
+	float currentX = SCORE_POSITION_X - NUMBER_0_WIDTH;
+	float currentY = NUMBER_POSITION_Y - NUMBER_0_HEIGHT/2;
+
+	for(auto spriteID : {PainterManager::SPRITE_ID::NUMBER_0, PainterManager::SPRITE_ID::NUMBER_5})
+	{
+		int alphaID = _alphaManager.AddAlpha(DURATION_EASING_SCORE, 
+			currentX, currentY, NUMBER_0_WIDTH, NUMBER_0_HEIGHT, 
+			spriteID);
+
+		int easeID = _easingManager.AddEase(DURATION_EASING_SCORE, currentX, currentY, 
+			currentX, currentY - NUMBER_0_HEIGHT, Ease::EASE_TYPES::INOUTCIRC, 
+			[](bool forced){},
+			[&](float x, float y, Ease& ease)
+			{
+				int idAlpha = ease.GetReferenceID();
+				_alphaManager.CallFunctionInPool(idAlpha, [&](Alpha& alpha){alpha.SetPosition(x, y);});
+			}
+		);
+		_easingManager.SetReferenceIDToEase(easeID, alphaID);
+		currentX -= NUMBER_0_WIDTH;
+	}
 }
 
 void GameManager::ConfigureStar(Star& star)

@@ -18,7 +18,7 @@ public:
 						NUMBER_7,NUMBER_8,NUMBER_9,
 						METEORITE, EXPLOSION, ENEMY_SHIELD, PLAYER_SHIELD,
 						NEAR_STAR, MID_STAR, FAR_STAR,
-						FINAL_SCORE, RETURN_MENU
+						FINAL_SCORE, RETURN_MENU, EXIT_GAME
 					};
 
 private:
@@ -36,6 +36,8 @@ public:
 	~PainterManager();
 public:
 	void Paint() const;
+
+	Painter* GetPainter(){return _painter;}
 
 public:
 	void ClearListPaint();

@@ -12,11 +12,12 @@ constexpr int SELECTOR_Y_ENEMY = SCREEN_HEIGHT - SELECTOR_Y_PLAYER;
 constexpr float OPTION_LEFT_X = 0.2;
 constexpr float OPTION_RIGHT_X = 0.8;
 
-ImprovementSelectionState::ImprovementSelectionState(Plane *player, PainterManager *painter, ButtonA *buttonAManager,
-													 std::function<void(const std::string &optionForPlayer, const std::string &optionForEnemy)> callbackSeleccion,
-													 NumberManager *numberManager, AlphaManager* alphaManager) : State(player, painter), _callbackSeleccion(callbackSeleccion),
-																					 _buttonAManager(buttonAManager), _numberManager(numberManager),
-																					 _alphaManager(alphaManager)
+ImprovementSelectionState::ImprovementSelectionState(Plane *player, PainterManager *painter, 
+        NumberManager* numberManager, AlphaManager* alphaManager,
+        EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager, 
+            std::function<void(const std::string& optionForPlayer,const std::string& optionForEnemy )> callbackSeleccion) : 
+			State(player, painter, numberManager, alphaManager, 
+			easingManager, randomManager, buttonAManager), _callbackSeleccion(callbackSeleccion)
 {
 	InitializeImprovementsUI();
 }
@@ -81,6 +82,8 @@ void ImprovementSelectionState::Paint()
 }
 void ImprovementSelectionState::OnEnter()
 {
+	_easingManager->KillAll();
+
 	auto halfZoneA = SCREEN_WIDTH * OPTION_LEFT_X;
 	std::pair<float, float> zoneA = {halfZoneA - PLAYER_SELECTOR_WIDTH / 2, halfZoneA + PLAYER_SELECTOR_WIDTH / 2};
 

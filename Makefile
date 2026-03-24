@@ -18,6 +18,7 @@ default: $(TARGET)
 src_dir = ./src
 bin_dir = bin
 sdk_dir = ./SDK
+libxmp = ./3rdparty/libxmp
 
 # Rules
 ifeq ($(UNAME), Windows)
@@ -42,11 +43,13 @@ else
 	PROFILING_FLAG :=
 endif
 
-ARM_GCC_OPTS += -std=c++20 $(OPT_FLAGS) $(PROFILING_FLAG) -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard
+ARM_GCC_OPTS += -std=c++20 $(OPT_FLAGS) -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard
+ARM_GCC_OPTS += -DLIBXMP_NO_DEPACKERS -DLIBXMP_CORE_PLAYER
 ARM_CC_OPTS  += $(OPT_FLAGS) -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard
-ARM_GCC_LIBS += -lgcc -lc -lm
+ARM_CC_OPTS  += -DLIBXMP_NO_DEPACKERS -DLIBXMP_CORE_PLAYER
+ARM_GCC_LIBS += -lgcc -lc -lm -pthread
 
-incs += -I$(src_dir) -I$(sdk_dir)/include
+incs += -I$(src_dir) -I$(sdk_dir)/include -I$(libxmp)/include/ -I$(libxmp)/src/
 
 # Source files
 cpp_srcs := $(wildcard $(src_dir)/*.cpp)
@@ -76,7 +79,7 @@ $(bin_dir)/%.o: $(src_dir)/%.c | $(bin_dir)
 
 # Link target
 $(TARGET): $(sdk_dir)/libsandpiper.a $(all_objs)
-	$(ARM_GCC) $(ARM_GCC_OPTS) -o $@ $(all_objs) -L$(sdk_dir) -lsandpiper $(ARM_GCC_LIBS)
+	$(ARM_GCC) $(ARM_GCC_OPTS) -o $@ $(all_objs) -L$(sdk_dir) -lsandpiper -L$(libxmp) -lxmp $(ARM_GCC_LIBS)
 
 .PHONY: clean
 clean:

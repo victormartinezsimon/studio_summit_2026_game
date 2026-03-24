@@ -4,6 +4,7 @@ setlocal enabledelayedexpansion
 REM --- CONFIGURACION ---
 set INPUT_DIR=input
 set OUTPUT_DIR=output
+set INPUT_PALETE_DIR=input_palette
 
 REM Resolucion "pixel"
 set PIXEL_W=64
@@ -55,7 +56,7 @@ echo ==========================================
 set /p NUMBER_COLORS="  Select number of colors: "
 
 set "IMG_LIST="
-for /r "%INPUT_DIR%" %%F in (*.png) do (
+for /r "%INPUT_PALETE_DIR%" %%F in (*.png) do (
   set "IMG_LIST=!IMG_LIST! "%%F""
 )
 

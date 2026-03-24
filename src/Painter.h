@@ -20,11 +20,6 @@
 #define VIDEO_MODE EVM_320_240
 #define VIDEO_COLOR ECM_8bit_Indexed
 
-#define SPRITE_W 32
-#define SPRITE_H 32
-#define SPRITE_COUNT 4
-#define TRANSPARENT_KEY 0
-
 struct Sprite
 {
 	int x;
@@ -33,7 +28,7 @@ struct Sprite
 	int vy;
 };
 
-static struct SPPlatform *s_platform = NULL;
+static struct SPPlatform *s_platform;
 static struct SPSizeAlloc frameBufferA;
 static struct SPSizeAlloc frameBufferB;
 
@@ -52,6 +47,9 @@ public:
 	void PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y);
 	void PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y, int maskType);
 
+public:
+ struct SPPlatform* GetPlatform(){return s_platform;}
+
 private:
 	void init_palette(struct EVideoContext *vctx);
 	void masked_blit_8(
@@ -64,7 +62,7 @@ private:
 		int src_h,
 		int dst_x,
 		int dst_y,
-		const uint8_t *transparent_ids, uint8_t transparent_count,
+		const uint8_t transparent_id,
 		uint8x16_t evenRowMask, uint8x16_t oddRowMask);
 
 private:

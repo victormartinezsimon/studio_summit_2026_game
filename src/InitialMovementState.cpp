@@ -4,10 +4,15 @@
 #include "GameConfig.h"
 #include "Sprites.h"
 #include "EasingManager.h"
+#include "AlphaManager.h"
 
 
-InitialMovementState::InitialMovementState(Plane* player, PainterManager* painter, EasingManager* easingManager, Pool<Plane, PLANES_POOL_SIZE>* enemiesPool) : 
-State(player, painter), _easingManager(easingManager), _enemiesPool(enemiesPool)
+InitialMovementState::InitialMovementState(Plane *player, PainterManager *painter, 
+        NumberManager* numberManager, AlphaManager* alphaManager,
+        EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager,
+		 Pool<Plane, PLANES_POOL_SIZE>* enemiesPool) : 
+State(player, painter, numberManager, alphaManager, 
+			easingManager, randomManager, buttonAManager), _enemiesPool(enemiesPool)
 {
 }
 
@@ -39,18 +44,19 @@ void InitialMovementState::OnEnter()
 	_player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
 	_player->SetPositionY(POSITION_Y_PLAYER);
 	_easingManager->KillAll();
+	_alphaManager->FinishAll();
 
 	_enemiesPool->for_each_active(
 		[this](Plane &p)
 		{
 			_easingManager->AddEase(INTIAL_ANIMATION_DURATION, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
-				 p.GetX(), p.GetY(), Ease::EASE_TYPES::INOUTCUBE, 
-				 [this] 
-				 {
+				p.GetX(), p.GetY(), Ease::EASE_TYPES::INOUTCUBE, 
+				[this] (bool normalEnded)
+				{
 					_nextState = STATES::BATTLE;
 				}, 
-				 [&p](float x, float y)
-					{ p.SetPosition(x, y); });
+				[&p](float x, float y, Ease& ease)	{ p.SetPosition(x, y); }
+			);
 		}
 	);
 }

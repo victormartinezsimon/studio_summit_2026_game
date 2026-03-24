@@ -12,14 +12,14 @@ bool Ease::Update(const float deltaTime)
 
     if (_acumTime > _duration)
     {
-        EndEase();
+        KillEase();
         return true;
     }
     else
     {
         if(_tickCallback)
         {
-            _tickCallback(x, y);
+            _tickCallback(x, y, *this);
         }
     }
     
@@ -33,8 +33,8 @@ void Ease::BuildEase(float duration, float startX, float startY,
 }
 
 void Ease::BuildEase(float duration, float startX, float startY,
-                            float endX, float endY, EASE_TYPES type, std::function<void()> endCallback,
-                            std::function<void(float currentX, float currentY)> tickCallback)
+                            float endX, float endY, EASE_TYPES type, std::function<void(bool)> endCallback,
+                            std::function<void(float currentX, float currentY, Ease& ease)> tickCallback)
 {
     
     _acumTime = 0;
@@ -46,6 +46,7 @@ void Ease::BuildEase(float duration, float startX, float startY,
     _endY = endY;
     _type = type;
     _tickCallback = tickCallback;
+    _referenceID = -1;
 }
 
 void Ease::GetValues(float &x, float &y) const
@@ -82,17 +83,17 @@ void Ease::GetValues(float &x, float &y) const
     }
 }
 
-void Ease::EndEase()
-{
-    KillEase();
-     if(_endCallback)
-    {
-        _endCallback();
-    }
-}
 void Ease::KillEase()
 {
     _acumTime = _duration;
+}
+
+void Ease::CallEndCallback(bool value)
+{
+    if(_endCallback != nullptr)
+    {
+        _endCallback(value);
+    }
 }
 
 

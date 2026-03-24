@@ -15,7 +15,8 @@
 #include "AlphaManager.h"
 #include "Spawner.h"
 #include "Star.h"
-#include <random>
+#include "RandomManager.h"
+#include "Meteorite.h"
 
 class InputManager;
 
@@ -73,6 +74,9 @@ private:
 private:
 	void ApplyImprovements(const std::string &playerSelection, const std::string &enemySelection);
 
+private:	        
+	void ConfigureMeteoriteSpawn(Meteorite& meteorite);
+
 private:
 	modifiable_data playerData;
 	modifiable_data enemyData;
@@ -90,13 +94,14 @@ private:
 	Spawner<Star, TOTAL_STARS> _spawnerStars;
 	float _currentFrameInputValueNormalized;
 	int _currentFrameInputValue;
-	std::mt19937 _generator;
+	RandomManager _randomManager;
 
 private:
 	int _currentLevel = 0;
 	float _currentTimePlaying = 0;
 	long long _currentScore = 0;
 	float _lastDeltaTime;
+	int _totalImprovementSelected = 0;
 
 private:
 	std::map<std::string, std::function<void(modifiable_data &)>> _improvementFunctions;
@@ -107,4 +112,5 @@ private:
 	State::STATES _currentStateLogic;
 	State::STATES _oldStateLogic;
 	std::map<State::STATES, std::function<void()>> _statesBeginFunction;
+	Spawner<Meteorite, TOTAL_METEORITES> _spawnerMeteorites;
 };
