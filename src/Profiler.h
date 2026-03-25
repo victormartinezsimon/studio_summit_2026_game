@@ -2,8 +2,9 @@
 
 #include <chrono>
 #include <cstdio>
-#include <array>
 #include <cstring>
+#include <ctime>
+#include <vector>
 
 #ifdef PROFILING_ENABLED
 
@@ -11,21 +12,23 @@ class Profiler
 {
 public:
     static constexpr int MAX_SECTIONS = 16;
-    static constexpr int REPORT_INTERVAL_FRAMES = 120;
 
-    struct Section
+    struct TraceEvent
     {
         const char* name;
-        double totalUs;
-        double minUs;
-        double maxUs;
-        int count;
+        double ts;
+        double dur;
     };
 
     static Profiler& Instance()
     {
         static Profiler instance;
         return instance;
+    }
+
+    ~Profiler()
+    {
+        SaveToFile();
     }
 
     void BeginFrame()
@@ -36,25 +39,15 @@ public:
     void EndFrame()
     {
         auto now = Clock::now();
-        double frameUs = ToMicroseconds(_frameStart, now);
-        _frameTotalUs += frameUs;
-
-        if (frameUs < _frameMinUs) _frameMinUs = frameUs;
-        if (frameUs > _frameMaxUs) _frameMaxUs = frameUs;
-
-        ++_frameCount;
-
-        if (_frameCount >= REPORT_INTERVAL_FRAMES)
-        {
-            PrintReport();
-            Reset();
-        }
+        double ts = ToMicroseconds(_profileStart, _frameStart);
+        double dur = ToMicroseconds(_frameStart, now);
+        _events.push_back({"Frame", ts, dur});
     }
 
     void BeginSection(int id, const char* name)
     {
         if (id >= MAX_SECTIONS) return;
-        _sections[id].name = name;
+        _sectionNames[id] = name;
         _sectionStarts[id] = Clock::now();
     }
 
@@ -62,70 +55,56 @@ public:
     {
         if (id >= MAX_SECTIONS) return;
         auto now = Clock::now();
-        double us = ToMicroseconds(_sectionStarts[id], now);
-        auto& s = _sections[id];
-        s.totalUs += us;
-        if (us < s.minUs) s.minUs = us;
-        if (us > s.maxUs) s.maxUs = us;
-        ++s.count;
+        double ts = ToMicroseconds(_profileStart, _sectionStarts[id]);
+        double dur = ToMicroseconds(_sectionStarts[id], now);
+        _events.push_back({_sectionNames[id], ts, dur});
+    }
+
+    void SaveToFile()
+    {
+        if (_events.empty()) return;
+
+        auto now = std::time(nullptr);
+        char filename[64];
+        std::strftime(filename, sizeof(filename), "profile_%Y%m%d_%H%M%S.json", std::localtime(&now));
+
+        FILE* f = std::fopen(filename, "w");
+        if (!f) return;
+
+        std::fprintf(f, "{\"traceEvents\":[\n");
+        for (size_t i = 0; i < _events.size(); ++i)
+        {
+            auto& e = _events[i];
+            std::fprintf(f, "{\"name\":\"%s\",\"ph\":\"X\",\"ts\":%.1f,\"dur\":%.1f,\"pid\":0,\"tid\":0}",
+                         e.name, e.ts, e.dur);
+            if (i + 1 < _events.size()) std::fprintf(f, ",");
+            std::fprintf(f, "\n");
+        }
+        std::fprintf(f, "]}\n");
+        std::fclose(f);
+
+        _events.clear();
     }
 
 private:
     using Clock = std::chrono::steady_clock;
     using TimePoint = Clock::time_point;
 
-    Profiler() { Reset(); }
+    Profiler() : _profileStart(Clock::now())
+    {
+        _events.reserve(100000);
+    }
 
     double ToMicroseconds(TimePoint start, TimePoint end) const
     {
         return std::chrono::duration<double, std::micro>(end - start).count();
     }
 
-    void PrintReport()
-    {
-        double avgFrame = _frameTotalUs / _frameCount;
-
-        std::printf("\n===== PROFILE REPORT (%d frames) =====\n", _frameCount);
-        std::printf("Frame:  avg=%.1f us  min=%.1f us  max=%.1f us  (avg=%.2f ms)\n",
-                    avgFrame, _frameMinUs, _frameMaxUs, avgFrame / 1000.0);
-
-        for (int i = 0; i < MAX_SECTIONS; ++i)
-        {
-            auto& s = _sections[i];
-            if (s.count == 0) continue;
-            double avg = s.totalUs / s.count;
-            double pct = (s.totalUs / _frameTotalUs) * 100.0;
-            std::printf("  [%s]  avg=%.1f us  min=%.1f us  max=%.1f us  (%.1f%% of frame)\n",
-                        s.name, avg, s.minUs, s.maxUs, pct);
-        }
-
-        std::printf("======================================\n\n");
-        std::fflush(stdout);
-    }
-
-    void Reset()
-    {
-        _frameCount = 0;
-        _frameTotalUs = 0.0;
-        _frameMinUs = 1e12;
-        _frameMaxUs = 0.0;
-        for (auto& s : _sections)
-        {
-            s.name = "";
-            s.totalUs = 0.0;
-            s.minUs = 1e12;
-            s.maxUs = 0.0;
-            s.count = 0;
-        }
-    }
-
+    TimePoint _profileStart;
     TimePoint _frameStart;
     TimePoint _sectionStarts[MAX_SECTIONS];
-    Section _sections[MAX_SECTIONS];
-    int _frameCount = 0;
-    double _frameTotalUs = 0.0;
-    double _frameMinUs = 1e12;
-    double _frameMaxUs = 0.0;
+    const char* _sectionNames[MAX_SECTIONS] = {};
+    std::vector<TraceEvent> _events;
 };
 
 // Convenience macros
@@ -133,6 +112,7 @@ private:
 #define PROFILE_END_FRAME()         Profiler::Instance().EndFrame()
 #define PROFILE_BEGIN(id, name)     Profiler::Instance().BeginSection(id, name)
 #define PROFILE_END(id)             Profiler::Instance().EndSection(id)
+#define PROFILE_SAVE()              Profiler::Instance().SaveToFile()
 
 // RAII scoped section
 struct ProfileScope
@@ -150,5 +130,6 @@ struct ProfileScope
 #define PROFILE_BEGIN(id, name)
 #define PROFILE_END(id)
 #define PROFILE_SCOPE(id, name)
+#define PROFILE_SAVE()
 
 #endif
