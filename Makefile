@@ -43,10 +43,12 @@ else
 	PROFILING_FLAG :=
 endif
 
-ARM_GCC_OPTS += -std=c++20 $(OPT_FLAGS) -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard
+ARM_GCC_OPTS += -std=c++20 $(OPT_FLAGS) -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard 
 ARM_GCC_OPTS += -DLIBXMP_NO_DEPACKERS -DLIBXMP_CORE_PLAYER
+ARM_GCC_OPTS += $(PROFILING_FLAG)
 ARM_CC_OPTS  += $(OPT_FLAGS) -mcpu=cortex-a9 -mfpu=neon -mfloat-abi=hard
 ARM_CC_OPTS  += -DLIBXMP_NO_DEPACKERS -DLIBXMP_CORE_PLAYER
+ARM_CC_OPTS  += $(PROFILING_FLAG)
 ARM_GCC_LIBS += -lgcc -lc -lm -pthread
 
 incs += -I$(src_dir) -I$(sdk_dir)/include -I$(libxmp)/include/ -I$(libxmp)/src/
