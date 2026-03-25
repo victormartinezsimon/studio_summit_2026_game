@@ -1,5 +1,5 @@
 #include "SoundManager.h"
-#include "space_chorus.h"
+#include "background_sound.h"
 
 SoundManager::SoundManager(struct SPPlatform* platform)
 	: m_platform(platform)
@@ -46,7 +46,7 @@ void SoundManager::playThread()
 {
 	m_ctx = xmp_create_context();
 
-	if (xmp_load_module_from_memory(m_ctx, space_chorus_mod, space_chorus_mod_len) < 0)
+	if (xmp_load_module_from_memory(m_ctx, space_alliance_mod, space_alliance_mod_len) < 0)
 	{
 		printf("Error: cannot load embedded module\n");
 		xmp_free_context(m_ctx);
@@ -59,15 +59,10 @@ void SoundManager::playThread()
 	APUSetBufferSize(m_platform->ac, ABS_4096Bytes);
 	APUSetSampleRate(m_platform->ac, ASR_22_050_Hz);
 
-	printf("Checking device status\n");
-	printf(" Word count:%d\n", APUGetWordCount(m_platform->ac));
-	printf(" Cursor: %d\n", APUFrame(m_platform->ac));
-
 	if (xmp_start_player(m_ctx, 22050, 0) == 0)
 	{
 		struct xmp_module_info mi;
 		xmp_get_module_info(m_ctx, &mi);
-		printf("%s (%s)\n", mi.mod->name, mi.mod->type);
 
 		short* buf = (short*)m_apuBuffer.cpuAddress;
 		while (!m_stopRequested)
@@ -104,7 +99,7 @@ void SoundManager::Prepare()
 
 	m_ctx = xmp_create_context();
 
-	if (xmp_load_module_from_memory(m_ctx, space_chorus_mod, space_chorus_mod_len) < 0)
+	if (xmp_load_module_from_memory(m_ctx, space_alliance_mod, space_alliance_mod_len) < 0)
 	{
 		xmp_free_context(m_ctx);
 		m_ctx = nullptr;
