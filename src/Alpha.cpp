@@ -56,14 +56,14 @@ void Alpha::Paint(PainterManager* _painter)
     
     float percent = _acumTime / _duration;
 
-    int maskIndex = 0;
+    PainterManager::MASK_ID maskIndex = PainterManager::MASK_ID::FULL;
     if(percent >= 0.25 && percent <= 0.75)
     {
-        maskIndex = 1;
+        maskIndex = PainterManager::MASK_ID::HALF;
     }
     if(percent > 0.75)
     {
-        maskIndex = 2;
+        maskIndex = PainterManager::MASK_ID::QUARTER;
     }
 
     if(_isUI)

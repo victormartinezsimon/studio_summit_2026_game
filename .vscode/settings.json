@@ -9,5 +9,6 @@
             "binaryPath": ".\\the_battle_of_rogue",
             "binaryArgs": []
         }
-    ]
+    ],
+    "cmake.ignoreCMakeListsMissing": true
 }

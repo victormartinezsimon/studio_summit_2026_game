@@ -128,7 +128,7 @@ void PainterManager::AddToPaint(SPRITE_ID id, unsigned int width, unsigned int h
 		_toPaint[_currentIndexToPaint].height = height;
 		_toPaint[_currentIndexToPaint].x = x;
 		_toPaint[_currentIndexToPaint].y = y;
-		_toPaint[_currentIndexToPaint].mask = -1;
+		_toPaint[_currentIndexToPaint].mask = GetMaskID(MASK_ID::FULL);
 		++_currentIndexToPaint;
 	}
 }
@@ -140,7 +140,7 @@ void PainterManager::AddUIToPaint(SPRITE_ID id, int x, int y)
 	AddToPaint(id, width, height, x - width/2, y - height /2);
 }
 
-void PainterManager::AddToPaintWithAlpha(SPRITE_ID id, unsigned int width, unsigned int height, int x, int y, int maskID)
+void PainterManager::AddToPaintWithAlpha(SPRITE_ID id, unsigned int width, unsigned int height, int x, int y, MASK_ID maskID)
 {
 	if(_currentIndexToPaint < MAX_PAINTED_OBJECTS)
 	{
@@ -149,13 +149,24 @@ void PainterManager::AddToPaintWithAlpha(SPRITE_ID id, unsigned int width, unsig
 		_toPaint[_currentIndexToPaint].height = height;
 		_toPaint[_currentIndexToPaint].x = x;
 		_toPaint[_currentIndexToPaint].y = y;
-		_toPaint[_currentIndexToPaint].mask = maskID;
+		_toPaint[_currentIndexToPaint].mask = GetMaskID(maskID);
 		++_currentIndexToPaint;
 	}
 }
-void PainterManager::AddUIToPaintWithAlpha(SPRITE_ID id, int x, int y, int maskID)
+void PainterManager::AddUIToPaintWithAlpha(SPRITE_ID id, int x, int y, MASK_ID maskID)
 {
 	auto width = _sizes[id].first;
 	auto height = _sizes[id].second;
 	AddToPaintWithAlpha(id, width, height, x - width/2, y - height /2, maskID);
+}
+
+int PainterManager::GetMaskID(MASK_ID maskID)
+{
+	switch (maskID)
+	{
+		case MASK_ID::FULL: return -1;
+		case MASK_ID::HALF: return 1;
+		case MASK_ID::QUARTER: return 2;
+	}
+	return -1;
 }

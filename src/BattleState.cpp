@@ -7,6 +7,7 @@
 #include "AlphaManager.h"
 #include "EasingManager.h"
 #include "RandomManager.h"
+#include "TrailManager.h"
 
 BattleState::BattleState(
     Plane *player, PainterManager *painter,
@@ -16,12 +17,14 @@ BattleState::BattleState(
     Pool<Bullet, BULLETS_POOL_SIZE> *bulletsPool,
     std::function<void()> damagePlayerCallback,
     std::function<void(float x, float y)> damageEnemy,
-    long long *score, float *time, Spawner<Meteorite, TOTAL_METEORITES> *spawnerMeteorites)
+    long long *score, float *time, 
+    Spawner<Meteorite, TOTAL_METEORITES> *spawnerMeteorites,
+    TrailManager* trailManager)
     : State(player, painter, numberManager, alphaManager,
             easingManager, randomManager, buttonAManager),
       _enemiesPool(enemiesPool), _bulletsPool(bulletsPool),
       _damagePlayerCallback(damagePlayerCallback), _damageEnemyCallback(damageEnemy),
-      _score(score), _timeLeft(time), _spawnerMeteorites(spawnerMeteorites)
+      _score(score), _timeLeft(time), _spawnerMeteorites(spawnerMeteorites),_trailManager(trailManager)
 {
 }
 
@@ -55,10 +58,10 @@ void BattleState::Paint()
             _player->GetPaintPosition(playerX, playerY);
             float percent = currentTimeInmortal / TIME_INMORTAL;
 
-            int mask = 0;
+            PainterManager::MASK_ID mask = PainterManager::MASK_ID::HALF;
             if ((percent >= 0.25 && percent <= 0.50) || (percent >= 0.75 && percent <= 1.0))
             {
-                mask = 1;
+                mask = PainterManager::MASK_ID::QUARTER;
             }
 
             _painterManager->AddToPaintWithAlpha(PainterManager::SPRITE_ID::PLAYER,
@@ -163,17 +166,26 @@ void BattleState::UpdateBullets(float deltaTime)
     _bulletsPool->for_each_active([this, deltaTime](Bullet &bullet)
                                   {
                                     bullet.Update(deltaTime);
-                                    UpdateBullet(deltaTime, bullet);
+                                    bool isDestroyed = UpdateBullet(deltaTime, bullet);
+                                    if(!isDestroyed && SHOW_TRAIL)
+                                    {
+                                        float x, y;
+                                        bullet.GetPaintPosition(x, y);
+                                        _trailManager->AddTrail(x, y, 
+                                        bullet.GetWidth(), bullet.GetHeight(),
+                                        TRAIL_LIVE, 
+                                        PainterManager::SPRITE_ID::BULLET);
+                                    }
                                   });
 }
 
-void BattleState::UpdateBullet(float deltaTime, Bullet &bullet)
+bool BattleState::UpdateBullet(float deltaTime, Bullet &bullet)
 {
     bool isDestroyed = ManageBulletCollisions(bullet);
     if (isDestroyed)
     {
         DoExplosion(bullet);
-        return;
+        return true;
     }
 
     // Enemy
@@ -192,7 +204,7 @@ void BattleState::UpdateBullet(float deltaTime, Bullet &bullet)
     if (isDestroyed)
     {
         DoExplosion(bullet);
-        return;
+        return true;
     }
 
     // PLAYER
@@ -207,8 +219,9 @@ void BattleState::UpdateBullet(float deltaTime, Bullet &bullet)
     if (isDestroyed)
     {
         DoExplosion(bullet);
-        return;
     }
+
+    return isDestroyed;
 }
 bool BattleState::ManagePlaneCollisions(Plane &plane)
 {

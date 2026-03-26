@@ -12,6 +12,7 @@
 #include "BattleState.h"
 #include "Star.h"
 #include "Profiler.h"
+#include "TrailManager.h"
 
 constexpr std::array<PainterManager::SPRITE_ID, 2> SPRITE_IDS_ANIMATION_HIT = {PainterManager::SPRITE_ID::NUMBER_0, PainterManager::SPRITE_ID::NUMBER_1};
 constexpr std::array<PainterManager::SPRITE_ID, 2> SPRITE_IDS_ANIMATION_KILL = {PainterManager::SPRITE_ID::NUMBER_0, PainterManager::SPRITE_ID::NUMBER_5};
@@ -50,7 +51,7 @@ void GameManager::InitializeStates()
 		&_easingManager, &_randomManager, &_buttonAManager,&_enemiesPool, &_bulletsPool,
 		[this](){DamagePlayer();}, 
 		[this](float x, float y){DamageEnemy(x, y);}, 
-		&_currentScore, &_currentTimePlaying, &_spawnerMeteorites);
+		&_currentScore, &_currentTimePlaying, &_spawnerMeteorites, &_trailManager);
 	
 	_statesLogic[State::STATES::END_GAME] = new EndGameState(&_player, _painterManager, &_numberManager, &_alphaManager, 
 		&_easingManager, &_randomManager, &_buttonAManager);
@@ -174,6 +175,10 @@ bool GameManager::Update(const float deltaTime)
 	_spawnerMeteorites.Update(deltaTime);
 	PROFILE_END(4);
 
+	PROFILE_BEGIN(8, "update spawner meteorites");
+	_trailManager.Update(deltaTime);
+	PROFILE_END(8);
+
 	PROFILE_BEGIN(5, "move player");
 	MovePlayer();
 	PROFILE_END(5);
@@ -249,6 +254,7 @@ void GameManager::Paint()
 	_statesLogic[_oldStateLogic]->Paint();
 	_alphaManager.Paint();
 	_spawnerMeteorites.Paint();
+	_trailManager.Paint(_painterManager);
 	_spawnerStars.Paint();
 }	
 void GameManager::ApplyImprovements(const std::string& playerSelection, const std::string& enemySelection)

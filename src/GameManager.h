@@ -17,6 +17,7 @@
 #include "Star.h"
 #include "RandomManager.h"
 #include "Meteorite.h"
+#include "TrailManager.h"
 
 class InputManager;
 
@@ -97,10 +98,13 @@ private:
 	NumberManager _numberManager;
 	AlphaManager _alphaManager;
 	Spawner<Star, TOTAL_STARS> _spawnerStars;
+	RandomManager _randomManager;
+	TrailManager _trailManager;
+	
+private:
 	float _currentFrameInputValueNormalized;
 	float _lastFrameInputValueNormalized;
 	int _countFramesToReadInput = NUM_FRAMES_TO_READ_INPUT;
-	RandomManager _randomManager;
 
 private:
 	int _currentLevel = 0;

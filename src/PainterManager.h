@@ -20,6 +20,7 @@ public:
 						NEAR_STAR, MID_STAR, FAR_STAR,
 						FINAL_SCORE, RETURN_MENU, EXIT_GAME
 					};
+	enum class MASK_ID {FULL, HALF, QUARTER};
 
 private:
 	struct data
@@ -44,9 +45,11 @@ public:
 	void AddToPaint(SPRITE_ID id, unsigned int width, unsigned int height, int x, int y);
 	void AddUIToPaint(SPRITE_ID id, int x, int y);
 
-	void AddToPaintWithAlpha(SPRITE_ID id, unsigned int width, unsigned int height, int x, int y, int maskID);
-	void AddUIToPaintWithAlpha(SPRITE_ID id, int x, int y, int maskID);
+	void AddToPaintWithAlpha(SPRITE_ID id, unsigned int width, unsigned int height, int x, int y, MASK_ID maskID);
+	void AddUIToPaintWithAlpha(SPRITE_ID id, int x, int y, MASK_ID maskID);
 
+private:
+	int GetMaskID(MASK_ID maskID);
 
 private:
 	Painter* _painter;

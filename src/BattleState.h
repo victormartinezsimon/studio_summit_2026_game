@@ -16,6 +16,7 @@ class Bullet;
 class AlphaManager;
 class EasingManager;
 class RandomManager;
+class TrailManager;
 
 class BattleState: public State
 {
@@ -29,7 +30,8 @@ class BattleState: public State
         std::function<void()> damagePlayerCallback, 
         std::function<void(float x, float y)> damageEnemy,
         long long* score, float* time,
-        Spawner<Meteorite, TOTAL_METEORITES>* spawnerMeteorites
+        Spawner<Meteorite, TOTAL_METEORITES>* spawnerMeteorites,
+        TrailManager* trailManager
         );
         
     public:    
@@ -42,7 +44,7 @@ class BattleState: public State
         void UpdatePlayer(float deltaTime);
         void UpdateBullets(float deltaTime);
         void UpdateEnemies(float deltaTime);
-        void UpdateBullet(float deltaTime, Bullet& bullet);
+        bool UpdateBullet(float deltaTime, Bullet& bullet);
     
     private:
         bool ManageBulletCollisions(Bullet& bullet);
@@ -88,4 +90,5 @@ class BattleState: public State
         Pool<Explosion, TOTAL_EXPLOSIONS> _explosionPool;
         int _currentLevel;
         Spawner<Meteorite, TOTAL_METEORITES>* _spawnerMeteorites;
+        TrailManager* _trailManager;
 };
