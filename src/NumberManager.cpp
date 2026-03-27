@@ -48,24 +48,30 @@ void NumberManager::PaintRight(int number, int x, int y, int minDigits)
 {
 	int currentValue = number;
 	int digitsUsed = 0;
-	int currentX = x;
+	float w_0, h_0;
+	_painterManager->GetSpriteSize(_spriteIDs[0], w_0, h_0);
+	int currentX = x + w_0/2;
 	while(currentValue != 0)
 	{
 		int digit = currentValue % 10;
 		currentValue = currentValue/ 10;
 		++digitsUsed;
-		int realX = currentX - _digitWidth[digit]/2;//this line is becuase we paint with center coordinates
-		_painterManager->AddUIToPaint(_spriteIDs[digit], realX, y);
-		currentX -= _digitWidth[digit];
+
+		float w, h;
+		_painterManager->GetSpriteSize(_spriteIDs[digit], w, h);
+
+		currentX -= w;
+		_painterManager->AddToPaint(_spriteIDs[digit], currentX, y);
 	}
 
 	while(digitsUsed < minDigits)
 	{
 		int digit = 0;
 		++digitsUsed;
-		int realX = currentX - _digitWidth[digit]/2;//this line is becuase we paint with center coordinates
-		_painterManager->AddUIToPaint(_spriteIDs[digit], realX, y);
-		currentX -= _digitWidth[digit];
+		float w, h;
+		_painterManager->GetSpriteSize(_spriteIDs[digit], w, h);
+		currentX -= w;
+		_painterManager->AddToPaint(_spriteIDs[digit], currentX, y);
 	}
 }
 void NumberManager::PaintCenter(int number, int x, int y, int minDigits)

@@ -30,12 +30,6 @@ public:
 		_Y = y;
 	}
 
-	void GetPaintPosition(float &finalX, float &finalY) const
-	{
-		finalX = GetX() - GetWidth() / 2;
-		finalY = GetY() - GetHeight() / 2;
-	}
-
 public:
 	unsigned int GetWidth() const
 	{

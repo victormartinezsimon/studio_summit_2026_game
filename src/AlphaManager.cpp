@@ -18,8 +18,9 @@ void AlphaManager::Update(const float deltaTime)
    
 }
 
-int AlphaManager::AddInternalAlpha(float duration, bool isUI, float startX, float startY,
-                            float width, float height, PainterManager::SPRITE_ID sprite)
+int AlphaManager::AddInternalAlpha(float duration, float startX, float startY,
+					 PainterManager::SPRITE_ID sprite,
+                     float width, float height)
 {
 
     int poolID = _alphaPool.Get();
@@ -28,20 +29,20 @@ int AlphaManager::AddInternalAlpha(float duration, bool isUI, float startX, floa
     {
         _alphaPool.call_for_element(poolID, [&](Alpha& alpha)
         {
-            alpha.ConfigureAlpha(duration,isUI, startX, startY, width, height, sprite);
+            alpha.ConfigureAlpha(duration,startX, startY, sprite, width, height);
         });
     }
 
     return poolID;
 }
 
-int AlphaManager::AddUIAlpha(float duration, float x, float y, PainterManager::SPRITE_ID sprite)
+int AlphaManager::AddAlpha(float duration, float x, float y, PainterManager::SPRITE_ID sprite)
 {
-    return AddInternalAlpha(duration, true, x, y,  -1, -1, sprite );
+    return AddInternalAlpha(duration, x, y, sprite, -1, -1);
 }
-int AlphaManager::AddAlpha(float duration, float x, float y, float width, float height, PainterManager::SPRITE_ID sprite)
+int AlphaManager::AddAlpha(float duration, float x, float y, PainterManager::SPRITE_ID sprite, float width, float height)
 {
-    return AddInternalAlpha(duration, false, x, y,  width, height, sprite );
+    return AddInternalAlpha(duration, x, y, sprite, width, height );
 }
 
 void AlphaManager::FinishAll()

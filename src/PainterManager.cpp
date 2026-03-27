@@ -1,7 +1,6 @@
 #include "PainterManager.h"
 #include "Painter.h"
 #include "sprites.h"
-#include "Painter.h"
 
 PainterManager::PainterManager()
 {
@@ -88,6 +87,13 @@ PainterManager::PainterManager()
 
 }
 
+void PainterManager::GetSpriteSize(SPRITE_ID id, float& width, float& height)
+{
+	width = _sizes[id].first;
+	height = _sizes[id].second;
+}
+
+
 PainterManager::~PainterManager()
 {
 	delete _painter;
@@ -119,6 +125,37 @@ void PainterManager::ClearListPaint()
 	_currentIndexToPaint = 0;
 }
 
+void PainterManager::AddToPaint(SPRITE_ID id, float x, float y)
+{
+	auto size = _sizes[id];
+	AddToPaint(id, x, y, MASK_ID::FULL, size.first, size.second);
+}
+void PainterManager::AddToPaint(SPRITE_ID id, float x, float y, MASK_ID mask)
+{
+	auto size = _sizes[id];
+	AddToPaint(id, x, y, mask, size.first, size.second);
+}
+
+void PainterManager::AddToPaint(SPRITE_ID id, float x, float y, unsigned int width, unsigned int height)
+{
+	AddToPaint(id, x, y, MASK_ID::FULL, width, height);
+}
+
+void PainterManager::AddToPaint(SPRITE_ID id, float x, float y, MASK_ID mask, unsigned int width, unsigned int height)
+{
+	if(_currentIndexToPaint < MAX_PAINTED_OBJECTS)
+	{
+		_toPaint[_currentIndexToPaint].id = id;
+		_toPaint[_currentIndexToPaint].width = width;
+		_toPaint[_currentIndexToPaint].height = height;
+		_toPaint[_currentIndexToPaint].x = x - width/2;
+		_toPaint[_currentIndexToPaint].y = y - height/2;
+		_toPaint[_currentIndexToPaint].mask = GetMaskID(mask);
+		++_currentIndexToPaint;
+	}
+}
+
+/*
 void PainterManager::AddToPaint(SPRITE_ID id, unsigned int width, unsigned int height, int x, int y)
 {
 	if(_currentIndexToPaint < MAX_PAINTED_OBJECTS)
@@ -159,6 +196,7 @@ void PainterManager::AddUIToPaintWithAlpha(SPRITE_ID id, int x, int y, MASK_ID m
 	auto height = _sizes[id].second;
 	AddToPaintWithAlpha(id, width, height, x - width/2, y - height /2, maskID);
 }
+*/
 
 int PainterManager::GetMaskID(MASK_ID maskID)
 {

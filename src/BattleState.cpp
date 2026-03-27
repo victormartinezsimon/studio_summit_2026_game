@@ -46,16 +46,14 @@ State::STATES BattleState::Update(const float deltaTime, float currentFrameInput
 void BattleState::Paint()
 {
     {
-        float playerX, playerY;
         float currentTimeInmortal = _player->GetTimeInmortal();
         if (currentTimeInmortal <= 0)
         {
-            _player->GetPaintPosition(playerX, playerY);
-            _painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player->GetWidth(), _player->GetHeight(), playerX, playerY);
+            _painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player->GetX(), _player->GetY(),
+                _player->GetWidth(), _player->GetHeight());
         }
         else
         {
-            _player->GetPaintPosition(playerX, playerY);
             float percent = currentTimeInmortal / TIME_INMORTAL;
 
             PainterManager::MASK_ID mask = PainterManager::MASK_ID::HALF;
@@ -64,38 +62,34 @@ void BattleState::Paint()
                 mask = PainterManager::MASK_ID::QUARTER;
             }
 
-            _painterManager->AddToPaintWithAlpha(PainterManager::SPRITE_ID::PLAYER,
-                                                 _player->GetWidth(), _player->GetHeight(), playerX, playerY, mask);
+            _painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER,_player->GetX(), _player->GetY(), mask,
+                                                 _player->GetWidth(), _player->GetHeight());
         }
 
         if (_player->GetHasShield())
         {
-            _painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SHIELD,
-                                        SHIELD_PLAYER_WIDTH, SHIELD_PLAYER_HEIGHT, playerX, playerY);
+            _painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SHIELD,_player->GetX(), _player->GetY(),
+                                        SHIELD_PLAYER_WIDTH, SHIELD_PLAYER_HEIGHT );
         }
     }
 
     {
         _bulletsPool->for_each_active([&](const Bullet &bullet)
                                       {
-            float posX, posY;
-            bullet.GetPaintPosition(posX, posY);
-            _painterManager->AddToPaint(PainterManager::SPRITE_ID::BULLET, 
-                bullet.GetWidth(), bullet.GetHeight(), posX, posY); });
+            _painterManager->AddToPaint(PainterManager::SPRITE_ID::BULLET, bullet.GetX(), bullet.GetY(),
+                bullet.GetWidth(), bullet.GetHeight()); });
     }
 
     {
         _enemiesPool->for_each_active([this](const Plane &p)
                                       {
-                float posX, posY;
-                p.GetPaintPosition(posX, posY);
-                _painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, 
-                    p.GetWidth(), p.GetHeight(), posX, posY);
+                _painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, p.GetX(), p.GetY(),
+                    p.GetWidth(), p.GetHeight());
 
                 if(p.GetHasShield())
                 {
-                    _painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY_SHIELD,
-                        SHIELD_ENEMY_WIDTH,SHIELD_ENEMY_HEIGHT, posX, posY );
+                    _painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY_SHIELD,p.GetX(), p.GetY(),
+                        SHIELD_ENEMY_WIDTH,SHIELD_ENEMY_HEIGHT );
                 } });
     }
 
@@ -169,9 +163,7 @@ void BattleState::UpdateBullets(float deltaTime)
                                     bool isDestroyed = UpdateBullet(deltaTime, bullet);
                                     if(!isDestroyed && SHOW_TRAIL)
                                     {
-                                        float x, y;
-                                        bullet.GetPaintPosition(x, y);
-                                        _trailManager->AddTrail(x, y, 
+                                        _trailManager->AddTrail(bullet.GetX(), bullet.GetY(), 
                                         bullet.GetWidth(), bullet.GetHeight(),
                                         TRAIL_LIVE, 
                                         PainterManager::SPRITE_ID::BULLET);
@@ -350,10 +342,8 @@ void BattleState::ReturnEnemy(Plane &enemy)
 
     _easingManager->KillEase(enemy.GetRandomMovementID());
 
-    float x, y;
-    enemy.GetPaintPosition(x, y);
-    int id = _alphaManager->AddAlpha(ALPHA_TIME_DESTROY_PLANE, x, y,
-                                     ENEMY_WIDTH, ENEMY_HEIGHT, PainterManager::SPRITE_ID::ENEMY);
+    int id = _alphaManager->AddAlpha(ALPHA_TIME_DESTROY_PLANE, enemy.GetX(), enemy.GetY(),PainterManager::SPRITE_ID::ENEMY,
+                                     ENEMY_WIDTH, ENEMY_HEIGHT );
     _alphaManager->AddCallback(id, [this]()
                                { --_enemiesAlive; });
 
@@ -361,7 +351,7 @@ void BattleState::ReturnEnemy(Plane &enemy)
     {
         --_enemiesAlive;
     }
-    _damageEnemyCallback(x, y);
+    _damageEnemyCallback(enemy.GetX(), enemy.GetY());
 }
 
 void BattleState::DoExplosion(const Bullet &bullet)
@@ -406,8 +396,9 @@ void BattleState::ConfigureExplosion(const int id, Explosion &exp, const Bullet 
     auto alphaID = _alphaManager->AddAlpha(EXPLOSION_DURATION,
                                            x,
                                            y,
-                                           EXPLOSION_WIDTH, EXPLOSION_HEIGHT,
-                                           PainterManager::SPRITE_ID::EXPLOSION);
+                                           PainterManager::SPRITE_ID::EXPLOSION,
+                                           EXPLOSION_WIDTH, EXPLOSION_HEIGHT
+                                          );
 
     _alphaManager->AddCallback(alphaID,
                                [&]()

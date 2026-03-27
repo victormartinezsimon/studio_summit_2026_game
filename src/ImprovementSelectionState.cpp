@@ -34,49 +34,46 @@ void ImprovementSelectionState::Paint()
 {
 	if(_doingFadeOut){return;}
 	{
-		float playerX, playerY;
-		_player->GetPaintPosition(playerX, playerY);
-		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player->GetWidth(), _player->GetHeight(), playerX, playerY);
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, 
+			_player->GetX(), _player->GetY(), _player->GetWidth(), _player->GetHeight());
 	}
 
 	{
-		float playerX, playerY;
-		_player->GetPaintPosition(playerX, playerY);
+		
 		float posY = _player->GetY();
 		int time = _buttonAManager->GetLeftTime() + 1;
-		_numberManager->PaintNumber(time, playerX, posY, 1, NumberManager::PIVOT::RIGHT);
+		float w,h;
+		_painterManager->GetSpriteSize(PainterManager::SPRITE_ID::PLAYER, w, h);
+		_numberManager->PaintNumber(time, _player->GetX()-w/2,_player->GetY(), 1, NumberManager::PIVOT::RIGHT);
 	}
 
 	{
-		float playerX, playerY;
-		_player->GetPaintPosition(playerX, playerY);
-
-		float x = SCREEN_WIDTH - playerX - ENEMY_WIDTH; // OK
-		float y = SCREEN_HEIGHT - POSITION_Y_PLAYER;
-		_painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY,
-									ENEMY_WIDTH, ENEMY_HEIGHT, x, y);
+		float x = SCREEN_WIDTH - _player->GetX();
+		float y = SCREEN_HEIGHT - _player->GetY();
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, x, y,
+									ENEMY_WIDTH, ENEMY_HEIGHT);
 	}
 
 	{
-		_painterManager->AddUIToPaint(_improvementsUI[_leftSelection],
+		_painterManager->AddToPaint(_improvementsUI[_leftSelection],
 									  SCREEN_WIDTH * OPTION_LEFT_X,
 									  SCREEN_HEIGHT * 0.5f);
-		_painterManager->AddUIToPaint(_improvementsUI[_rightSelection],
+		_painterManager->AddToPaint(_improvementsUI[_rightSelection],
 									  SCREEN_WIDTH * OPTION_RIGHT_X,
 									  SCREEN_HEIGHT * 0.5f);
 	}
 
 	{
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
 									  SCREEN_WIDTH * OPTION_LEFT_X, SELECTOR_Y_PLAYER);
 
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
 									  SCREEN_WIDTH * OPTION_RIGHT_X, SELECTOR_Y_PLAYER);
 
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::ENEMY_SELECTOR,
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY_SELECTOR,
 									  SCREEN_WIDTH * OPTION_LEFT_X, SELECTOR_Y_ENEMY);
 
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::ENEMY_SELECTOR,
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY_SELECTOR,
 									  SCREEN_WIDTH * OPTION_RIGHT_X, SELECTOR_Y_ENEMY);
 	}
 }
@@ -105,10 +102,12 @@ void ImprovementSelectionState::OnEnter()
 											  _callbackSeleccion(optionForPlayer, optionForEnemy);
 										  }
 
-										  int idLeft = _alphaManager->AddUIAlpha(ALPHA_TIME_ENTER_GAME, SCREEN_WIDTH * OPTION_LEFT_X, SCREEN_HEIGHT * 0.5f, 
+										  int idLeft = _alphaManager->AddAlpha(ALPHA_TIME_ENTER_GAME,
+											 SCREEN_WIDTH * OPTION_LEFT_X, SCREEN_HEIGHT * 0.5f,
 											_improvementsUI[_leftSelection]);
 
-											_alphaManager->AddUIAlpha(ALPHA_TIME_ENTER_GAME, SCREEN_WIDTH * OPTION_RIGHT_X, SCREEN_HEIGHT * 0.5f,
+											_alphaManager->AddAlpha(ALPHA_TIME_ENTER_GAME, 
+												SCREEN_WIDTH * OPTION_RIGHT_X, SCREEN_HEIGHT * 0.5f,
 											_improvementsUI[_rightSelection]);
 
 										  	_alphaManager->AddCallback(idLeft, [this]()
@@ -125,7 +124,6 @@ void ImprovementSelectionState::OnEnter()
 void ImprovementSelectionState::OnExit()
 {
 }
-
 void ImprovementSelectionState::InitializeImprovementsUI()
 {
 	_improvementsUI[std::string(IMPROVEMENT_3_SHOTS)] = PainterManager::SPRITE_ID::SHOT_3_TIMES;

@@ -15,8 +15,8 @@ public:
 
 public:
 	void Update(const float deltaTime);
-	int AddUIAlpha(float duration, float x, float y, PainterManager::SPRITE_ID sprite);
-	int AddAlpha(float duration, float x, float y, float width, float height, PainterManager::SPRITE_ID sprite);
+	int AddAlpha(float duration, float x, float y, PainterManager::SPRITE_ID sprite);
+	int AddAlpha(float duration, float x, float y, PainterManager::SPRITE_ID sprite, float width, float height);
 	void FinishAll();
 	void FinishAlpha(int id);
 	void Paint();
@@ -24,9 +24,10 @@ public:
 	void CallFunctionInPool(int id, std::function<void(Alpha& alpha)> function);
 
 private:
-int AddInternalAlpha(float duration, bool isUI, float startX, float startY,
-                            float width, float height, 
-							PainterManager::SPRITE_ID sprite);
+int AddInternalAlpha(float duration, float startX, float startY,
+					 PainterManager::SPRITE_ID sprite,
+                     float width, float height
+							);
 
 private:
 	Pool<Alpha, MAX_ALPHA_VALUES> _alphaPool;

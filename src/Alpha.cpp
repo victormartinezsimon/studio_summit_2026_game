@@ -13,13 +13,12 @@ bool Alpha::Update(const float deltaTime)
     return false;
 }
 
-void Alpha::ConfigureAlpha(float duration, bool isUI, float x, float y,
-                            float width, float height, PainterManager::SPRITE_ID sprite)
+void Alpha::ConfigureAlpha(float duration, float x, float y,
+                           PainterManager::SPRITE_ID sprite, float width, float height)
 {
     _acumTime = 0;
     _duration = duration;
     _sprite = sprite;
-    _isUI = isUI;
     _currentX = x;
     _currentY = y;
     _width = width;
@@ -66,14 +65,7 @@ void Alpha::Paint(PainterManager* _painter)
         maskIndex = PainterManager::MASK_ID::QUARTER;
     }
 
-    if(_isUI)
-    {
-        _painter->AddUIToPaintWithAlpha(_sprite, _currentX, _currentY, maskIndex);
-    }
-    else
-    {
-        _painter->AddToPaintWithAlpha(_sprite, _width, _height,
-            _currentX, _currentY, maskIndex);
-    }
+    _painter->AddToPaint(_sprite, _currentX, _currentY, maskIndex, _width, _height);
+    
 }
 

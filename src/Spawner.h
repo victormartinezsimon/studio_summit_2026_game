@@ -35,10 +35,7 @@ public:
 	{
 		 _objects.for_each_active([&](const T& obj)
         {
-            float posX, posY;
-            obj.GetPaintPosition(posX, posY);
-            _painterManager->AddToPaint(obj.GetSprite(), 
-                obj.GetWidth(), obj.GetHeight(), posX, posY);
+            _painterManager->AddToPaint(obj.GetSprite(),obj.GetX(), obj.GetY(), obj.GetWidth(), obj.GetHeight());
         });
 	}
 
@@ -69,14 +66,13 @@ private:
 
 	bool OutOfScreen(const T& obj)
 	{
-		float posX, posY;
-        obj.GetPaintPosition(posX, posY);
-        if(posX + obj.GetWidth() < 0 && obj.GetMoveLeft())
+		auto x = obj.GetX();
+        if(x + obj.GetWidth() < 0 && obj.GetMoveLeft())
         {   
             return true;
         }
 
-        if(posX > SCREEN_WIDTH && !obj.GetMoveLeft())
+        if(x > SCREEN_WIDTH && !obj.GetMoveLeft())
         {   
             return true;
         }

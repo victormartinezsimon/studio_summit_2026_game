@@ -36,42 +36,40 @@ void MainMenuState::Paint()
 	}
 
 	{
-		float playerX, playerY;
-		_player->GetPaintPosition(playerX, playerY);
-		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER,
-									_player->GetWidth(), _player->GetHeight(), playerX, playerY);
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER,_player->GetX(), _player->GetY(),
+									_player->GetWidth(), _player->GetHeight() );
 	}
 
 	{
-		float playerX, playerY;
-		_player->GetPaintPosition(playerX, playerY);
 		float posY = _player->GetY();
 		int time = _buttonAManager->GetLeftTime() + 1;
-		_numberManager->PaintNumber(time, playerX, posY, 1, NumberManager::PIVOT::RIGHT);
+		float w,h;
+		_painterManager->GetSpriteSize(PainterManager::SPRITE_ID::PLAYER, w, h);
+		_numberManager->PaintNumber(time, _player->GetX() - w/2, _player->GetY(), 1, NumberManager::PIVOT::RIGHT);
 	}
 
 	{
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::TITLE,
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::TITLE,
 									  SCREEN_WIDTH * 0.5f, TITLE_Y);
 	}
 
 	{
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
 									  START_GAME_SELECTOR_X, SELECTOR_Y);
 	}
 
 	{
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
 									  EXIT_GAME_X, SELECTOR_Y);
 	}
 	
 	{
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::START_GAME,
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::START_GAME,
 									  START_GAME_X, START_Y);
 	}
 
 	{
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::EXIT_GAME,
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::EXIT_GAME,
 									  EXIT_GAME_X, START_Y);
 	}
 
@@ -110,7 +108,7 @@ void MainMenuState::StartGame()
 	_alphaManager->FinishAll();
 	_easingManager->KillAll();
 
-	int id = _alphaManager->AddUIAlpha(ALPHA_TIME_ENTER_GAME, SCREEN_WIDTH * 0.5f, TITLE_Y, PainterManager::SPRITE_ID::TITLE);
+	int id = _alphaManager->AddAlpha(ALPHA_TIME_ENTER_GAME, SCREEN_WIDTH * 0.5f, TITLE_Y, PainterManager::SPRITE_ID::TITLE);
 	_alphaManager->AddCallback(id, [this]() { _nextState = STATES::INITIAL_MOVEMENT; });
 	_startingGame = true;
 }

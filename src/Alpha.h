@@ -10,9 +10,10 @@ class Alpha
 
 public:
 	bool Update(const float deltaTime);
-	void ConfigureAlpha(float duration, bool isUI, float x, float y,
-                            float width, float height, 
-							PainterManager::SPRITE_ID sprite);
+	void ConfigureAlpha(float duration, float x, float y,
+						PainterManager::SPRITE_ID sprite,
+						float width, float height
+						);
 	
 	void AddCallback(std::function<void()> callback);
 	void Paint(PainterManager* _painter);
@@ -20,9 +21,8 @@ public:
 	void SetPosition(float x, float y);
 
 private:
-int ConfigureInternalAlpha(float duration, bool isUI, float x, float y,
-                            float width, float height, 
-							PainterManager::SPRITE_ID sprite);
+int ConfigureInternalAlpha(float duration, float x, float y,
+                           PainterManager::SPRITE_ID sprite, float width, float height);
 
 public:
 	void SetID(int id)
@@ -49,7 +49,6 @@ private:
 	PainterManager::SPRITE_ID _sprite;
 	int _currentX;
 	int _currentY;
-	bool _isUI;
 	int _width;
 	int _height;
 	int _easeID;

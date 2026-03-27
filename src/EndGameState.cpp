@@ -30,18 +30,13 @@ State::STATES EndGameState::Update(const float deltaTime, float _currentFrameInp
 void EndGameState::Paint()
 {
 	{
-		float playerX, playerY;
-		_player->GetPaintPosition(playerX, playerY);
-		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER,
-									_player->GetWidth(), _player->GetHeight(), playerX, playerY);
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player->GetX(), _player->GetY(),
+									_player->GetWidth(), _player->GetHeight() );
 	}
 
 	{
-		float playerX, playerY;
-		_player->GetPaintPosition(playerX, playerY);
-		float posY = _player->GetY();
 		int time = _buttonAManager->GetLeftTime() + 1;
-		_numberManager->PaintNumber(time, playerX, posY, 1, NumberManager::PIVOT::RIGHT);
+		_numberManager->PaintNumber(time, _player->GetX(), _player->GetY(), 1, NumberManager::PIVOT::RIGHT);
 	}
 
 	{
@@ -49,17 +44,17 @@ void EndGameState::Paint()
 	}
 
 	{
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
 									  SELECTOR_X, SELECTOR_Y);
 	}
 	
 	{
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::FINAL_SCORE,
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::FINAL_SCORE,
 									  SCREEN_WIDTH * 0.5f, FINAL_SCORE_Y);
 	}
 
 	{
-		_painterManager->AddUIToPaint(PainterManager::SPRITE_ID::RETURN_MENU,
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::RETURN_MENU,
 									  SELECTOR_X, RETURN_Y);
 	}
 }

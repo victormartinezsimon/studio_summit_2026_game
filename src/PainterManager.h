@@ -28,8 +28,8 @@ private:
 		SPRITE_ID id;
 		unsigned int width;
 		unsigned int height;
-		int x;
-		int y;
+		float x;
+		float y;
 		unsigned int mask;
 	};
 public:
@@ -39,14 +39,15 @@ public:
 	void Paint() const;
 
 	Painter* GetPainter(){return _painter;}
+	void GetSpriteSize(SPRITE_ID id, float& width, float& height);
 
 public:
 	void ClearListPaint();
-	void AddToPaint(SPRITE_ID id, unsigned int width, unsigned int height, int x, int y);
-	void AddUIToPaint(SPRITE_ID id, int x, int y);
 
-	void AddToPaintWithAlpha(SPRITE_ID id, unsigned int width, unsigned int height, int x, int y, MASK_ID maskID);
-	void AddUIToPaintWithAlpha(SPRITE_ID id, int x, int y, MASK_ID maskID);
+	void AddToPaint(SPRITE_ID id, float x, float y);
+	void AddToPaint(SPRITE_ID id, float x, float y, MASK_ID mask);
+	void AddToPaint(SPRITE_ID id, float x, float y, unsigned int width, unsigned int height);
+	void AddToPaint(SPRITE_ID id, float x, float y, MASK_ID mask, unsigned int width, unsigned int height);
 
 private:
 	int GetMaskID(MASK_ID maskID);

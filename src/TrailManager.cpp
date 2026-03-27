@@ -37,7 +37,7 @@ void TrailManager::UpdateTrail(Trail& trail, const float deltaTime)
 
 void TrailManager::PaintTrail(PainterManager* painter, Trail& trail)
 {
-	painter->AddToPaintWithAlpha(trail.sprite, trail.width, trail.height, trail.x, trail.y, GetMaskFromFrame(trail));
+	painter->AddToPaint(trail.sprite, trail.x, trail.y, GetMaskFromFrame(trail), trail.width, trail.height );
 }
 
 PainterManager::MASK_ID TrailManager::GetMaskFromFrame(Trail& trail) const

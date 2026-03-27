@@ -380,9 +380,9 @@ void GameManager::AnimateNumberScore(const std::array<PainterManager::SPRITE_ID,
 
 	for(auto spriteID : elements)
 	{
-		int alphaID = _alphaManager.AddAlpha(DURATION_EASING_SCORE, 
-			currentX, currentY, NUMBER_0_WIDTH, NUMBER_0_HEIGHT, 
-			spriteID);
+		int alphaID = _alphaManager.AddAlpha(DURATION_EASING_SCORE,
+			currentX, currentY, spriteID, NUMBER_0_WIDTH, NUMBER_0_HEIGHT
+			);
 
 		int easeID = _easingManager.AddEase(DURATION_EASING_SCORE, currentX, currentY, 
 			currentX, endY, Ease::EASE_TYPES::INOUTCIRC, 
