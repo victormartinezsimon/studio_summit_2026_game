@@ -8,18 +8,28 @@ constexpr int TIME_POSITION_X = 0;
 
 namespace MAIN_MENU_COORDS
 {
-    constexpr int TITLE_X = SCREEN_WIDTH/2;
-    constexpr int TITLE_Y = 70;
+    constexpr float TITLE_X = SCREEN_WIDTH * 0.5f;
+    constexpr float TITLE_Y = 0.27 * SCREEN_HEIGHT;
 
-    constexpr int SELECTOR_START_X = 0.2 * SCREEN_WIDTH;
-    constexpr int SELECTOR_START_Y = 205;
+    constexpr float SELECTOR_START_X = 0.2 * SCREEN_WIDTH;
+    constexpr float SELECTOR_START_Y = 0.8 * SCREEN_HEIGHT;
 
-    constexpr int START_X = SELECTOR_START_X;
-    constexpr int START_Y = 153;
+    constexpr float START_X = SELECTOR_START_X;
+    constexpr int START_Y = 0.6 * SCREEN_HEIGHT;
 
-    constexpr int SELECTOR_EXIT_X = 0.8 * SCREEN_WIDTH;
-    constexpr int SELECTOR_EXIT_Y = SELECTOR_START_Y;
+    constexpr float SELECTOR_EXIT_X = 0.8 * SCREEN_WIDTH;
+    constexpr float SELECTOR_EXIT_Y = SELECTOR_START_Y;
 
     constexpr float EXIT_GAME_X = SELECTOR_EXIT_X;
     constexpr float EXIT_GAME_Y = START_Y;
+};
+
+namespace IMPROVEMENT_SELECTION_COORDS
+{
+    constexpr float OPTION_LEFT_X = SCREEN_WIDTH * 0.2;
+    constexpr float OPTION_RIGHT_X = SCREEN_WIDTH * 0.8;
+    constexpr float OPTION_Y = SCREEN_HEIGHT * 0.5;
+
+    constexpr float SELECTOR_Y_PLAYER = MAIN_MENU_COORDS::SELECTOR_START_Y; //190;
+    constexpr float SELECTOR_Y_ENEMY = SCREEN_HEIGHT - SELECTOR_Y_PLAYER;
 };

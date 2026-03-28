@@ -7,6 +7,7 @@
 #include "NumberManager.h"
 #include "AlphaManager.h"
 
+//TODO: REFACTOR ALL THIS CLASS
 constexpr int FINAL_SCORE_Y = FINAL_SCORE_HEIGHT;
 constexpr int RETURN_Y = 153;
 constexpr int SELECTOR_Y = 205;

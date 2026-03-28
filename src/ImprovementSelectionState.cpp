@@ -7,11 +7,6 @@
 #include "NumberManager.h"
 #include "AlphaManager.h"
 
-constexpr int SELECTOR_Y_PLAYER = 190;
-constexpr int SELECTOR_Y_ENEMY = SCREEN_HEIGHT - SELECTOR_Y_PLAYER;
-constexpr float OPTION_LEFT_X = 0.2;
-constexpr float OPTION_RIGHT_X = 0.8;
-
 ImprovementSelectionState::ImprovementSelectionState(Plane *player, PainterManager *painter, 
         NumberManager* numberManager, AlphaManager* alphaManager,
         EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager, 
@@ -58,34 +53,38 @@ void ImprovementSelectionState::PaintUI()
 	
 	{
 		_painterManager->AddToPaint(_improvementsUI[_leftSelection],
-									  SCREEN_WIDTH * OPTION_LEFT_X,
-									  SCREEN_HEIGHT * 0.5f);
+									  IMPROVEMENT_SELECTION_COORDS::OPTION_LEFT_X,
+									  IMPROVEMENT_SELECTION_COORDS::OPTION_Y);
 									  
 		_painterManager->AddToPaint(_improvementsUI[_rightSelection],
-									  SCREEN_WIDTH * OPTION_RIGHT_X,
-									  SCREEN_HEIGHT * 0.5f);
+									  IMPROVEMENT_SELECTION_COORDS::OPTION_RIGHT_X,
+									  IMPROVEMENT_SELECTION_COORDS::OPTION_Y);
 	}
 
 	{
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
-									  SCREEN_WIDTH * OPTION_LEFT_X, SELECTOR_Y_PLAYER);
+									IMPROVEMENT_SELECTION_COORDS::OPTION_LEFT_X, 
+  									IMPROVEMENT_SELECTION_COORDS::SELECTOR_Y_PLAYER);
 
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
-									  SCREEN_WIDTH * OPTION_RIGHT_X, SELECTOR_Y_PLAYER);
+									IMPROVEMENT_SELECTION_COORDS::OPTION_RIGHT_X, 
+  									IMPROVEMENT_SELECTION_COORDS::SELECTOR_Y_PLAYER);
 
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY_SELECTOR,
-									  SCREEN_WIDTH * OPTION_LEFT_X, SELECTOR_Y_ENEMY);
+									IMPROVEMENT_SELECTION_COORDS::OPTION_LEFT_X, 
+  									IMPROVEMENT_SELECTION_COORDS::SELECTOR_Y_ENEMY);
 
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY_SELECTOR,
-									  SCREEN_WIDTH * OPTION_RIGHT_X, SELECTOR_Y_ENEMY);
+									IMPROVEMENT_SELECTION_COORDS::OPTION_RIGHT_X, 
+  									IMPROVEMENT_SELECTION_COORDS::SELECTOR_Y_ENEMY);
 	}
 }
 void ImprovementSelectionState::OnEnter()
 {
-	auto halfZoneA = SCREEN_WIDTH * OPTION_LEFT_X;
+	auto halfZoneA = IMPROVEMENT_SELECTION_COORDS::OPTION_LEFT_X;
 	std::pair<float, float> zoneA = {halfZoneA - PLAYER_SELECTOR_WIDTH / 2, halfZoneA + PLAYER_SELECTOR_WIDTH / 2};
 
-	auto halfZoneB = SCREEN_WIDTH * OPTION_RIGHT_X;
+	auto halfZoneB = IMPROVEMENT_SELECTION_COORDS::OPTION_RIGHT_X;
 	std::pair<float, float> zoneB = {halfZoneB - PLAYER_SELECTOR_WIDTH / 2, halfZoneB + PLAYER_SELECTOR_WIDTH / 2};
 
 	_buttonAManager->SelectInPosition(TIME_TO_SELECT_IMPROVEMENT, zoneA, zoneB,
@@ -106,11 +105,11 @@ void ImprovementSelectionState::OnEnter()
 										  }
 
 										  int idLeft = _alphaManager->AddAlpha(ALPHA_TIME_ENTER_GAME,
-											 SCREEN_WIDTH * OPTION_LEFT_X, SCREEN_HEIGHT * 0.5f,
+											 IMPROVEMENT_SELECTION_COORDS::OPTION_LEFT_X, SCREEN_HEIGHT * 0.5f,
 											_improvementsUI[_leftSelection]);
 
 											_alphaManager->AddAlpha(ALPHA_TIME_ENTER_GAME, 
-												SCREEN_WIDTH * OPTION_RIGHT_X, SCREEN_HEIGHT * 0.5f,
+												IMPROVEMENT_SELECTION_COORDS::OPTION_RIGHT_X, SCREEN_HEIGHT * 0.5f,
 											_improvementsUI[_rightSelection]);
 
 										  	_alphaManager->AddCallback(idLeft, [this]()

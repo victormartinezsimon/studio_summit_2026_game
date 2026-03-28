@@ -53,6 +53,16 @@ void MainMenuState::PaintUI()
 	}
 
 	{
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::START_GAME,
+									  MAIN_MENU_COORDS::START_X, MAIN_MENU_COORDS::START_Y);
+	}
+
+	{
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::EXIT_GAME,
+									  MAIN_MENU_COORDS::EXIT_GAME_X, MAIN_MENU_COORDS::EXIT_GAME_Y);
+	}
+
+	{
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
 									  MAIN_MENU_COORDS::SELECTOR_START_X, MAIN_MENU_COORDS::SELECTOR_START_Y);
 	}
@@ -62,15 +72,7 @@ void MainMenuState::PaintUI()
 									   MAIN_MENU_COORDS::SELECTOR_EXIT_X, MAIN_MENU_COORDS::SELECTOR_EXIT_Y);
 	}
 	
-	{
-		_painterManager->AddToPaint(PainterManager::SPRITE_ID::START_GAME,
-									  MAIN_MENU_COORDS::START_X, MAIN_MENU_COORDS::START_Y);
-	}
-
-	{
-		_painterManager->AddToPaint(PainterManager::SPRITE_ID::EXIT_GAME,
-									  MAIN_MENU_COORDS::EXIT_GAME_X, MAIN_MENU_COORDS::EXIT_GAME_Y);
-	}
+	
 }
 
 void MainMenuState::OnEnter()
