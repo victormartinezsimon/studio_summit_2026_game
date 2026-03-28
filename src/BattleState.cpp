@@ -45,19 +45,13 @@ State::STATES BattleState::Update(const float deltaTime, float currentFrameInput
 }
 void BattleState::Paint()
 {
-    {
-        _player->Paint(_painterManager);
-    }
+    _player->Paint(_painterManager);
+    _bulletsPool->Paint(_painterManager);
+    _enemiesPool->Paint(_painterManager);
+}
 
-    {
-        _bulletsPool->Paint(_painterManager);
-    }
-
-    {
-        
-        _enemiesPool->Paint(_painterManager);
-    }
-
+void BattleState::PaintUI()
+{
     {
         long long value = *_score;
         _numberManager->PaintNumber(value, SCORE_POSITION_X, SCREEN_HEIGHT - NUMBER_0_HEIGHT, 3, NumberManager::PIVOT::RIGHT);

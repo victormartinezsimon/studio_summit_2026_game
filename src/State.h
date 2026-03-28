@@ -32,6 +32,7 @@ public:
 public:
     virtual STATES Update(const float deltaTime, float _currentFrameInputValueNormalized) {return STATES::MENU;};
     virtual void Paint() {};
+    virtual void PaintUI() {};
     virtual void OnEnter() {};
     virtual void OnExit() {};
 

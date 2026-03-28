@@ -20,6 +20,7 @@ class ImprovementSelectionState: public State
     public:    
         STATES Update(const float deltaTime, float currentFrameInputValueNormalized)override;
         void Paint()override;
+        void PaintUI()override;
         void OnEnter()override;
         void OnExit()override;
 

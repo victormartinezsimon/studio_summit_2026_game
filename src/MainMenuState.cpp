@@ -45,7 +45,15 @@ void MainMenuState::Paint()
 		float w = _painterManager->GetWidth(PainterManager::SPRITE_ID::PLAYER);
 		_numberManager->PaintNumber(time, _player->GetX() - w/2, _player->GetY(), 1, NumberManager::PIVOT::RIGHT);
 	}
+}
 
+void MainMenuState::PaintUI()
+{
+	if (_startingGame)
+	{
+		return;
+	}
+	
 	{
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::TITLE,
 									  SCREEN_WIDTH * 0.5f, TITLE_Y);
@@ -70,10 +78,8 @@ void MainMenuState::Paint()
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::EXIT_GAME,
 									  EXIT_GAME_X, START_Y);
 	}
-
-	
-	
 }
+
 void MainMenuState::OnEnter()
 {
 	_buttonAManager->SelectInPosition(MAIN_MENU_TIME_TO_ENTER, 
@@ -95,6 +101,7 @@ void MainMenuState::OnEnter()
 	_player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
 	_player->SetPositionY(POSITION_Y_PLAYER);
 	_player->SetPlayerTeam(TEAM_PLAYER);
+	_player->SetHasShield(false);
 	_startingGame = false;
 }
 void MainMenuState::OnExit()

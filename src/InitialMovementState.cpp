@@ -22,14 +22,12 @@ State::STATES InitialMovementState::Update(const float deltaTime, float _current
 }
 void InitialMovementState::Paint()
 {
-    {
-		_player->Paint(_painterManager);
-	}
-
-	{
-		_enemiesPool->Paint(_painterManager);
-	}
+	_player->Paint(_painterManager);
+	_enemiesPool->Paint(_painterManager);
 }
+
+void InitialMovementState::PaintUI(){}
+
 void InitialMovementState::OnEnter()
 {
 	_nextState = STATES::INITIAL_MOVEMENT;

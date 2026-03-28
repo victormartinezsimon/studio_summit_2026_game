@@ -15,6 +15,7 @@ class EndGameState: public State
     public:    
         STATES Update(const float deltaTime, float _currentFrameInputValueNormalized)override;
         void Paint()override;
+        void PaintUI()override;
         void OnEnter()override;
         void OnExit()override;
 

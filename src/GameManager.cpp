@@ -256,6 +256,7 @@ void GameManager::Paint()
 	#endif
 	
 	_statesLogic[_oldStateLogic]->Paint();
+	_statesLogic[_oldStateLogic]->PaintUI();
 	_alphaManager.Paint();
 	_spawnerMeteorites.Paint(_painterManager);
 	_trailManager.Paint(_painterManager);

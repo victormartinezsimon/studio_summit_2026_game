@@ -52,7 +52,10 @@ void ImprovementSelectionState::Paint()
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, x, y,
 									ENEMY_WIDTH, ENEMY_HEIGHT);
 	}
-
+}
+void ImprovementSelectionState::PaintUI()
+{
+	
 	{
 		_painterManager->AddToPaint(_improvementsUI[_leftSelection],
 									  SCREEN_WIDTH * OPTION_LEFT_X,
