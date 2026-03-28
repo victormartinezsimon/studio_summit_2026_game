@@ -31,12 +31,13 @@ public:
 		_objects.for_each_active([&](T& obj){UpdateObject(deltaTime, obj);});
 	}
 
-	void Paint()
+	void Paint(PainterManager* painter) override
 	{
-		 _objects.for_each_active([&](const T& obj)
+		_objects.for_each_active([&](T& obj)
         {
-            _painterManager->AddToPaint(obj.GetSprite(),obj.GetX(), obj.GetY(), obj.GetWidth(), obj.GetHeight());
+			obj.Paint(_painterManager);
         });
+		
 	}
 
 	void Reset()

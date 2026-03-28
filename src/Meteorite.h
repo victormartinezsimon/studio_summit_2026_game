@@ -31,10 +31,11 @@ public:
 		return _moveLeft;
 	}
 
-	PainterManager::SPRITE_ID GetSprite() const
+	void Paint(PainterManager* painter)override
 	{
-		return PainterManager::SPRITE_ID::METEORITE;
+		painter->AddToPaint(PainterManager::SPRITE_ID::METEORITE, GetX(), GetY());
 	}
+
 
 private:
 	float _velocityX = 0;

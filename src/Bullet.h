@@ -9,6 +9,8 @@ public:
 public:
 	void SetVelocity(float velX, float velY);
 	void Update(const float deltaTime);
+	void Paint(PainterManager* painter)override;
+
 
 public:
 	void SetHasPenetration(bool value);

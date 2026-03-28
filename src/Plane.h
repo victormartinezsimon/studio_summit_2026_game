@@ -1,12 +1,14 @@
 #pragma once
 #include <functional>
 #include "WorldObject.h"
+#include "PainterManager.h"
 
 class Plane : public WorldObject
 {
 public:
 	void Update(const float deltaTime);
 	void Reset(float value);
+	void Paint(PainterManager* painter) override;
 
 public:
 	void SetCallbackFire(std::function<void(int, const Plane&)> fun);
@@ -33,6 +35,9 @@ public:
 public:
 	void SetRandomMovementID(int value);
 	int GetRandomMovementID() const;
+
+private:
+	void Paint(PainterManager* painter, PainterManager::SPRITE_ID spritePlane, PainterManager::SPRITE_ID spriteShield)const;
 
 private:
 	std::function<void(int, const Plane&)> _callbackFire = nullptr;

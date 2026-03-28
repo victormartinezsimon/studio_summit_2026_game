@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include "WorldObject.h"
+#include "PainterManager.h"
 
 class Explosion : public WorldObject
 {
@@ -25,6 +26,10 @@ public:
 		_duration = duration;
 	}
 
+	void Paint(PainterManager* painter) override
+	{
+		painter->AddToPaint(PainterManager::SPRITE_ID::EXPLOSION, GetX(), GetY());
+	}
 
 private:
 	float _duration = 0;

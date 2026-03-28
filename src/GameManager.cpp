@@ -253,9 +253,9 @@ void GameManager::Paint()
 	
 	_statesLogic[_oldStateLogic]->Paint();
 	_alphaManager.Paint();
-	_spawnerMeteorites.Paint();
+	_spawnerMeteorites.Paint(_painterManager);
 	_trailManager.Paint(_painterManager);
-	_spawnerStars.Paint();
+	_spawnerStars.Paint(_painterManager);
 }	
 void GameManager::ApplyImprovements(const std::string& playerSelection, const std::string& enemySelection)
 {

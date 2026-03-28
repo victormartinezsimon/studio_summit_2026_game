@@ -46,51 +46,21 @@ State::STATES BattleState::Update(const float deltaTime, float currentFrameInput
 void BattleState::Paint()
 {
     {
-        float currentTimeInmortal = _player->GetTimeInmortal();
-        if (currentTimeInmortal <= 0)
-        {
-            _painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, _player->GetX(), _player->GetY(),
-                _player->GetWidth(), _player->GetHeight());
-        }
-        else
-        {
-            float percent = currentTimeInmortal / TIME_INMORTAL;
-
-            PainterManager::MASK_ID mask = PainterManager::MASK_ID::HALF;
-            if ((percent >= 0.25 && percent <= 0.50) || (percent >= 0.75 && percent <= 1.0))
-            {
-                mask = PainterManager::MASK_ID::QUARTER;
-            }
-
-            _painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER,_player->GetX(), _player->GetY(), mask,
-                                                 _player->GetWidth(), _player->GetHeight());
-        }
-
-        if (_player->GetHasShield())
-        {
-            _painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SHIELD,_player->GetX(), _player->GetY(),
-                                        SHIELD_PLAYER_WIDTH, SHIELD_PLAYER_HEIGHT );
-        }
+        _player->Paint(_painterManager);
     }
 
     {
-        _bulletsPool->for_each_active([&](const Bullet &bullet)
+        _bulletsPool->for_each_active([&](Bullet &bullet)
                                       {
-            _painterManager->AddToPaint(PainterManager::SPRITE_ID::BULLET, bullet.GetX(), bullet.GetY(),
-                bullet.GetWidth(), bullet.GetHeight()); });
+                                        bullet.Paint(_painterManager);
+                                      });
     }
 
     {
-        _enemiesPool->for_each_active([this](const Plane &p)
+        _enemiesPool->for_each_active([this](Plane &p)
                                       {
-                _painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, p.GetX(), p.GetY(),
-                    p.GetWidth(), p.GetHeight());
-
-                if(p.GetHasShield())
-                {
-                    _painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY_SHIELD,p.GetX(), p.GetY(),
-                        SHIELD_ENEMY_WIDTH,SHIELD_ENEMY_HEIGHT );
-                } });
+                                        p.Paint(_painterManager);
+                                    });
     }
 
     {

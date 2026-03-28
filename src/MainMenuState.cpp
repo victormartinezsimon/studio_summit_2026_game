@@ -36,8 +36,7 @@ void MainMenuState::Paint()
 	}
 
 	{
-		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER,_player->GetX(), _player->GetY(),
-									_player->GetWidth(), _player->GetHeight() );
+		_player->Paint(_painterManager);
 	}
 
 	{
@@ -93,9 +92,9 @@ void MainMenuState::OnEnter()
 									  });
 
 	_nextState = STATES::MENU;
-
 	_player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
 	_player->SetPositionY(POSITION_Y_PLAYER);
+	_player->SetPlayerTeam(TEAM_PLAYER);
 	_startingGame = false;
 }
 void MainMenuState::OnExit()

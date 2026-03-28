@@ -50,6 +50,11 @@ public:
 		return PainterManager::SPRITE_ID::FAR_STAR;
 	}
 
+	void Paint(PainterManager* painter)override
+	{
+		painter->AddToPaint(GetSprite(), GetX(), GetY());
+	}
+
 private:
 	float _velocityX = 0;
 	float _velocityY = 0;

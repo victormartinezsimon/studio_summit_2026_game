@@ -33,9 +33,9 @@ State::STATES ImprovementSelectionState::Update(const float deltaTime, float cur
 void ImprovementSelectionState::Paint()
 {
 	if(_doingFadeOut){return;}
+
 	{
-		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, 
-			_player->GetX(), _player->GetY(), _player->GetWidth(), _player->GetHeight());
+		_player->Paint(_painterManager);
 	}
 
 	{
@@ -57,6 +57,7 @@ void ImprovementSelectionState::Paint()
 		_painterManager->AddToPaint(_improvementsUI[_leftSelection],
 									  SCREEN_WIDTH * OPTION_LEFT_X,
 									  SCREEN_HEIGHT * 0.5f);
+									  
 		_painterManager->AddToPaint(_improvementsUI[_rightSelection],
 									  SCREEN_WIDTH * OPTION_RIGHT_X,
 									  SCREEN_HEIGHT * 0.5f);

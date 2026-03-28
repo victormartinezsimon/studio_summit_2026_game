@@ -23,17 +23,14 @@ State::STATES InitialMovementState::Update(const float deltaTime, float _current
 void InitialMovementState::Paint()
 {
     {
-		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER, 
-			_player->GetX(), _player->GetY(),
-			_player->GetWidth(), _player->GetHeight());
+		_player->Paint(_painterManager);
 	}
 
 	{
-		_enemiesPool->for_each_active([this](const Plane &p)
+		_enemiesPool->for_each_active([this](Plane &p)
 									 {
-			_painterManager->AddToPaint(PainterManager::SPRITE_ID::ENEMY, 
-				p.GetX(), p.GetY(),
-				p.GetWidth(), p.GetHeight()); });
+										p.Paint(_painterManager);
+									});
 	}
 }
 void InitialMovementState::OnEnter()
@@ -42,6 +39,7 @@ void InitialMovementState::OnEnter()
 
 	_player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
 	_player->SetPositionY(POSITION_Y_PLAYER);
+	_player->SetPlayerTeam(TEAM_PLAYER);
 	_enemiesPool->for_each_active(
 		[this](Plane &p)
 		{

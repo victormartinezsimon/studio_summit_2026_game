@@ -1,8 +1,13 @@
 #pragma once
 #include <utility>
 
+class PainterManager;
+
 class WorldObject
 {
+public:
+	virtual void Paint(PainterManager* painter) = 0;
+
 public:
 	float GetX() const
 	{
@@ -71,6 +76,6 @@ protected:
 	unsigned int _width = 0;
 	unsigned int _height = 0;
 
-	unsigned char _playerTeam= 0;
+	unsigned char _playerTeam = 0;
 	int _id = -1;
 };

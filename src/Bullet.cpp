@@ -2,6 +2,7 @@
 #include <cmath>
 #include "GameConfig.h"
 #include "Sprites.h"
+#include "PainterManager.h"
 
 Bullet::Bullet() : _velocityX(0), _velocityY(0)
 {
@@ -40,4 +41,9 @@ void Bullet::SetHasExplostion(bool value)
 bool Bullet::GetHasExplostion() const
 {
 	return _hasExplosion;
+}
+
+void Bullet::Paint(PainterManager* painter)
+{
+	painter->AddToPaint(PainterManager::SPRITE_ID::BULLET, GetX(), GetY());
 }
