@@ -231,6 +231,10 @@ bool GameManager::Update(const float deltaTime)
 			_currentLevel = 0;
 			InitializeConstantValues();
 		}
+		if(_oldStateLogic == State::STATES::END_GAME)
+		{
+			InitializeConstantValues();
+		}
 
 		_statesBeginFunction[nextState]();
 		_statesLogic[nextState]->OnEnter();

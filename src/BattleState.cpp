@@ -351,9 +351,6 @@ void BattleState::ConfigureExplosion(const int id, Explosion &exp, const Bullet 
         y -= EXPLOSION_HEIGHT / 2;
     }
     exp.SetPosition(x, y);
-    x -= EXPLOSION_WIDTH / 2;
-    y -= EXPLOSION_HEIGHT / 2;
-
     exp.SetID(id);
     exp.SetSize(EXPLOSION_WIDTH, EXPLOSION_HEIGHT);
     exp.SetPlayerTeam(bullet.GetPlayerTeam());
