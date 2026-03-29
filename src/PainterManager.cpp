@@ -42,6 +42,8 @@ PainterManager::PainterManager()
 	_sprites[SPRITE_ID::NUMBER_8] = sprite_NUMBER_8;
 	_sprites[SPRITE_ID::NUMBER_9] = sprite_NUMBER_9;
 
+	_sprites[SPRITE_ID::LETTERS] = sprite_LETTERS;
+
 	_painter = new Painter();
 
 	_sizes[SPRITE_ID::PLAYER] = {PLAYER_WIDTH, PLAYER_HEIGHT};
@@ -85,6 +87,8 @@ PainterManager::PainterManager()
 	_sizes[SPRITE_ID::RETURN_MENU] = {RETURN_WIDTH, RETURN_HEIGHT};
 	_sizes[SPRITE_ID::EXIT_GAME] = {EXIT_WIDTH, EXIT_HEIGHT};
 
+	_sizes[SPRITE_ID::LETTERS] = {LETTERS_WIDTH, LETTERS_HEIGHT};
+
 }
 
 void PainterManager::GetSpriteSize(SPRITE_ID id, float& width, float& height)const
@@ -115,8 +119,11 @@ void PainterManager::Paint() const
 
 	for(int index = _currentIndexToPaint-1; index >= 0; --index)
 	{
+		float w, h;
+		GetSpriteSize(_toPaint[index].id, w, h);
 		_painter->PaintItem(_sprites.at(_toPaint[index].id), _toPaint[index].width, _toPaint[index].height, _toPaint[index].x, _toPaint[index].y, 
-		_toPaint[index].mask, _toPaint[index].spriteCoordX, _toPaint[index].spriteCoordY);
+		_toPaint[index].mask, _toPaint[index].spriteCoordX, _toPaint[index].spriteCoordY,
+		w, h );
 	}
 
 	_painter->EndPaint();

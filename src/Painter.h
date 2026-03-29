@@ -44,7 +44,8 @@ public:
 
 public:
 	void PaintBackground();
-	void PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y, int maskType, int startX, int startY);
+	void PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y, int maskType,
+		 int startX, int startY, int fullImageWidth, int fullImageHeight);
 
 public:
  struct SPPlatform* GetPlatform(){return s_platform;}
@@ -54,15 +55,17 @@ private:
 	void masked_blit_8(
 		uint8_t *dst,
 		uint32_t dst_stride,
-		int dst_w,
-		int dst_h,
-		const uint8_t *src,
-		int src_w,
-		int src_h,
-		int dst_x,
-		int dst_y,
+		int screen_width,
+		int screen_height,
+		const uint8_t *sprite,
+		int sprite_width,
+		int sprite_height,
+		int screen_x,
+		int screen_y,
 		int startX,
 		int startY,
+		int full_image_widht,
+		int full_image_height,
 		const uint8_t transparent_id,
 		uint8x16_t evenRowMask, uint8x16_t oddRowMask);
 

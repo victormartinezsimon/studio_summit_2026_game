@@ -68,7 +68,8 @@ void Painter::PaintBackground()
 	VPUClear(s_platform->vx, 0x10101010);
 }
 
-void Painter::PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y, int maskType, int startX, int startY)
+void Painter::PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y, 
+	int maskType, int startX, int startY, int fullImageWidth, int fullImageHeight)
 {
 	uint8x16_t evenMask = allMask;
 	uint8x16_t oddMask = allMask;
@@ -83,7 +84,9 @@ void Painter::PaintItem(const uint8_t *sprite, unsigned int width, unsigned int 
 		oddMask = quarterMaskAlt;
 	}
 
-	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, startX, startY, TRANSPARENT_KEY, evenMask, oddMask);
+	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, startX, startY, 
+		fullImageWidth, fullImageHeight, TRANSPARENT_KEY, 
+		evenMask, oddMask);
 }
 
 void Painter::init_palette(struct EVideoContext *vctx)
@@ -117,40 +120,42 @@ void Painter::init_palette(struct EVideoContext *vctx)
 void Painter::masked_blit_8(
 	uint8_t *dst,
 	uint32_t dst_stride,
-	int dst_w,
-	int dst_h,
-	const uint8_t *src,
-	int src_w,
-	int src_h,
-	int dst_x,
-	int dst_y,
+	int screen_width,
+	int screen_height,
+	const uint8_t *sprite,
+	int sprite_width,
+	int sprite_height,
+	int screen_x,
+	int screen_y,
 	int startX,
 	int startY,
+	int full_image_widht,
+	int full_image_height,
 	const uint8_t transparent_key, 
 	uint8x16_t evenRowMask, uint8x16_t oddRowMask)
 {
-	int src_x = 0;
-	int src_y = 0;
-	int w = src_w;
-	int h = src_h;
+	int src_x = startX;
+	int src_y = startY;
+	int w = sprite_width;
+	int h = sprite_height;
 
 	// Clip the source and destination rectangles to ensure we don't read/write out of screen bounds
-	if (dst_x < 0)
+	if (screen_x < 0)
 	{
-		src_x = -dst_x;
-		dst_x = 0;
+		src_x = -screen_x;
+		screen_x = 0;
 		w -= src_x;
 	}
-	if (dst_y < 0)
+	if (screen_y < 0)
 	{
-		src_y = -dst_y;
-		dst_y = 0;
+		src_y = -screen_y;
+		screen_y = 0;
 		h -= src_y;
 	}
-	if (dst_x + w > dst_w)
-		w = dst_w - dst_x;
-	if (dst_y + h > dst_h)
-		h = dst_h - dst_y;
+	if (screen_x + w > screen_width)
+		w = screen_width - screen_x;
+	if (screen_y + h > screen_height)
+		h = screen_height - screen_y;
 	if (w <= 0 || h <= 0)
 		return;
 
@@ -158,38 +163,38 @@ void Painter::masked_blit_8(
 	uint8x16_t keyv0 = vdupq_n_u8(transparent_key);
 #endif
 
-	int endY = startY + h;
-	for (int y = startY; y < endY; ++y)
+	for (int y = 0; y < h; ++y)
 	{
-		uint8_t *d = dst + (uint32_t)(dst_y + y) * dst_stride + dst_x;
-		const uint8_t *s = src + (src_y + y) * src_w + src_x;
-		uint8x16_t extraAlphaMask = ((dst_y + y) & 1) ? oddRowMask : evenRowMask;
+		uint8_t *d = dst + (uint32_t)(screen_y + y) * dst_stride + screen_x;
+		//const uint8_t *s_1 = sprite + (src_y + y) * sprite_width + src_x;
+		const uint8_t *s = sprite + (src_y + y) * full_image_widht + src_x;
 
-		int x = startX;
-		int endX = startX + w;
+		uint8x16_t extraAlphaMask = ((screen_y + y) & 1) ? oddRowMask : evenRowMask;
+
+		int x = 0;
 
 		// If NEON is available, we can process 16 pixels at a time.
 		// The key is compared against the source pixels, and if it matches,
 		// the destination pixel is kept; otherwise, the source pixel is copied to the destination.
 #if defined(__ARM_NEON) || defined(__ARM_NEON__)
-		for (; x + 15 < endX; x += 16)
+		for (; x + 15 < w; x += 16)
 		{
 			uint8x16_t sv = vld1q_u8(s + x);		 // Load source pixels
 			uint8x16_t dv = vld1q_u8(d + x);		 // Load destination pixels
 
-			// Apply extra alpha mask: where mask byte is 0x00, replace src pixel with transparent value
+			// Apply extra alpha mask: where mask byte is 0x00, replace sprite pixel with transparent value
     		 // Apply extra alpha mask first
             sv = vbslq_u8(extraAlphaMask, sv, keyv0);
 
             // Build transparency mask: 0xFF where pixel matches ANY transparent id
             uint8x16_t tmask = vceqq_u8(sv, keyv0);
 
-			uint8x16_t out = vbslq_u8(tmask, dv, sv); // transparent -> keep dst, else copy src
+			uint8x16_t out = vbslq_u8(tmask, dv, sv); // transparent -> keep dst, else copy sprite
             vst1q_u8(d + x, out);
 		}
 #endif
 		// Process any remaining pixels that don't fit into a 16-byte block
-		for (; x < endX; ++x)
+		for (; x < w; ++x)
 		{
 			uint8_t px = s[x];
 			if (px != TRANSPARENT_KEY)
