@@ -24,7 +24,7 @@ public:
 
 	void ConfigureSprite(PainterManager* painter) override
 	{
-		_spriteController.Configure(painter, PainterManager::SPRITE_ID::EXPLOSION, 3,3, 0.2);
+		_spriteController.Configure(painter, PainterManager::SPRITE_ID::EXPLOSION, 3,3, 0.1);
 	}
 
 	void GetSize(float& w, float& h)
