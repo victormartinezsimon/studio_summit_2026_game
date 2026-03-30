@@ -46,7 +46,7 @@ void InitialMovementState::OnEnter()
 				{
 					_nextState = STATES::BATTLE;
 				}, 
-				[&p](float x, float y, Ease& ease)	{ p.SetPosition(x, y); }
+				[&p](float x, float y, Ease& ease, float percent)	{ p.SetPosition(x, y); }
 			);
 		}
 	);

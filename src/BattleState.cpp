@@ -408,10 +408,9 @@ void BattleState::ConfigureRandomMovement(Plane &plane)
 
     float duration = _randomManager->GetValue(MIN_DURATION_MOVEMENT_ENEMY, MAX_DURATION_MOVEMENT_ENEMY, 100.0f);
 
-    int easeID = _easingManager->AddEase(duration, plane.GetX(), plane.GetY(), nextX, nextY, easeType, [&](bool normalEnded)
-                                         { 
-            if(normalEnded){ConfigureRandomMovement(plane);} }, [&plane](float x, float y, Ease &ease)
-                                         { plane.SetPosition(x, y); });
+    int easeID = _easingManager->AddEase(duration, plane.GetX(), plane.GetY(), nextX, nextY, easeType, 
+            [&](bool normalEnded) { if(normalEnded){ConfigureRandomMovement(plane);} }, 
+            [&plane](float x, float y, Ease &ease, float percent) { plane.SetPosition(x, y); });
     plane.SetRandomMovementID(easeID);
 }
 

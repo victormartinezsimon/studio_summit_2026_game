@@ -396,7 +396,7 @@ void GameManager::AnimateNumberScore(const std::array<PainterManager::SPRITE_ID,
 		int easeID = _easingManager.AddEase(DURATION_EASING_SCORE, currentX, currentY, 
 			currentX, endY, Ease::EASE_TYPES::INOUTCIRC, 
 			[](bool forced){},
-			[&](float x, float y, Ease& ease)
+			[&](float x, float y, Ease& ease, float percent)
 			{
 				int idAlpha = ease.GetReferenceID();
 				_alphaManager.CallFunctionInPool(idAlpha, [&](Alpha& alpha){alpha.SetPosition(x, y);});

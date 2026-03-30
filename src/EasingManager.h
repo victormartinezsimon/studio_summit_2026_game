@@ -16,7 +16,7 @@ public:
 
 	int AddEase(float duration, float startX, float startY, 
 		float endX, float endY, Ease::EASE_TYPES type, std::function<void(bool)> endCallback,
-		std::function<void(float currentX, float currentY, Ease& ease)> tickCallback);
+		std::function<void(float currentX, float currentY, Ease& ease, float percent)> tickCallback);
 
 	void KillEase(int id);
 	void KillAll();
