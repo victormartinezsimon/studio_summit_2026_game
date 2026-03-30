@@ -5,6 +5,7 @@
 #include "Sprites.h"
 #include "ButtonA.h"
 #include "NumberManager.h"
+#include "EasingManager.h"
 
 ImprovementSelectionState::ImprovementSelectionState(Plane *player, PainterManager *painter, 
         NumberManager* numberManager,
@@ -54,12 +55,14 @@ void ImprovementSelectionState::PaintUI()
 	{
 		_painterManager->AddToPaint(_improvementsUI[_leftSelection],
 									  IMPROVEMENT_SELECTION_COORDS::OPTION_LEFT_X,
-									  IMPROVEMENT_SELECTION_COORDS::OPTION_Y);
+									  IMPROVEMENT_SELECTION_COORDS::OPTION_Y, _percentEase);
 									  
 		_painterManager->AddToPaint(_improvementsUI[_rightSelection],
 									  IMPROVEMENT_SELECTION_COORDS::OPTION_RIGHT_X,
-									  IMPROVEMENT_SELECTION_COORDS::OPTION_Y);
+									  IMPROVEMENT_SELECTION_COORDS::OPTION_Y, _percentEase);
 	}
+
+	if(_doingFadeOut){return;}
 
 	{
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
@@ -104,21 +107,12 @@ void ImprovementSelectionState::OnEnter()
 											  _callbackSeleccion(optionForPlayer, optionForEnemy);
 										  }
 
-										//TODO: refactor this
-										  /*
-										  int idLeft = _alphaManager->AddAlpha(ALPHA_TIME_ENTER_GAME,
-											 IMPROVEMENT_SELECTION_COORDS::OPTION_LEFT_X, SCREEN_HEIGHT * 0.5f,
-											_improvementsUI[_leftSelection]);
+									    _easingManager->AddEase(ALPHA_TIME_ENTER_GAME, 
+										100, 100, 0, 0, Ease::EASE_TYPES::LINEAL, 
+										[&](bool forced){_nextState = STATES::INITIAL_MOVEMENT;},
+										[&](float x, float y, Ease& ease, float percent){_percentEase = 1 - percent;});
 
-											_alphaManager->AddAlpha(ALPHA_TIME_ENTER_GAME, 
-												IMPROVEMENT_SELECTION_COORDS::OPTION_RIGHT_X, SCREEN_HEIGHT * 0.5f,
-											_improvementsUI[_rightSelection]);
-
-										  	_alphaManager->AddCallback(idLeft, [this]()
-																	{ _nextState = STATES::INITIAL_MOVEMENT; });
-											_doingFadeOut = true;
-											*/
-										  	_nextState = STATES::INITIAL_MOVEMENT;
+										_doingFadeOut = true;
 									  });
 
 	_nextState = STATES::IMPROVEMENT_SELECTOR;

@@ -36,4 +36,5 @@ class ImprovementSelectionState: public State
         std::string _rightSelection;
         std::map<std::string, PainterManager::SPRITE_ID> _improvementsUI;
         bool _doingFadeOut = false;
+        float _percentEase = 1.0;
 };
