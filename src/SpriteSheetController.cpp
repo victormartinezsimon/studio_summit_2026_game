@@ -68,3 +68,9 @@ void SpriteSheetController::SetSprite(PainterManager::SPRITE_ID sprite)
 {
 	_sprite = sprite;
 }
+
+void SpriteSheetController::GetSize(float& w, float& h)
+{
+	w = _frameWidth;
+	h = _frameHeight;
+}

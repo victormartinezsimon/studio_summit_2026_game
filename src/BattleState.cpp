@@ -30,6 +30,8 @@ BattleState::BattleState(
 
 State::STATES BattleState::Update(const float deltaTime, float currentFrameInputValueNormalized)
 {
+    UpdateExplosions(deltaTime);
+
     UpdatePlayer(deltaTime);
 
     UpdateBullets(deltaTime);
@@ -48,6 +50,7 @@ void BattleState::Paint()
     _player->Paint(_painterManager);
     _bulletsPool->Paint(_painterManager);
     _enemiesPool->Paint(_painterManager);
+    _explosionPool.Paint(_painterManager);
 }
 
 void BattleState::PaintUI()
@@ -86,6 +89,15 @@ void BattleState::OnExit()
     _enemiesPool->ReturnAll();
     _explosionPool.ReturnAll();
 }
+
+void BattleState::UpdateExplosions(float deltaTime)
+{
+    _explosionPool.for_each_active([&](Explosion& exp)
+    {
+        exp.Update(deltaTime);
+    });
+}
+
 
 void BattleState::UpdatePlayer(float deltaTime)
 {
@@ -336,18 +348,22 @@ void BattleState::ConfigureExplosion(const int id, Explosion &exp, const Bullet 
 {
     float x = bullet.GetX();
     float y = bullet.GetY();
+
+    float w,h;
+    exp.GetSize(w,h);
+
     if (y <= 0)
     {
-        y += EXPLOSION_HEIGHT / 2;
+        y += h / 2;
     }
     if (y >= SCREEN_HEIGHT)
     {
-        y -= EXPLOSION_HEIGHT / 2;
+        y -= h / 2;
     }
     
     exp.SetPosition(x, y);
     exp.SetID(id);
-    exp.SetSize(EXPLOSION_WIDTH/3, EXPLOSION_HEIGHT/3);
+    exp.SetSize(w, h);
     exp.ConfigureSprite(_painterManager);
     exp.SetPlayerTeam(bullet.GetPlayerTeam());
 

@@ -63,7 +63,7 @@ void GameManager::InitializeConstantValues()
 	playerData.fireRate = DEFAULT_FIRE_RATE;
 	playerData.bulletsSource = DEFAULT_BULLETS_ORIGIN;
 	playerData.bulletHasPenetration = DEFAULT_BULLET_HAS_PENETRATION;
-	playerData.bulletHasExplosion = DEFAULT_BULLET_HAS_EXPLOSION;
+	playerData.bulletHasExplosion = true;//DEFAULT_BULLET_HAS_EXPLOSION;
 	playerData.hasShield = DEFAULT_HAS_SHIELD;
 	playerData.bulletsPerShot = DEFAULT_BULLETS_PER_SHOT;
 

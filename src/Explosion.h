@@ -7,7 +7,6 @@ class Explosion : public WorldObject
 {
 public:
 
-
 	void Update(const float deltaTime) override
 	{
 		bool ended = _spriteController.Update(deltaTime);
@@ -26,6 +25,11 @@ public:
 	void ConfigureSprite(PainterManager* painter) override
 	{
 		_spriteController.Configure(painter, PainterManager::SPRITE_ID::EXPLOSION, 3,3, 0.2);
+	}
+
+	void GetSize(float& w, float& h)
+	{
+		_spriteController.GetSize(w, h);
 	}
 
 private:
