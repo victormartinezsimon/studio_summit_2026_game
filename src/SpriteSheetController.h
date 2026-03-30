@@ -5,15 +5,17 @@
 class SpriteSheetController 
 {
 	public:
-		SpriteSheetController(unsigned int cols, unsigned int rows, float frameDuration, PainterManager::SPRITE_ID sprite);
+		SpriteSheetController();
 
 	public:
-		void CalculateSpriteSizes(const PainterManager* painter);
 		bool Update(const float deltaTime);
-		void Paint(PainterManager* painter, float x, float y);
-		void PaintFrame(PainterManager* painter, float x, float y, int frameId);
-		void GetCoordsForFrame(int frameId, int& coordX, int& coordY);
+		void Paint(PainterManager* painter, float x, float y)const;
+		void PaintFrame(PainterManager* painter, float x, float y, int frameId)const;
+		void GetCoordsForFrame(int frameId, int& coordX, int& coordY)const;
 		void Reset();
+
+		void Configure(	const PainterManager* painter, unsigned int cols, unsigned int rows, float frameDuration, PainterManager::SPRITE_ID sprite);
+		void SetSprite(PainterManager::SPRITE_ID sprite);
 
 	private:
 		unsigned int _cols;
