@@ -311,19 +311,17 @@ void BattleState::ReturnEnemy(Plane &enemy)
 
     _easingManager->KillEase(enemy.GetRandomMovementID());
 
-    /*
-    int id = _alphaManager->AddAlpha(ALPHA_TIME_DESTROY_PLANE, enemy.GetX(), enemy.GetY(),PainterManager::SPRITE_ID::ENEMY,
-                                     ENEMY_WIDTH, ENEMY_HEIGHT );
-    _alphaManager->AddCallback(id, [this]()
-                               { --_enemiesAlive; });
+    int id = _easingManager->AddEase(ALPHA_TIME_DESTROY_PLANE, 100.0, 100.0, 0, 0.0,Ease::EASE_TYPES::LINEAL,
+    [&](bool forced, int noUsed){--_enemiesAlive; _enemiesPool->Release(enemy);},
+    [&](float x, float y, Ease& ease, float percent){
 
-    if( id == -1)
-    {
-        --_enemiesAlive;
+       enemy.SetAlpha(1 - percent);
     }
-    */
-   //TODO: add alpha for the enemies
-   --_enemiesAlive;
+    );
+
+    //TODO: set enemy as dead, so it can't give more points
+
+    _easingManager->SetReferenceIDToEase(id, enemy.GetID());
     _damageEnemyCallback(enemy.GetX(), enemy.GetY());
 }
 
@@ -411,7 +409,7 @@ void BattleState::ConfigureRandomMovement(Plane &plane)
     float duration = _randomManager->GetValue(MIN_DURATION_MOVEMENT_ENEMY, MAX_DURATION_MOVEMENT_ENEMY, 100.0f);
 
     int easeID = _easingManager->AddEase(duration, plane.GetX(), plane.GetY(), nextX, nextY, easeType, 
-            [&](bool normalEnded) { if(normalEnded){ConfigureRandomMovement(plane);} }, 
+            [&](bool normalEnded, int noUsed) { if(normalEnded){ConfigureRandomMovement(plane);} }, 
             [&plane](float x, float y, Ease &ease, float percent) { plane.SetPosition(x, y); });
     plane.SetRandomMovementID(easeID);
 }

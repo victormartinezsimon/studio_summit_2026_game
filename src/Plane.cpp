@@ -111,7 +111,7 @@ void Plane::Paint(PainterManager* painter, PainterManager::SPRITE_ID spritePlane
 	float currentTimeInmortal = GetTimeInmortal();
 	if (currentTimeInmortal <= 0)
 	{
-		painter->AddToPaint(spritePlane, GetX(), GetY());
+		painter->AddToPaint(spritePlane, GetX(), GetY(), GetAlpha());
 	}
 	else
 	{

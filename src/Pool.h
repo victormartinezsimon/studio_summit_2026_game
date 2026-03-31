@@ -50,6 +50,11 @@ public:
 	void Release(const T& elem)
 	{
 		int index = elem.GetID();
+		Release(index);
+	}
+
+	void Release(int index)
+	{
 		_used[index] = false;
 		--_currentUse;
 
@@ -57,7 +62,6 @@ public:
 		{
 			--_lastInUse;
 		}
-
 	}
 
 	void ReturnAll()

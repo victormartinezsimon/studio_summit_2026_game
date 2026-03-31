@@ -121,4 +121,5 @@ private:
 	State::STATES _oldStateLogic;
 	std::map<State::STATES, std::function<void()>> _statesBeginFunction;
 	Spawner<Meteorite, TOTAL_METEORITES> _spawnerMeteorites;
+	Pool<WorldObject, TOTAL_NUMBER_ANIMATIONS> _numbersAnimation;
 };

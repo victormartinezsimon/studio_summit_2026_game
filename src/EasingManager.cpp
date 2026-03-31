@@ -24,7 +24,7 @@ int EasingManager::AddEase(float duration, float startX, float startY,
 
 int EasingManager::AddEase(float duration, float startX, float startY,
                             float endX, float endY, Ease::EASE_TYPES type, 
-                            std::function<void(bool)> endCallback,
+                            std::function<void(bool, int)> endCallback,
                             std::function<void(float currentX, float currentY, Ease& ease, float percent)> tickCallback)
 {
 
@@ -40,7 +40,7 @@ int EasingManager::AddEase(float duration, float startX, float startY,
 
     if(easeID == -1)
     {
-        endCallback( false );//just in case    
+        endCallback( false, -1 );//just in case    
     }
     return easeID;
 }

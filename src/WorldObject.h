@@ -10,11 +10,14 @@ class WorldObject
 public:
 	virtual void Paint(PainterManager* painter)
 	{
-		_spriteController.Paint(painter, GetX(), GetY());
+		_spriteController.Paint(painter, GetX(), GetY(), _alpha);
 	}
 	
-	virtual void ConfigureSprite(PainterManager* painter) = 0;
-	virtual void Update(const float deltaTime) = 0;
+	virtual void ConfigureSprite(PainterManager* painter){};
+	virtual void Update(const float deltaTime)
+	{
+		_spriteController.Update(deltaTime);
+	};
 
 public:
 	float GetX() const
@@ -78,9 +81,26 @@ public:
 		return _id;
 	}
 
+public:
+	void SetAlpha(float alpha)
+	{
+		_alpha = alpha;
+	}
+	int GetAlpha() const
+	{
+		return _alpha;
+	}
+
+public:
+	SpriteSheetController* GetSpriteController()
+	{
+		return &_spriteController;
+	}
+
 protected:
 	float _X = 0;
 	float _Y = 0;
+	float _alpha = 1;
 	unsigned int _width = 0;
 	unsigned int _height = 0;
 

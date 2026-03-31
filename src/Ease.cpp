@@ -20,6 +20,7 @@ bool Ease::Update(const float deltaTime)
         if(_tickCallback)
         {
             _tickCallback(x, y, *this, _acumTime / _duration);
+            GetValues( x, y);
         }
     }
     
@@ -33,7 +34,7 @@ void Ease::BuildEase(float duration, float startX, float startY,
 }
 
 void Ease::BuildEase(float duration, float startX, float startY,
-                            float endX, float endY, EASE_TYPES type, std::function<void(bool)> endCallback,
+                            float endX, float endY, EASE_TYPES type, std::function<void(bool, int)> endCallback,
                             std::function<void(float currentX, float currentY, Ease& ease, float percent)> tickCallback)
 {
     _acumTime = 0;
@@ -95,7 +96,7 @@ void Ease::CallEndCallback(bool value)
 {
     if(_endCallback != nullptr)
     {
-        _endCallback(value);
+        _endCallback(value, GetReferenceID());
     }
 }
 
@@ -149,5 +150,5 @@ float Ease::pingPong(float progress, float startValue, float endValue) const
 
 float Ease::lineal(float progress, float startValue, float endValue) const
 {
-    return startValue + (endValue - startValue) * progress;
+    return startValue + (endValue - startValue) * progress/100.0f;
 }

@@ -4,7 +4,6 @@ SpriteSheetController::SpriteSheetController():_cols(1), _rows(1),_frameDuration
 	 _totalFrames(1), _totalDuration(-1)
 	 
 {
-	
 }
 
 void SpriteSheetController::Configure( const PainterManager* painter, PainterManager::SPRITE_ID sprite, unsigned int cols, unsigned int rows, float frameDuration)
@@ -64,9 +63,11 @@ void SpriteSheetController::GetCoordsForFrame(int frameId, int& coordX, int& coo
 	coordY = _frameHeight * row;
 }
 
-void SpriteSheetController::SetSprite(PainterManager::SPRITE_ID sprite)
+void SpriteSheetController::SetSprite(PainterManager::SPRITE_ID sprite, float width, float height)
 {
 	_sprite = sprite;
+	_frameWidth = width;
+	_frameHeight = height;
 }
 
 void SpriteSheetController::GetSize(float& w, float& h)

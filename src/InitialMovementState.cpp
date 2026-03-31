@@ -40,7 +40,7 @@ void InitialMovementState::OnEnter()
 		{
 			_easingManager->AddEase(INTIAL_ANIMATION_DURATION, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
 				p.GetX(), p.GetY(), Ease::EASE_TYPES::INOUTCUBE, 
-				[this] (bool normalEnded)
+				[this] (bool normalEnded, int noUsed)
 				{
 					_nextState = STATES::BATTLE;
 				}, 

@@ -16,7 +16,7 @@ class SpriteSheetController
 
 		void Configure(	const PainterManager* painter, PainterManager::SPRITE_ID sprite, unsigned int cols, unsigned int rows, float frameDuration);
 		void Configure(	const PainterManager* painter,  PainterManager::SPRITE_ID sprite);
-		void SetSprite(PainterManager::SPRITE_ID sprite);
+		void SetSprite(PainterManager::SPRITE_ID sprite, float width, float height);
 
 		void GetSize(float& w, float& h);
 

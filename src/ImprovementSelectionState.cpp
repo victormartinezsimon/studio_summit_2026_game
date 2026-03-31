@@ -109,7 +109,7 @@ void ImprovementSelectionState::OnEnter()
 
 									    _easingManager->AddEase(ALPHA_TIME_ENTER_GAME, 
 										100, 100, 0, 0, Ease::EASE_TYPES::LINEAL, 
-										[&](bool forced){_nextState = STATES::INITIAL_MOVEMENT;},
+										[&](bool forced, int noUsed){_nextState = STATES::INITIAL_MOVEMENT;},
 										[&](float x, float y, Ease& ease, float percent){_percentEase = 1 - percent;});
 
 										_doingFadeOut = true;

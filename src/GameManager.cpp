@@ -14,6 +14,8 @@
 #include "Profiler.h"
 #include "TrailManager.h"
 
+#include <stdio.h>
+
 constexpr std::array<PainterManager::SPRITE_ID, 2> SPRITE_IDS_ANIMATION_HIT = {PainterManager::SPRITE_ID::NUMBER_0, PainterManager::SPRITE_ID::NUMBER_1};
 constexpr std::array<PainterManager::SPRITE_ID, 2> SPRITE_IDS_ANIMATION_KILL = {PainterManager::SPRITE_ID::NUMBER_0, PainterManager::SPRITE_ID::NUMBER_5};
 constexpr std::array<PainterManager::SPRITE_ID, 3> SPRITE_IDS_ANIMATION_LEVEL = {PainterManager::SPRITE_ID::NUMBER_0, PainterManager::SPRITE_ID::NUMBER_0, PainterManager::SPRITE_ID::NUMBER_1};
@@ -253,6 +255,7 @@ void GameManager::Paint()
 	
 	_statesLogic[_oldStateLogic]->Paint();
 	_statesLogic[_oldStateLogic]->PaintUI();
+	_numbersAnimation.Paint(_painterManager);
 	_spawnerMeteorites.Paint(_painterManager);
 	_trailManager.Paint(_painterManager);
 	_spawnerStars.Paint(_painterManager);
@@ -291,6 +294,7 @@ void GameManager::ConfigurePlane(Plane &p, const float posX, const float posY,
 	p.SetBulletsPerShot(data.bulletsPerShot);
 	p.SetFireRate(data.fireRate);
 	p.SetHasShield(data.hasShield);
+	p.SetAlpha(1);
 
 	if(isPlayer)
 	{
@@ -384,24 +388,30 @@ void GameManager::AnimateNumberScore(const std::array<PainterManager::SPRITE_ID,
 
 	for(auto spriteID : elements)
 	{
-		//TODO: change this to a new easing
-		/*
-		int alphaID = _alphaManager.AddAlpha(DURATION_EASING_SCORE,
-			currentX, currentY, spriteID, NUMBER_0_WIDTH, NUMBER_0_HEIGHT
-			);
+		int idNumber = _numbersAnimation.Get();
 
-		int easeID = _easingManager.AddEase(DURATION_EASING_SCORE, currentX, currentY, 
-			currentX, endY, Ease::EASE_TYPES::INOUTCIRC, 
-			[](bool forced){},
-			[&](float x, float y, Ease& ease, float percent)
-			{
-				int idAlpha = ease.GetReferenceID();
-				_alphaManager.CallFunctionInPool(idAlpha, [&](Alpha& alpha){alpha.SetPosition(x, y);});
-			}
-		);
-		_easingManager.SetReferenceIDToEase(easeID, alphaID);
+		_numbersAnimation.call_for_element(idNumber, [&](WorldObject& obj)
+		{
+			SpriteSheetController* sprite = obj.GetSpriteController();
+			sprite->Configure(_painterManager, spriteID);
+		});
+		
+		int idEase = _easingManager.AddEase(DURATION_EASING_SCORE, currentX, currentY, currentX, endY, Ease::EASE_TYPES::LINEAL, 
+					[&](bool forced, int idNum)
+					{
+						_numbersAnimation.Release(idNum);
+					},
+					[&](float x, float y, Ease& ease, float percent)
+					{
+						int numberAnimID = ease.GetReferenceID();
+						_numbersAnimation.call_for_element(numberAnimID, [&](WorldObject& obj){
+							obj.SetAlpha(1- percent);
+							obj.SetPositionX(x);
+							obj.SetPositionY(y);
+						});
+					});
+		_easingManager.SetReferenceIDToEase(idEase, idNumber);
 		currentX -= NUMBER_0_WIDTH;
-		*/
 	}
 }
 void GameManager::GetMinMaxXPosiblePositionForEnemies(float &minX, float &maxX) const
