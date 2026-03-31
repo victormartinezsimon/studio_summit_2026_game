@@ -378,8 +378,8 @@ void GameManager::EndLevel()
 template <unsigned int N>
 void GameManager::AnimateNumberScore(const std::array<PainterManager::SPRITE_ID, N> elements, bool up)
 {
-	float currentX = SCORE_POSITION_X - NUMBER_0_WIDTH;
-	float currentY = SCORE_POSITION_Y - NUMBER_0_HEIGHT/2;
+	float currentX = SCORE_POSITION_X - NUMBER_0_WIDTH/2;
+	float currentY = SCORE_POSITION_Y;
 	float endY = currentY - NUMBER_0_HEIGHT;
 	if(!up)
 	{

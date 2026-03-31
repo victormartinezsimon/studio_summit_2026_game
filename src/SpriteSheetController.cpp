@@ -51,7 +51,7 @@ void SpriteSheetController::Paint(PainterManager* painter, float x, float y)cons
 void SpriteSheetController::Paint(PainterManager* painter, float x, float y, float alpha)const
 {
 	int frameID = _timeAcum / _frameDuration;
-	PaintFrame(painter, x, y, frameID);
+	PaintFrame(painter, x, y, frameID, alpha);
 }
 void SpriteSheetController::PaintFrame(PainterManager* painter, float x, float y, int frameId) const
 {
