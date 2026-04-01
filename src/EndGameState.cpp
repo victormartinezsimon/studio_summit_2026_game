@@ -7,12 +7,7 @@
 #include "NumberManager.h"
 #include "EasingManager.h"
 
-//TODO: REFACTOR ALL THIS CLASS
-constexpr int FINAL_SCORE_Y = FINAL_SCORE_HEIGHT;
-constexpr int RETURN_Y = 153;
-constexpr int SELECTOR_Y = 205;
-constexpr int SCORE_Y = 110;
-constexpr int SELECTOR_X = SCREEN_WIDTH/2;
+constexpr float TIME_BLINK_LETTER = 0.5f;
 
 EndGameState::EndGameState(Plane *player, PainterManager *painter, 
         NumberManager* numberManager,
@@ -23,9 +18,9 @@ EndGameState::EndGameState(Plane *player, PainterManager *painter,
 
 	_bestscores[0].name = "AAA"; _bestscores[0].points = 1000;
 	_bestscores[1].name = "BBB"; _bestscores[1].points = 900;
-	_bestscores[2].name = "CCC"; _bestscores[2].points = 800;
+	_bestscores[2].name = "VMS"; _bestscores[2].points = 800;
 	_bestscores[3].name = "DDD"; _bestscores[3].points = 700;
-	_bestscores[4].name = "EEE"; _bestscores[4].points = 600;
+	_bestscores[4].name = "EEE"; _bestscores[4].points = -1;//always is a best score
 
 
 	_letters.Configure(painter, PainterManager::SPRITE_ID::LETTERS, 13, 2, -1);
@@ -34,7 +29,11 @@ EndGameState::EndGameState(Plane *player, PainterManager *painter,
 State::STATES EndGameState::Update(const float deltaTime, float _currentFrameInputValueNormalized)
 {
 	//_buttonAManager->Update(deltaTime, _currentFrameInputValueNormalized);
-
+	_timeAcumBlink += deltaTime;
+	if(_timeAcumBlink > TIME_BLINK_LETTER)
+	{
+		_timeAcumBlink = 0;
+	}
 	return _nextState;
 }
 void EndGameState::Paint()
@@ -54,13 +53,12 @@ void EndGameState::Paint()
 
 void EndGameState::PaintUI()
 {
-
 	int positionX = SCREEN_WIDTH * 0.5f;
 	int positionY = SCREEN_HEIGHT * 0.1f;
 
 	for(int i = 0; i < _bestscores.size(); ++i)
 	{
-		PaintScore(i, positionX, positionY);
+		PaintSavedScore(i, positionX, positionY, i == _playerIndexScore);
 		positionY += (_letters.GetHeight() + 5);
 	}
 
@@ -89,6 +87,13 @@ void EndGameState::PaintUI()
 void EndGameState::OnEnter()
 {
 	_nextState = STATES::END_GAME;
+	_timeAcumBlink = 0;
+	_indexLetterBlink = 0;
+
+	if(_playerIndexScore == -1)
+	{
+		_nextState = STATES::MENU;
+	}
 	/*
 	_buttonAManager->SelectInPosition(END_GAME_TIME_TO_MAIN_MENU, {SELECTOR_X- PLAYER_SELECTOR_WIDTH / 2, SELECTOR_X + PLAYER_SELECTOR_WIDTH / 2},
 									  [this](int selection)
@@ -109,9 +114,24 @@ void EndGameState::OnExit()
 void EndGameState::Configure(float score)
 {
 	_playerScore = score;
+	CalculateIndexPlayerScore();
 }
 
-void EndGameState::PaintScore(int index, float x, float y)
+void EndGameState::CalculateIndexPlayerScore()
+{
+	for(int i = 0; i < _bestscores.size(); ++i)
+	{
+		if(_bestscores[i].points < _playerScore)
+		{
+			_playerIndexScore = i;
+			return;
+		}
+	}
+	_playerIndexScore = -1;
+}
+
+
+void EndGameState::PaintSavedScore(int index, float x, float y, bool forPlayer)
 {
 	//paint letters
 	int letterX = x -  _letters.GetWidth();
@@ -119,10 +139,18 @@ void EndGameState::PaintScore(int index, float x, float y)
 	{
 		char letter = _bestscores[index].name[i];
 		int frame =  letter - 'A';
-		_letters.PaintFrame(_painterManager, letterX, y, frame);
+		if((i == _indexLetterBlink && _timeAcumBlink < TIME_BLINK_LETTER/2) || !forPlayer || i!= _indexLetterBlink)
+		{
+			_letters.PaintFrame(_painterManager, letterX, y, frame);
+		}
 		letterX -= (_letters.GetWidth()+5);
 	}
 
 	//paint numbers
-	_numberManager->PaintNumber(_bestscores[index].points, x, y, 4, NumberManager::PIVOT::LEFT);
+	int score = _bestscores[index].points;
+	if(forPlayer)
+	{
+		score = _playerScore;
+	}
+	_numberManager->PaintNumber(score, x, y, 4, NumberManager::PIVOT::LEFT);
 }

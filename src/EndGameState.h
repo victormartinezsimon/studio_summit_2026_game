@@ -33,7 +33,8 @@ public:
     void Configure(float score);
 
 private:
-    void PaintScore(int index, float x, float y);
+    void PaintSavedScore(int index, float x, float y, bool forPlayer);
+    void CalculateIndexPlayerScore();
 private:
     STATES _nextState;
     float _playerScore;
@@ -41,4 +42,7 @@ private:
     NumberManager *_numbers;
 
     std::array<Score, 5> _bestscores;
+    int _playerIndexScore;
+    float _timeAcumBlink = 0;
+    int _indexLetterBlink =0;
 };
