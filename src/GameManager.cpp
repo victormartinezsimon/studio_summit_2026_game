@@ -23,7 +23,7 @@ constexpr std::array<PainterManager::SPRITE_ID, 3> SPRITE_IDS_ANIMATION_LEVEL = 
 GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	: _inputManager(input),
 	  _painterManager(painterManager), _currentLevel(0), 
-	  _currentStateLogic(State::STATES::END_GAME),_currentScore(0), _numberManager(_painterManager),
+	  _currentStateLogic(State::STATES::MENU),_currentScore(0), _numberManager(_painterManager),
 	  _spawnerStars(TIME_SPAWN_STAR, painterManager),
 	  _spawnerMeteorites(TIME_SPAWN_METEORITE, painterManager)
 {

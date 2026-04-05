@@ -118,6 +118,13 @@ void EndGameState::Configure(float score)
 	else
 	{
 		
+		for(int i = _bestscores.size() -1; i > _playerIndexScore; --i)
+		{
+			_bestscores[i].name = _bestscores[i-1].name;
+			_bestscores[i].points = _bestscores[i-1].points;
+		}
+
+
 		float playerSelectorWidth = _painterManager->GetWidth(PainterManager::SPRITE_ID::PLAYER_SELECTOR);
 	
 		_buttonAManager->SelectInPosition(TIME_TO_SELECT_OPTION, 
@@ -133,6 +140,8 @@ void EndGameState::Configure(float score)
 
 void EndGameState::CalculateIndexPlayerScore()
 {
+	_playerIndexScore = 0;
+	return;
 	for(int i = 0; i < _bestscores.size(); ++i)
 	{
 		if(_bestscores[i].points < _playerScore)
