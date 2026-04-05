@@ -3,14 +3,21 @@
 
 constexpr int selectionA = 0;
 constexpr int selectionB = 1;
+constexpr int selectionC = 2;
 constexpr int selectionNone = -1;
 
 void ButtonA::SelectInPosition(float duration, std::pair<int, int> optionA, std::function<void(int)> callback)
 {
-    SelectInPosition(duration, optionA, {-1, -1}, callback);
+    SelectInPosition(duration, optionA, {-1, -1}, {-1, -1}, callback);
 }
 
 void ButtonA::SelectInPosition(float duration, std::pair<int, int> optionA, std::pair<int, int> optionB, std::function<void(int)> callback)
+{
+    SelectInPosition(duration, optionA, optionB, {-1, -1}, callback);
+}
+
+void ButtonA::SelectInPosition(float duration, std::pair<int, int> optionA, std::pair<int, int> optionB,
+                               std::pair<int, int> optionC, std::function<void(int)> callback)
 {
     _duration = duration;
     _callback = callback;
@@ -18,6 +25,8 @@ void ButtonA::SelectInPosition(float duration, std::pair<int, int> optionA, std:
 
     _optionA = optionA;
     _optionB = optionB;
+    _optionC = optionC;
+
     _acumTime = 0;
     _currentSelection = selectionNone;
 }
@@ -50,7 +59,18 @@ void ButtonA::Update(float deltaTime, const float currentInputValueNormalized)
         }
         else
         {
-            _acumTime = 0;
+            if (_optionC.first <= screenValue && screenValue <= _optionC.second)
+            {
+                if (_currentSelection == selectionC)
+                {
+                    _acumTime += deltaTime;
+                }
+                _currentSelection = selectionC;
+            }
+            else
+            {
+                _acumTime = 0;
+            }
         }
     }
 
