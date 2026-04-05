@@ -62,18 +62,26 @@ void EndGameState::PaintUI()
 		positionY += (_letters.GetHeight() + LETTER_SEPARATION);
 	}
 
-	_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
-									END_GAME_COORDS::DECREASE_LETTER_X, 
-  									END_GAME_COORDS::SELECTOR_Y);
+	if(_playerIndexScore != -1)
+	{
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
+										END_GAME_COORDS::DECREASE_LETTER_X, 
+										END_GAME_COORDS::SELECTOR_Y);
 
-	_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
-								END_GAME_COORDS::INCREASE_LETTER_X, 
-								END_GAME_COORDS::SELECTOR_Y);
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
+									END_GAME_COORDS::INCREASE_LETTER_X, 
+									END_GAME_COORDS::SELECTOR_Y);
 
-	_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
-								END_GAME_COORDS::ACCEPT_LETTER_X, 
-								END_GAME_COORDS::SELECTOR_Y);
-
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
+									END_GAME_COORDS::ACCEPT_LETTER_X, 
+									END_GAME_COORDS::SELECTOR_Y);
+	}
+	else
+	{
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
+									END_GAME_COORDS::ACCEPT_LETTER_X, 
+									END_GAME_COORDS::SELECTOR_Y);
+	}
 	
 }
 void EndGameState::OnEnter()
@@ -106,8 +114,7 @@ void EndGameState::Configure(float score)
 	{
 		
 		float playerSelectorWidth = _painterManager->GetWidth(PainterManager::SPRITE_ID::PLAYER_SELECTOR);
-
-		
+	
 		_buttonAManager->SelectInPosition(TIME_TO_SELECT_OPTION, 
 			{END_GAME_COORDS::DECREASE_LETTER_X - playerSelectorWidth/2, END_GAME_COORDS::DECREASE_LETTER_X + playerSelectorWidth/2 },
 			{END_GAME_COORDS::INCREASE_LETTER_X - playerSelectorWidth/2, END_GAME_COORDS::INCREASE_LETTER_X + playerSelectorWidth/2 },
@@ -163,6 +170,8 @@ void EndGameState::CallbackButtonA(int option)
 		++_indexLetterBlink;
 		if(_indexLetterBlink >= 3)
 		{
+			_bestscores[_playerIndexScore].points = _playerScore;
+			_playerIndexScore = -1;
 			ConfigureReturnToMenu();
 		}
 		return;
@@ -189,5 +198,17 @@ void EndGameState::CallbackButtonA(int option)
 
 void EndGameState::ConfigureReturnToMenu()
 {
+	_playerIndexScore = -1;
+	_indexLetterBlink = -1;
 
+	float playerSelectorWidth = _painterManager->GetWidth(PainterManager::SPRITE_ID::PLAYER_SELECTOR);
+
+	_buttonAManager->SelectInPosition(TIME_TO_SELECT_OPTION, 
+			{END_GAME_COORDS::ACCEPT_LETTER_X - playerSelectorWidth/2, END_GAME_COORDS::ACCEPT_LETTER_X + playerSelectorWidth/2 },
+			[&](int option){
+				
+				_nextState = STATES::MENU;
+			}
+		);
+	_buttonAManager->SetAutoRestart(true);//hack, so the callstack is correctly executed
 }
