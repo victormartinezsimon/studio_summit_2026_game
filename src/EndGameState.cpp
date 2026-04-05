@@ -6,6 +6,7 @@
 #include "ButtonA.h"
 #include "NumberManager.h"
 #include "EasingManager.h"
+#include <cmath>
 
 constexpr float TIME_BLINK_LETTER = 0.5f;
 constexpr float TIME_TO_SELECT_OPTION = 2;
@@ -44,7 +45,7 @@ void EndGameState::Paint()
 	}
 
 	{
-		int time = static_cast<int>(_buttonAManager->GetLeftTime());
+		int time = std::round(_buttonAManager->GetLeftTime());
 		float w = _painterManager->GetWidth(PainterManager::SPRITE_ID::PLAYER);
 		_numberManager->PaintNumber(time, _player->GetX() -w/2, _player->GetY(), 1, NumberManager::PIVOT::RIGHT);
 	}
