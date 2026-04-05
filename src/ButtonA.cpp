@@ -78,16 +78,16 @@ void ButtonA::Update(float deltaTime, const float currentInputValueNormalized)
 
     if (_acumTime >= _duration)
     {
-        _callback(_currentSelection);
         if(_autoRestart)
         {
-            _currentSelection = selectionNone;
             _acumTime = 0;
         }
         else
         {
             _enabled = false;
         }
+        _callback(_currentSelection);
+        _currentSelection = selectionNone;
     }
 }
 

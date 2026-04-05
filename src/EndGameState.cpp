@@ -210,5 +210,4 @@ void EndGameState::ConfigureReturnToMenu()
 				_nextState = STATES::MENU;
 			}
 		);
-	_buttonAManager->SetAutoRestart(true);//hack, so the callstack is correctly executed
 }
