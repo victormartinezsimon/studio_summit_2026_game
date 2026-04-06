@@ -16,7 +16,7 @@ public:
         BATTLE,
         IMPROVEMENT_SELECTOR,
         INITIAL_MOVEMENT,
-        END_GAME,
+        HIGH_SCORES,
         EXIT
     };
 

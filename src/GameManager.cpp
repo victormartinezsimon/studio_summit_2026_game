@@ -55,7 +55,7 @@ void GameManager::InitializeStates()
 		[this](float x, float y){DamageEnemy(x, y);}, 
 		&_currentScore, &_currentTimePlaying, &_spawnerMeteorites, &_trailManager);
 	
-	_statesLogic[State::STATES::END_GAME] = new EndGameState(&_player, _painterManager, &_numberManager,
+	_statesLogic[State::STATES::HIGH_SCORES] = new EndGameState(&_player, _painterManager, &_numberManager,
 		&_easingManager, &_randomManager, &_buttonAManager);
 }
 void GameManager::InitializeConstantValues()
@@ -130,9 +130,9 @@ void GameManager::InitializeStatesBegin()
 	{
 		StartLevel();
 	};
-	_statesBeginFunction[State::STATES::END_GAME] = [this]()
+	_statesBeginFunction[State::STATES::HIGH_SCORES] = [this]()
 	{
-		static_cast<EndGameState*>(_statesLogic[State::STATES::END_GAME])->Configure(_currentScore);
+		static_cast<EndGameState*>(_statesLogic[State::STATES::HIGH_SCORES])->Configure(_currentScore);
 	};
 }
 bool GameManager::Update(const float deltaTime)
@@ -192,7 +192,7 @@ bool GameManager::Update(const float deltaTime)
 
 	if(_currentTimePlaying >= MAX_SECS_PLAYING)
 	{
-		nextState = State::STATES::END_GAME;
+		nextState = State::STATES::HIGH_SCORES;
 		_currentTimePlaying = 0;
 	}
 
@@ -217,7 +217,7 @@ bool GameManager::Update(const float deltaTime)
 			}
 		}
 
-		if(_oldStateLogic == State::STATES::BATTLE && nextState != State::STATES::END_GAME)
+		if(_oldStateLogic == State::STATES::BATTLE && nextState != State::STATES::HIGH_SCORES)
 		{
 			EndLevel();
 		}
@@ -229,7 +229,7 @@ bool GameManager::Update(const float deltaTime)
 			_currentLevel = 0;
 			InitializeConstantValues();
 		}
-		if(_oldStateLogic == State::STATES::END_GAME)
+		if(_oldStateLogic == State::STATES::HIGH_SCORES)
 		{
 			InitializeConstantValues();
 		}

@@ -91,7 +91,7 @@ void EndGameState::PaintUI()
 }
 void EndGameState::OnEnter()
 {
-	_nextState = STATES::END_GAME;
+	_nextState = STATES::HIGH_SCORES;
 	_timeAcumBlink = 0;
 	_indexLetterBlink = 0;
 
