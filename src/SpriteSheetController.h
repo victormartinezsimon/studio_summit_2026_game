@@ -24,6 +24,8 @@ class SpriteSheetController
 		unsigned int GetWidth()const;
 		unsigned int GetHeight()const;
 
+		void SetFixedFrame(int value);
+
 	private:
 		unsigned int _cols;
 		unsigned int _rows;
@@ -36,4 +38,5 @@ class SpriteSheetController
 		unsigned int _spriteHeight;
 		unsigned int _frameWidth;
 		unsigned int _frameHeight;
+		int _fixedFrame = -1;
 };

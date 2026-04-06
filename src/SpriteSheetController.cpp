@@ -15,6 +15,7 @@ void SpriteSheetController::Configure( const PainterManager* painter, PainterMan
 	_timeAcum = 0;
 	_totalFrames = cols * rows;
 	_totalDuration =cols * rows * frameDuration;
+	_fixedFrame = -1;
 
 	unsigned int w, h;
 	painter->GetSpriteSize(_sprite, w,h);
@@ -51,6 +52,10 @@ void SpriteSheetController::Paint(PainterManager* painter, float x, float y)cons
 void SpriteSheetController::Paint(PainterManager* painter, float x, float y, float alpha)const
 {
 	int frameID = _timeAcum / _frameDuration;
+	if(_fixedFrame != -1)
+	{
+		frameID = _fixedFrame;
+	}
 	PaintFrame(painter, x, y, frameID, alpha);
 }
 void SpriteSheetController::PaintFrame(PainterManager* painter, float x, float y, int frameId) const
@@ -93,4 +98,9 @@ unsigned int SpriteSheetController::GetWidth() const
 unsigned int SpriteSheetController::GetHeight() const
 {
 	return _frameHeight;
+}
+
+void SpriteSheetController::SetFixedFrame(int value)
+{
+	_fixedFrame = value;
 }
