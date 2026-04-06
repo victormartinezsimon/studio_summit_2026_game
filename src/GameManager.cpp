@@ -10,6 +10,7 @@
 #include "InitialMovementState.h"
 #include "HighScoreState.h"
 #include "BattleState.h"
+#include "EndGameState.h"
 #include "Star.h"
 #include "Profiler.h"
 #include "TrailManager.h"
@@ -56,6 +57,9 @@ void GameManager::InitializeStates()
 		&_currentScore, &_currentTimePlaying, &_spawnerMeteorites, &_trailManager);
 	
 	_statesLogic[State::STATES::HIGH_SCORES] = new HighScoreState(&_player, _painterManager, &_numberManager,
+		&_easingManager, &_randomManager, &_buttonAManager);
+
+	_statesLogic[State::STATES::END_GAME] = new EndGameState(&_player, _painterManager, &_numberManager,
 		&_easingManager, &_randomManager, &_buttonAManager);
 }
 void GameManager::InitializeConstantValues()
@@ -134,6 +138,10 @@ void GameManager::InitializeStatesBegin()
 	{
 		static_cast<HighScoreState*>(_statesLogic[State::STATES::HIGH_SCORES])->Configure(_currentScore);
 	};
+	_statesBeginFunction[State::STATES::END_GAME] = [this]()
+	{
+		static_cast<EndGameState*>(_statesLogic[State::STATES::END_GAME])->Configure(_currentScore);
+	};
 }
 bool GameManager::Update(const float deltaTime)
 {
@@ -192,7 +200,7 @@ bool GameManager::Update(const float deltaTime)
 
 	if(_currentTimePlaying >= MAX_SECS_PLAYING)
 	{
-		nextState = State::STATES::HIGH_SCORES;
+		nextState = State::STATES::END_GAME;
 		_currentTimePlaying = 0;
 	}
 
