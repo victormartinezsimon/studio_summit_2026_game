@@ -87,6 +87,7 @@ void BattleState::OnExit()
     _bulletsPool->ReturnAll();
     _enemiesPool->ReturnAll();
     _explosionPool.ReturnAll();
+    _player->SetTimeInmortal(0);
 }
 
 void BattleState::UpdateExplosions(float deltaTime)
