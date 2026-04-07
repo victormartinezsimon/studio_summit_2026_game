@@ -34,7 +34,7 @@ void MainMenuState::Paint()
 
 	{
 		float posY = _player->GetY();
-		int time = _buttonAManager->GetLeftTime() + 1;
+		int time = std::round(_buttonAManager->GetLeftTime());
 		float w = _painterManager->GetWidth(PainterManager::SPRITE_ID::PLAYER);
 		_numberManager->PaintNumber(time, _player->GetX() - w/2, _player->GetY(), 1, NumberManager::PIVOT::RIGHT);
 	}
