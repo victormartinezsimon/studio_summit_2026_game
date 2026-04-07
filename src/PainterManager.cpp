@@ -1,6 +1,8 @@
 #include "PainterManager.h"
 #include "Painter.h"
 #include "Sprites.h"
+#include "Sprites_scaled.h"
+#include <algorithm>
 
 PainterManager::PainterManager()
 {
@@ -32,12 +34,9 @@ PainterManager::PainterManager()
 	_sprites[SPRITE_ID::DECREASE_LETTER] = sprite_DECREASE_LETTER;
 	_sprites[SPRITE_ID::INCREASE_LETTER] = sprite_INCREASE_LETTER;
 	_sprites[SPRITE_ID::ACCEPT_LETTER] = sprite_INCREASE_LETTER;
-
-
 	_sprites[SPRITE_ID::NUMBERS] = sprite_NUMBERS;
 	_sprites[SPRITE_ID::LETTERS] = sprite_LETTERS;
 
-	_painter = new Painter();
 
 	_sizes[SPRITE_ID::PLAYER] = {PLAYER_WIDTH, PLAYER_HEIGHT};
 	_sizes[SPRITE_ID::ENEMY] = {ENEMY_WIDTH, ENEMY_HEIGHT};
@@ -46,7 +45,6 @@ PainterManager::PainterManager()
 	_sizes[SPRITE_ID::PLAYER_SELECTOR] = {PLAYER_SELECTOR_WIDTH, PLAYER_SELECTOR_HEIGHT};
 	_sizes[SPRITE_ID::START_GAME] = {START_GAME_WIDTH, START_GAME_HEIGHT};
 	_sizes[SPRITE_ID::ENEMY_SELECTOR] = {ENEMY_SELECTOR_WIDTH, ENEMY_SELECTOR_HEIGHT};
-
 	_sizes[SPRITE_ID::SHOT_3_TIMES] = {SHOT_3_TIMES_WIDTH, SHOT_3_TIMES_HEIGHT};
 	_sizes[SPRITE_ID::INCREASE_ORIGIN] = {MORE_SOURCE_WIDTH, MORE_SOURCE_HEIGHT};
 	_sizes[SPRITE_ID::INCRASE_FIRE_RATE] = {MORE_FIRERATE_WIDTH, MORE_FIRERATE_HEIGHT};
@@ -55,28 +53,44 @@ PainterManager::PainterManager()
 	_sizes[SPRITE_ID::FAST_SHOTS] = {FAST_BULLETS_WIDTH, FAST_BULLETS_HEIGHT};
 	_sizes[SPRITE_ID::SLOW_SHOTS] = {SLOW_WIDTH, SLOW_HEIGHT};
 	_sizes[SPRITE_ID::GIVE_SHIELD] = {GIVE_SHIELD_WIDTH, GIVE_SHIELD_HEIGHT};
-
 	_sizes[SPRITE_ID::METEORITE] = {METEORITE_WIDTH, METEORITE_HEIGHT};
 	_sizes[SPRITE_ID::EXPLOSION] = {EXPLOSION_WIDTH, EXPLOSION_HEIGHT};
 	_sizes[SPRITE_ID::PLAYER_SHIELD] = {SHIELD_PLAYER_WIDTH, SHIELD_PLAYER_HEIGHT};
 	_sizes[SPRITE_ID::ENEMY_SHIELD] = {SHIELD_ENEMY_WIDTH, SHIELD_ENEMY_HEIGHT};
-
 	_sizes[SPRITE_ID::NUMBERS] = {NUMBERS_WIDTH, NUMBERS_HEIGHT};
-	
 	_sizes[SPRITE_ID::NEAR_STAR] = {NEAR_STAR_WIDTH, NEAR_STAR_HEIGHT};
 	_sizes[SPRITE_ID::MID_STAR] = {MID_STAR_WIDTH, MID_STAR_HEIGHT};
 	_sizes[SPRITE_ID::FAR_STAR] = {FAR_STAR_WIDTH, FAR_STAR_HEIGHT};
-
 	_sizes[SPRITE_ID::FINAL_SCORE] = {FINAL_SCORE_WIDTH, FINAL_SCORE_HEIGHT};
 	_sizes[SPRITE_ID::RETURN_MENU] = {RETURN_WIDTH, RETURN_HEIGHT};
 	_sizes[SPRITE_ID::EXIT_GAME] = {EXIT_WIDTH, EXIT_HEIGHT};
-
 	_sizes[SPRITE_ID::LETTERS] = {LETTERS_WIDTH, LETTERS_HEIGHT};
-
 	_sizes[SPRITE_ID::DECREASE_LETTER] = {DECREASE_LETTER_WIDTH, DECREASE_LETTER_HEIGHT};
 	_sizes[SPRITE_ID::INCREASE_LETTER] = {INCREASE_LETTER_WIDTH, INCREASE_LETTER_HEIGHT};
 	_sizes[SPRITE_ID::ACCEPT_LETTER] = {INCREASE_LETTER_WIDTH, INCREASE_LETTER_HEIGHT};
 
+	_painter = new Painter();
+
+	//uint8_t extra_small_bullet_sprite[BULLET_WIDTH/4 * BULLET_HEIGHT/4];
+	//uint8_t small_bullet_sprite[BULLET_WIDTH/2 * BULLET_HEIGHT/2];
+	//uint8_t dst[width * height];
+	ScaleDown(sprite_BULLET, BULLET_WIDTH, BULLET_HEIGHT, BULLET_SMALL_WIDTH, BULLET_SMALL_HEIGHT, sprite_bullet_small);
+	ScaleDown(sprite_bullet_small, BULLET_SMALL_WIDTH, BULLET_SMALL_HEIGHT, BULLET_EXTRA_SMALL_WIDTH, BULLET_EXTRA_SMALL_HEIGHT, sprite_bullet_extra_small);
+
+	ScaleUp(sprite_BULLET, BULLET_WIDTH, BULLET_HEIGHT, BULLET_BIG_WIDTH, BULLET_BIG_HEIGHT, sprite_bullet_big);
+	ScaleUp(sprite_bullet_big, BULLET_BIG_WIDTH, BULLET_BIG_HEIGHT, 
+		BULLET_EXTRA_BIG_WIDTH, BULLET_EXTRA_BIG_HEIGHT, sprite_bullet_extra_big);
+
+
+	_sizes[SPRITE_ID::BULLET_EXTRA_BIG] = {BULLET_EXTRA_BIG_WIDTH, BULLET_EXTRA_BIG_HEIGHT};
+	_sizes[SPRITE_ID::BULLET_BIG] = {BULLET_BIG_WIDTH, BULLET_BIG_HEIGHT};
+	_sizes[SPRITE_ID::BULLET_SMALL] = {BULLET_SMALL_WIDTH, BULLET_SMALL_HEIGHT};
+	_sizes[SPRITE_ID::BULLET_EXTRA_SMALL] = {BULLET_EXTRA_SMALL_WIDTH, BULLET_EXTRA_SMALL_HEIGHT};
+
+	_sprites[SPRITE_ID::BULLET_BIG] = sprite_bullet_big;
+	_sprites[SPRITE_ID::BULLET_EXTRA_BIG] = sprite_bullet_extra_big;
+	_sprites[SPRITE_ID::BULLET_SMALL] = sprite_bullet_small;
+	_sprites[SPRITE_ID::BULLET_EXTRA_SMALL] = sprite_bullet_extra_small;
 }
 
 void PainterManager::GetSpriteSize(SPRITE_ID id, unsigned int& width, unsigned int& height)const
@@ -162,4 +176,43 @@ int PainterManager::GetMaskID(float alpha)
 	}
 
 	return 0;//full
+}
+
+
+void PainterManager::ScaleUp(const uint8_t* src, int w, int h, int newW, int newH, uint8_t* dst) 
+{
+
+    auto get = [&](int x, int y) -> uint8_t {
+        x = std::clamp(x, 0, w - 1);
+        y = std::clamp(y, 0, h - 1);
+        return src[y * w + x];
+    };
+
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            uint8_t A = get(x,   y-1);
+            uint8_t B = get(x-1, y  );
+            uint8_t P = get(x,   y  );
+            uint8_t C = get(x+1, y  );
+            uint8_t D = get(x,   y+1);
+
+            uint8_t E = (B==A && A!=C && B!=D) ? B : P;
+            uint8_t F = (A==C && A!=B && C!=D) ? C : P;
+            uint8_t G = (B==D && B!=A && D!=C) ? B : P;
+            uint8_t H = (D==C && D!=B && C!=A) ? C : P;
+
+            dst[(y*2  ) * newW + (x*2  )] = E;
+            dst[(y*2  ) * newW + (x*2+1)] = F;
+            dst[(y*2+1) * newW + (x*2  )] = G;
+            dst[(y*2+1) * newW + (x*2+1)] = H;
+        }
+    }
+	
+}
+
+void PainterManager::ScaleDown(const uint8_t* src, int w, int h, int newW, int newH, uint8_t* dst) 
+{
+    for (int y = 0; y < newH; y++)
+        for (int x = 0; x < newW; x++)
+            dst[y * newW + x] = src[(y * 2) * w + (x * 2)];
 }

@@ -19,7 +19,9 @@ public:
 						NEAR_STAR, MID_STAR, FAR_STAR,
 						FINAL_SCORE, RETURN_MENU, EXIT_GAME,
 						LETTERS,
-						DECREASE_LETTER, INCREASE_LETTER, ACCEPT_LETTER
+						DECREASE_LETTER, INCREASE_LETTER, ACCEPT_LETTER,
+
+						BULLET_EXTRA_BIG, BULLET_BIG, BULLET_SMALL, BULLET_EXTRA_SMALL
 					};
 private:
 	struct data
@@ -54,6 +56,8 @@ public:
 
 private:
 	int GetMaskID(float alpha);
+	void ScaleUp(const uint8_t* src, int w, int h, int newW, int newH, uint8_t* dst);
+	void ScaleDown(const uint8_t* src, int w, int h, int newW, int newH, uint8_t* dst);
 
 private:
 	Painter* _painter;
@@ -61,4 +65,9 @@ private:
 	std::map<SPRITE_ID, std::pair<unsigned int, unsigned int>> _sizes;
 	std::array<data, MAX_PAINTED_OBJECTS> _toPaint;
 	int _currentIndexToPaint;
+
+private:
+	const unsigned int FAKE_FAR_STAR_WIDTH = FAR_STAR_WIDTH * 2;
+	const unsigned int FAKE_FAR_STAR_HEIGHT = FAR_STAR_HEIGHT * 2;
+	uint8_t sprite_FAKE_FAR_STAR[FAR_STAR_WIDTH * 2 * FAR_STAR_HEIGHT * 2];
 };
