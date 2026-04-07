@@ -40,6 +40,7 @@ namespace HIGH_SCORE_COORDS
     constexpr float INCREASE_LETTER_X = IMPROVEMENT_SELECTION_COORDS::OPTION_RIGHT_X;
     constexpr float ACCEPT_LETTER_X = 0.5 * SCREEN_WIDTH;
     constexpr float SELECTOR_Y = IMPROVEMENT_SELECTION_COORDS::SELECTOR_Y_PLAYER;
+    constexpr float INFORMATION_Y = MAIN_MENU_COORDS::START_Y;
     constexpr float SCORE_START_X = SCREEN_WIDTH * 0.5f;
     constexpr float SCORE_START_Y = SCREEN_HEIGHT * 0.1f;
     constexpr float RETURN_MENU_X = ACCEPT_LETTER_X;
@@ -49,7 +50,7 @@ namespace HIGH_SCORE_COORDS
 namespace END_GAME_COORDS
 {
     constexpr float TITLE_X = SCREEN_WIDTH * 0.5;
-    constexpr float TITLE_Y = SCREEN_HEIGHT * 0.1;
+    constexpr float TITLE_Y = SCREEN_HEIGHT * 0.2;
     constexpr float SCORE_X = SCREEN_WIDTH * 0.5;
     constexpr float SCORE_Y = SCREEN_HEIGHT * 0.5;
     

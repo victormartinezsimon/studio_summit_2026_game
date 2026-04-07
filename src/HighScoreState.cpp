@@ -75,6 +75,18 @@ void HighScoreState::PaintUI()
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
 									HIGH_SCORE_COORDS::ACCEPT_LETTER_X, 
 									HIGH_SCORE_COORDS::SELECTOR_Y);
+
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::DECREASE_LETTER,
+									HIGH_SCORE_COORDS::DECREASE_LETTER_X, 
+									HIGH_SCORE_COORDS::INFORMATION_Y);
+		
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::INCREASE_LETTER,
+									HIGH_SCORE_COORDS::INCREASE_LETTER_X, 
+									HIGH_SCORE_COORDS::INFORMATION_Y);
+		
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::ACCEPT_LETTER,
+									HIGH_SCORE_COORDS::ACCEPT_LETTER_X, 
+									HIGH_SCORE_COORDS::INFORMATION_Y);
 	}
 	else
 	{

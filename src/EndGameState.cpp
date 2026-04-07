@@ -42,7 +42,7 @@ void EndGameState::Paint()
 
 void EndGameState::PaintUI()
 {
-	_painterManager->AddToPaint(PainterManager::SPRITE_ID::FINAL_SCORE, END_GAME_COORDS::TITLE_X, SCREEN_HEIGHT * 0.2);
+	_painterManager->AddToPaint(PainterManager::SPRITE_ID::FINAL_SCORE, END_GAME_COORDS::TITLE_X, END_GAME_COORDS::TITLE_Y);
 	_numberManager->PaintNumber(_playerScore, END_GAME_COORDS::SCORE_X, END_GAME_COORDS::SCORE_Y, 4, NumberManager::PIVOT::CENTER);
 }
 void EndGameState::OnEnter()
