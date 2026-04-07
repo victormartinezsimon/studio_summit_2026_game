@@ -34,7 +34,7 @@ namespace IMPROVEMENT_SELECTION_COORDS
     constexpr float SELECTOR_Y_ENEMY = SCREEN_HEIGHT - SELECTOR_Y_PLAYER;
 };
 
-namespace END_GAME_COORDS
+namespace HIGH_SCORE_COORDS
 {
     constexpr float DECREASE_LETTER_X = IMPROVEMENT_SELECTION_COORDS::OPTION_LEFT_X;
     constexpr float INCREASE_LETTER_X = IMPROVEMENT_SELECTION_COORDS::OPTION_RIGHT_X;
@@ -44,4 +44,14 @@ namespace END_GAME_COORDS
     constexpr float SCORE_START_Y = SCREEN_HEIGHT * 0.1f;
     constexpr float RETURN_MENU_X = ACCEPT_LETTER_X;
     constexpr float RETURN_MENU_Y = MAIN_MENU_COORDS::START_Y;
-}
+};
+
+namespace END_GAME_COORDS
+{
+    constexpr float TITLE_X = SCREEN_WIDTH * 0.5;
+    constexpr float TITLE_Y = SCREEN_HEIGHT * 0.1;
+    constexpr float SCORE_X = SCREEN_WIDTH * 0.5;
+    constexpr float SCORE_Y = SCREEN_HEIGHT * 0.5;
+    
+};
+
