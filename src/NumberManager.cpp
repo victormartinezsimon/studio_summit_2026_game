@@ -26,7 +26,7 @@ void NumberManager::PaintLeft(int number, int x, int y, int minDigits)
 
 void NumberManager::PaintRight(int number, int x, int y, int minDigits)
 {
-	int currentValue = number;
+	int currentValue = std::abs(number);
 	int digitsUsed = 0;
 	float w = _numbersSprite.GetWidth();
 	int currentX = x + w/2;
@@ -57,8 +57,8 @@ void NumberManager::PaintCenter(int number, int x, int y, int minDigits)
 
 int NumberManager::GetSizeNumber(int number, int minDigits)
 {
-unsigned int totalSize = 0;
-	int currentValue = number;
+	unsigned int totalSize = 0;
+	int currentValue = std::abs(number);
 	int digitsUsed = 0;
 	float w = _numbersSprite.GetWidth();
 	while(currentValue != 0)
