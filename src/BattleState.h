@@ -58,7 +58,7 @@ class BattleState: public State
     private:
 	    bool HasCollision(const Bullet& bullet, const Plane& plane) const;
         bool HasCollision(const Bullet& bullet, const Meteorite& meteorite) const;
-	    bool CollsisionDetection(float ax, float ay, float aw, float ah,
+	    bool CollisionDetection(float ax, float ay, float aw, float ah,
 							 float bx, float by, float bw, float bh) const;
         
     private:    

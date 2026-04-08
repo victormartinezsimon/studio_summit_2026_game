@@ -247,7 +247,7 @@ bool BattleState::ManageBulletPlaneCollision(const Bullet &bullet, Plane &plane)
 
 bool BattleState::ManageExplosionPlaneCollision(const Explosion &explosion, const Plane &plane)
 {
-    bool hasCollision = CollsisionDetection(explosion.GetX(), explosion.GetY(), explosion.GetWidth(), explosion.GetHeight(),
+    bool hasCollision = CollisionDetection(explosion.GetX(), explosion.GetY(), explosion.GetWidth(), explosion.GetHeight(),
                                             plane.GetX(), plane.GetY(), plane.GetWidth(), plane.GetHeight());
     return hasCollision;
 }
@@ -279,17 +279,17 @@ bool BattleState::HasCollision(const Bullet &bullet, const Plane &plane) const
         return false;
     }
 
-    return CollsisionDetection(bullet.GetX(), bullet.GetY(), bullet.GetWidth(), bullet.GetHeight(),
+    return CollisionDetection(bullet.GetX(), bullet.GetY(), bullet.GetWidth(), bullet.GetHeight(),
                                plane.GetX(), plane.GetY(), plane.GetWidth(), plane.GetHeight());
 }
 
 bool BattleState::HasCollision(const Bullet &bullet, const Meteorite &meteorite) const
 {
-    return CollsisionDetection(bullet.GetX(), bullet.GetY(), bullet.GetWidth(), bullet.GetHeight(),
+    return CollisionDetection(bullet.GetX(), bullet.GetY(), bullet.GetWidth(), bullet.GetHeight(),
                                meteorite.GetX(), meteorite.GetY(), meteorite.GetWidth(), meteorite.GetHeight());
 }
 
-bool BattleState::CollsisionDetection(float ax, float ay, float aw, float ah,
+bool BattleState::CollisionDetection(float ax, float ay, float aw, float ah,
                                       float bx, float by, float bw, float bh) const
 {
     return (std::abs(ax - bx) < (aw + bw) / 2.0f &&
