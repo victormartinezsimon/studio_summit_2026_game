@@ -26,7 +26,7 @@ SoundManager::~SoundManager()
 		xmp_free_context(m_ctx);
 		m_ctx = nullptr;
 	}
-	//SPFreeBuffer(m_platform, &m_apuBuffer);
+		//SPFreeBuffer(m_platform, &m_apuBuffer); // freed by platform shutdown
 }
 
 void SoundManager::start()

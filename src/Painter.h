@@ -28,10 +28,6 @@ struct Sprite
 	int vy;
 };
 
-static struct SPPlatform *s_platform;
-static struct SPSizeAlloc frameBufferA;
-static struct SPSizeAlloc frameBufferB;
-
 class Painter
 {
 public:
@@ -71,6 +67,8 @@ private:
 
 private:
 	SPPlatform *s_platform;
+	struct SPSizeAlloc frameBufferA;
+	struct SPSizeAlloc frameBufferB;
 	uint32_t stride;
 	uint8_t *dst;
 	uint8x16_t allMask;

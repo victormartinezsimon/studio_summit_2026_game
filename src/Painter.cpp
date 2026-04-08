@@ -42,6 +42,9 @@ Painter::Painter()
 
 Painter::~Painter()
 {
+	SPFreeBuffer(s_platform, &frameBufferA);
+	SPFreeBuffer(s_platform, &frameBufferB);
+	SPShutdownPlatform(s_platform);	
 }
 
 void Painter::BeginPaint()
