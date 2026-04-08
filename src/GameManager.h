@@ -2,7 +2,7 @@
 
 #include "Pool.h"
 #include "GameConfig.h"
-#include <map>
+#include <unordered_map>
 #include <functional>
 #include "Plane.h"
 #include "Bullet.h"
@@ -113,14 +113,14 @@ private:
 	int _totalImprovementSelected = 0;
 
 private:
-	std::map<std::string, std::function<void(modifiable_data &)>> _improvementFunctions;
+	std::unordered_map<std::string, std::function<void(modifiable_data &)>> _improvementFunctions;
 	std::array<std::string, TOTAL_DEFINED_IMPROVEMENTS> _randomImprovements;
 
 private:
-	std::map<State::STATES, State*> _statesLogic;
+	std::unordered_map<State::STATES, State*> _statesLogic;
 	State::STATES _currentStateLogic;
 	State::STATES _oldStateLogic;
-	std::map<State::STATES, std::function<void()>> _statesBeginFunction;
+	std::unordered_map<State::STATES, std::function<void()>> _statesBeginFunction;
 	Spawner<Meteorite, TOTAL_METEORITES> _spawnerMeteorites;
 	Pool<WorldObject, TOTAL_NUMBER_ANIMATIONS> _numbersAnimation;
 };
