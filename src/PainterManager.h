@@ -18,7 +18,10 @@ public:
 						METEORITE, EXPLOSION, ENEMY_SHIELD, PLAYER_SHIELD,
 						NEAR_STAR, MID_STAR, FAR_STAR,
 						FINAL_SCORE, RETURN_MENU, EXIT_GAME,
-						LETTERS
+						LETTERS,
+						DECREASE_LETTER, INCREASE_LETTER, ACCEPT_LETTER,
+						BULLET_EXTRA_BIG, BULLET_BIG, BULLET_SMALL, BULLET_EXTRA_SMALL,
+						NUMBERS_BIG
 					};
 private:
 	struct data
@@ -53,6 +56,8 @@ public:
 
 private:
 	int GetMaskID(float alpha);
+	void ScaleUp(const uint8_t* src, int w, int h, int newW, int newH, uint8_t* dst);
+	void ScaleDown(const uint8_t* src, int w, int h, int newW, int newH, uint8_t* dst);
 
 private:
 	Painter* _painter;

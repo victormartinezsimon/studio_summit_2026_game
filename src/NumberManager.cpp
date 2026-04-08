@@ -1,6 +1,7 @@
 #include "NumberManager.h"
 #include "PainterManager.h"
 #include "Sprites.h" //TODO: remove this inclusion
+#include  <cmath>
 
 NumberManager::NumberManager(PainterManager* painterManager): _painterManager(painterManager)
 {
