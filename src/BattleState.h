@@ -93,5 +93,5 @@ class BattleState: public State
         Spawner<Meteorite, TOTAL_METEORITES>* _spawnerMeteorites;
         TrailManager* _trailManager;
         Pool<WorldObject, PLANES_POOL_SIZE> _enemiesDeathAnimation;
-
+        SpriteSheetController _countDownNumbers;
 };

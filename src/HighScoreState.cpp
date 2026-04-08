@@ -53,8 +53,8 @@ void HighScoreState::Paint()
 
 void HighScoreState::PaintUI()
 {
-	int positionX = END_GAME_COORDS::SCORE_START_X;
-	int positionY = END_GAME_COORDS::SCORE_START_Y;
+	int positionX = HIGH_SCORE_COORDS::SCORE_START_X;
+	int positionY = HIGH_SCORE_COORDS::SCORE_START_Y;
 
 	for(int i = 0; i < _bestscores.size(); ++i)
 	{
@@ -65,26 +65,38 @@ void HighScoreState::PaintUI()
 	if(_playerIndexScore != -1)
 	{
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
-										END_GAME_COORDS::DECREASE_LETTER_X, 
-										END_GAME_COORDS::SELECTOR_Y);
+										HIGH_SCORE_COORDS::DECREASE_LETTER_X, 
+										HIGH_SCORE_COORDS::SELECTOR_Y);
 
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
-									END_GAME_COORDS::INCREASE_LETTER_X, 
-									END_GAME_COORDS::SELECTOR_Y);
+									HIGH_SCORE_COORDS::INCREASE_LETTER_X, 
+									HIGH_SCORE_COORDS::SELECTOR_Y);
 
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
-									END_GAME_COORDS::ACCEPT_LETTER_X, 
-									END_GAME_COORDS::SELECTOR_Y);
+									HIGH_SCORE_COORDS::ACCEPT_LETTER_X, 
+									HIGH_SCORE_COORDS::SELECTOR_Y);
+
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::DECREASE_LETTER,
+									HIGH_SCORE_COORDS::DECREASE_LETTER_X, 
+									HIGH_SCORE_COORDS::INFORMATION_Y);
+		
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::INCREASE_LETTER,
+									HIGH_SCORE_COORDS::INCREASE_LETTER_X, 
+									HIGH_SCORE_COORDS::INFORMATION_Y);
+		
+		_painterManager->AddToPaint(PainterManager::SPRITE_ID::ACCEPT_LETTER,
+									HIGH_SCORE_COORDS::ACCEPT_LETTER_X, 
+									HIGH_SCORE_COORDS::INFORMATION_Y);
 	}
 	else
 	{
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::PLAYER_SELECTOR,
-									END_GAME_COORDS::ACCEPT_LETTER_X, 
-									END_GAME_COORDS::SELECTOR_Y);
+									HIGH_SCORE_COORDS::ACCEPT_LETTER_X, 
+									HIGH_SCORE_COORDS::SELECTOR_Y);
 		
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::RETURN_MENU,
-									END_GAME_COORDS::RETURN_MENU_X, 
-									END_GAME_COORDS::RETURN_MENU_Y);
+									HIGH_SCORE_COORDS::RETURN_MENU_X, 
+									HIGH_SCORE_COORDS::RETURN_MENU_Y);
 		
 	}
 	
@@ -128,9 +140,9 @@ void HighScoreState::Configure(float score)
 		float playerSelectorWidth = _painterManager->GetWidth(PainterManager::SPRITE_ID::PLAYER_SELECTOR);
 	
 		_buttonAManager->SelectInPosition(TIME_TO_SELECT_OPTION, 
-			{END_GAME_COORDS::DECREASE_LETTER_X - playerSelectorWidth/2, END_GAME_COORDS::DECREASE_LETTER_X + playerSelectorWidth/2 },
-			{END_GAME_COORDS::INCREASE_LETTER_X - playerSelectorWidth/2, END_GAME_COORDS::INCREASE_LETTER_X + playerSelectorWidth/2 },
-			{END_GAME_COORDS::ACCEPT_LETTER_X - playerSelectorWidth/2, END_GAME_COORDS::ACCEPT_LETTER_X + playerSelectorWidth/2 },
+			{HIGH_SCORE_COORDS::DECREASE_LETTER_X - playerSelectorWidth/2, HIGH_SCORE_COORDS::DECREASE_LETTER_X + playerSelectorWidth/2 },
+			{HIGH_SCORE_COORDS::INCREASE_LETTER_X - playerSelectorWidth/2, HIGH_SCORE_COORDS::INCREASE_LETTER_X + playerSelectorWidth/2 },
+			{HIGH_SCORE_COORDS::ACCEPT_LETTER_X - playerSelectorWidth/2, HIGH_SCORE_COORDS::ACCEPT_LETTER_X + playerSelectorWidth/2 },
 			[&](int option){CallbackButtonA(option);}
 		);
 
@@ -216,7 +228,7 @@ void HighScoreState::ConfigureReturnToMenu()
 	float playerSelectorWidth = _painterManager->GetWidth(PainterManager::SPRITE_ID::PLAYER_SELECTOR);
 
 	_buttonAManager->SelectInPosition(TIME_TO_SELECT_OPTION, 
-			{END_GAME_COORDS::ACCEPT_LETTER_X - playerSelectorWidth/2, END_GAME_COORDS::ACCEPT_LETTER_X + playerSelectorWidth/2 },
+			{HIGH_SCORE_COORDS::ACCEPT_LETTER_X - playerSelectorWidth/2, HIGH_SCORE_COORDS::ACCEPT_LETTER_X + playerSelectorWidth/2 },
 			[&](int option){
 				
 				_nextState = STATES::MENU;

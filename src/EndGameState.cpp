@@ -8,6 +8,8 @@
 #include "EasingManager.h"
 #include <cmath>
 
+constexpr int TOTAL_TIME_STATE = 5;
+
 EndGameState::EndGameState(Plane *player, PainterManager *painter, 
         NumberManager* numberManager,
         EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager) : 
@@ -20,7 +22,7 @@ State::STATES EndGameState::Update(const float deltaTime, float _currentFrameInp
 {
 	_timeAcumState += deltaTime;
 
-	if(_timeAcumState > 5)
+	if(_timeAcumState > TOTAL_TIME_STATE)
 	{
 		return State::STATES::HIGH_SCORES;
 	}
@@ -29,11 +31,19 @@ State::STATES EndGameState::Update(const float deltaTime, float _currentFrameInp
 }
 void EndGameState::Paint()
 {
+	_player->Paint(_painterManager);
+
+	{
+		int time = std::round( TOTAL_TIME_STATE - _timeAcumState );
+		float w = _painterManager->GetWidth(PainterManager::SPRITE_ID::PLAYER);
+		_numberManager->PaintNumber(time, _player->GetX() -w/2, _player->GetY(), 1, NumberManager::PIVOT::RIGHT);
+	}
 }
 
 void EndGameState::PaintUI()
 {
-	_numberManager->PaintNumber(_playerScore, SCREEN_WIDTH*0.5, SCREEN_HEIGHT* 0.5, 4, NumberManager::PIVOT::CENTER);
+	_painterManager->AddToPaint(PainterManager::SPRITE_ID::FINAL_SCORE, END_GAME_COORDS::TITLE_X, END_GAME_COORDS::TITLE_Y);
+	_numberManager->PaintNumber(_playerScore, END_GAME_COORDS::SCORE_X, END_GAME_COORDS::SCORE_Y, 4, NumberManager::PIVOT::CENTER);
 }
 void EndGameState::OnEnter()
 {
@@ -47,4 +57,12 @@ void EndGameState::Configure(float score)
 {
 	_playerScore = score;
 	_timeAcumState = 0;
+
+	_player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
+	_player->SetPositionY(POSITION_Y_PLAYER);
+	_player->ConfigureSprite(_painterManager);_player->SetSize(PLAYER_WIDTH, PLAYER_HEIGHT);
+	_player->SetPositionY(POSITION_Y_PLAYER);
+	_player->SetPlayerTeam(TEAM_PLAYER);
+	_player->SetHasShield(false);
+	_player->ConfigureSprite(_painterManager);
 }

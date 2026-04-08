@@ -25,6 +25,7 @@ BattleState::BattleState(
       _damagePlayerCallback(damagePlayerCallback), _damageEnemyCallback(damageEnemy),
       _score(score), _timeLeft(time), _spawnerMeteorites(spawnerMeteorites),_trailManager(trailManager)
 {
+    _countDownNumbers.Configure(_painterManager, PainterManager::SPRITE_ID::NUMBERS_BIG, 5, 2, -1);
 }
 
 State::STATES BattleState::Update(const float deltaTime, float currentFrameInputValueNormalized)
@@ -60,8 +61,13 @@ void BattleState::PaintUI()
     }
 
     {
-        float value = *_timeLeft;
-        _numberManager->PaintNumber(MAX_SECS_PLAYING - value, TIME_POSITION_X, SCORE_POSITION_Y, 3, NumberManager::PIVOT::LEFT);
+        int value = std::round(MAX_SECS_PLAYING - *_timeLeft);
+        _numberManager->PaintNumber(value, TIME_POSITION_X, SCORE_POSITION_Y, 3, NumberManager::PIVOT::LEFT);
+        
+        if(value < 10)
+        {
+            _countDownNumbers.PaintFrame(_painterManager, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.5, value, 0.5f);
+        }
     }
 
     _enemiesDeathAnimation.Paint(_painterManager);

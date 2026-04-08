@@ -40,7 +40,7 @@ public:
 
 public:
 	void PaintBackground();
-	void PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y, int maskType,
+	void PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y, int opacityPercent,
 		 int startX, int startY, int fullImageWidth, int fullImageHeight);
 
 public:
@@ -63,7 +63,7 @@ private:
 		int full_image_widht,
 		int full_image_height,
 		const uint8_t transparent_id,
-		uint8x16_t evenRowMask, uint8x16_t oddRowMask);
+		int opacityLevel);
 
 private:
 	SPPlatform *s_platform;
@@ -71,11 +71,7 @@ private:
 	struct SPSizeAlloc frameBufferB;
 	uint32_t stride;
 	uint8_t *dst;
-	uint8x16_t allMask;
-	uint8x16_t halfMask;
-	uint8x16_t halfMaskAlt;
-	uint8x16_t quarterMask;
-	uint8x16_t quarterMaskAlt;
+	uint8x16_t opacityMasks[10][10]; // [level_index 0-9][row_pattern 0-9]
 };
 
 #endif

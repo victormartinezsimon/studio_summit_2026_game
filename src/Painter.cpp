@@ -33,11 +33,23 @@ Painter::Painter()
 	VPUSwapPages(s_platform->vx, s_platform->sc);
 	VPUClear(s_platform->vx, 0x00000000);
 
-	halfMask = vreinterpretq_u8_u16(vdupq_n_u16(0x00FF));
-	halfMaskAlt = vreinterpretq_u8_u16(vdupq_n_u16(0xFF00));
-	quarterMask = vreinterpretq_u8_u32(vdupq_n_u32(0x000000FF));
-	quarterMaskAlt = vreinterpretq_u8_u32(vdupq_n_u32(0x00FF0000));
-	allMask = vdupq_n_u8(0xFF);
+	// Initialize opacity masks using ordered dithering threshold pattern
+	// threshold[row][col] = (row + col * 3) % 10
+	// For opacity level L (1-10): pixel is visible if threshold < L
+	for (int level = 0; level < 10; ++level)
+	{
+		int L = level + 1; // opacity level 1-10
+		for (int row = 0; row < 10; ++row)
+		{
+			uint8_t pattern[16];
+			for (int col = 0; col < 16; ++col)
+			{
+				int threshold = (row + col * 3) % 10;
+				pattern[col] = (threshold < L) ? 0xFF : 0x00;
+			}
+			opacityMasks[level][row] = vld1q_u8(pattern);
+		}
+	}
 }
 
 Painter::~Painter()
@@ -72,24 +84,15 @@ void Painter::PaintBackground()
 }
 
 void Painter::PaintItem(const uint8_t *sprite, unsigned int width, unsigned int height, int x, int y, 
-	int maskType, int startX, int startY, int fullImageWidth, int fullImageHeight)
+	int opacityPercent, int startX, int startY, int fullImageWidth, int fullImageHeight)
 {
-	uint8x16_t evenMask = allMask;
-	uint8x16_t oddMask = allMask;
-	if (maskType == 1)
-	{
-		evenMask = halfMask;
-		oddMask = halfMaskAlt;
-	}
-	if (maskType == 2)
-	{
-		evenMask = quarterMask;
-		oddMask = quarterMaskAlt;
-	}
+	int opacityLevel = opacityPercent / 10;
+	if (opacityLevel < 1) opacityLevel = 1;
+	if (opacityLevel > 10) opacityLevel = 10;
 
 	masked_blit_8(dst, stride, SCREEN_WIDTH, SCREEN_HEIGHT, sprite, width, height, x, y, startX, startY, 
 		fullImageWidth, fullImageHeight, TRANSPARENT_KEY, 
-		evenMask, oddMask);
+		opacityLevel);
 }
 
 void Painter::init_palette(struct EVideoContext *vctx)
@@ -135,7 +138,7 @@ void Painter::masked_blit_8(
 	int full_image_widht,
 	int full_image_height,
 	const uint8_t transparent_key, 
-	uint8x16_t evenRowMask, uint8x16_t oddRowMask)
+	int opacityLevel)
 {
 	int src_x = startX;
 	int src_y = startY;
@@ -172,7 +175,8 @@ void Painter::masked_blit_8(
 		//const uint8_t *s_1 = sprite + (src_y + y) * sprite_width + src_x;
 		const uint8_t *s = sprite + (src_y + y) * full_image_widht + src_x;
 
-		uint8x16_t extraAlphaMask = ((screen_y + y) & 1) ? oddRowMask : evenRowMask;
+		int row_in_pattern = (screen_y + y) % 10;
+		uint8x16_t extraAlphaMask = opacityMasks[opacityLevel - 1][row_in_pattern];
 
 		int x = 0;
 
@@ -199,6 +203,11 @@ void Painter::masked_blit_8(
 		// Process any remaining pixels that don't fit into a 16-byte block
 		for (; x < w; ++x)
 		{
+			//TODO: review this lines
+			int col = x & 15;
+			int threshold_val = (row_in_pattern + col * 3) % 10;
+			if (threshold_val >= opacityLevel) continue;
+			//TODO: end review
 			uint8_t px = s[x];
 			if (px != TRANSPARENT_KEY)
 				d[x] = px;
