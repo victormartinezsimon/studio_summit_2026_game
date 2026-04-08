@@ -37,6 +37,7 @@ private:
 
 public:
 	GameManager(InputManager *input, PainterManager *painterManager);
+	~GameManager();
 
 public:
 	bool Update(const float deltaTime);

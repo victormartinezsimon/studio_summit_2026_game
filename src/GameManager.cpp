@@ -38,6 +38,15 @@ GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	_statesBeginFunction[_currentStateLogic]();
 	_statesLogic[_currentStateLogic]->OnEnter();
 }
+
+GameManager::~GameManager()
+{
+	for (auto& [key, state] : _statesLogic)
+	{
+		delete state;
+	}
+	_statesLogic.clear();
+}
 void GameManager::InitializeStates()
 {
 	_statesLogic[State::STATES::MENU] = new MainMenuState(&_player, _painterManager, &_numberManager, 
