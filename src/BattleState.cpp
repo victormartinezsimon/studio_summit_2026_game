@@ -64,7 +64,7 @@ void BattleState::PaintUI()
         int value = std::round(MAX_SECS_PLAYING - *_timeLeft);
         _numberManager->PaintNumber(value, TIME_POSITION_X, SCORE_POSITION_Y, 3, NumberManager::PIVOT::LEFT);
         
-        if(value < 10)
+        if(value < 10 && SHOW_FINAL_COUNTDOWN)
         {
             _countDownNumbers.PaintFrame(_painterManager, SCREEN_WIDTH*0.5, SCREEN_HEIGHT*0.5, value, 0.5f);
         }

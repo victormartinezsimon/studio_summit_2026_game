@@ -27,3 +27,6 @@ constexpr unsigned int MAX_PAINTED_OBJECTS = 250;
 constexpr unsigned char TEAM_PLAYER = 1;
 constexpr unsigned char TEAM_ENEMY = 2;
 constexpr unsigned char TEAM_NEUTRAL = 0;
+
+constexpr bool SHOW_TRAIL = true;
+constexpr bool SHOW_FINAL_COUNTDOWN = true;

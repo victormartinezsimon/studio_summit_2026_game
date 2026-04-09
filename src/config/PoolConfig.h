@@ -8,4 +8,3 @@ constexpr unsigned int TOTAL_EXPLOSIONS = 10;
 constexpr unsigned int TOTAL_NUMBER_ANIMATIONS = 12;
 
 constexpr float TRAIL_LIVE = 0.3;
-constexpr bool SHOW_TRAIL = true;
