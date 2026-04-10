@@ -107,7 +107,10 @@ public:
 
 	T* GetElement(int id)
 	{
-		if(id < 0){return nullptr;}
+		if(id < 0 || id >= N)
+		{
+			return nullptr;
+		}
 		if(!_used[id]){return nullptr;}
 		return &_poolElements[id];
 	}

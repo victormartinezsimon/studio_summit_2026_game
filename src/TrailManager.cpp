@@ -39,6 +39,8 @@ void TrailManager::Configure(PainterManager* painter, Trail& trail, float x, flo
 void TrailManager::UpdateTrail(Trail& trail, const float deltaTime)
 {
 	trail.currentLive -= deltaTime;
+	trail.spriteSheetNormal.Update(deltaTime);
+	trail.spriteSheetSmall.Update(deltaTime);
 
 	if(trail.currentLive <= 0)
 	{
@@ -69,6 +71,7 @@ SpriteSheetController* TrailManager::GetSpriteSheetNormal(int id)
 	{
 		return &t->spriteSheetNormal;
 	}
+	return nullptr;
 }
 SpriteSheetController* TrailManager::GetSpriteSheetSmall(int id)
 {
