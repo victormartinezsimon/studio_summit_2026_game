@@ -15,6 +15,10 @@ public:
 	{
 		_configureCallback = configureCallback;
 	}
+	void SetCallbackUpdate(std::function<void(T& obj)> configureCallback)
+	{
+		_updateCallback = configureCallback;
+	}
 
 public:
 	void Update(const float deltaTime)
@@ -71,6 +75,11 @@ private:
 		{
 			_objects.Release(obj);
 		}
+
+		if(_updateCallback != nullptr)
+		{
+			_updateCallback(obj);
+		}
 	}
 
 	bool OutOfScreen(const T& obj)
@@ -94,4 +103,5 @@ private:
 	float _delaySpawn;
 	float _timeSpawn = 0;
 	std::function<void(T& obj)> _configureCallback = nullptr;
+	std::function<void(T& obj)> _updateCallback = nullptr;
 };

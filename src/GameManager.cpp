@@ -33,7 +33,15 @@ GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	InitializeStates();
 	
 	_spawnerStars.SetCallbackConfiguration([this](Star& star){ConfigureStar(star);});
+	if(SHOW_TRAIL_STARS)
+	{
+		_spawnerStars.SetCallbackUpdate([&](Star& star){CallbackUpdateStar(star);});
+	}
     _spawnerMeteorites.SetCallbackConfiguration([this](Meteorite& m){ConfigureMeteoriteSpawn(m);});
+	if(SHOW_TRAIL_METEORITE)
+	{
+		_spawnerMeteorites.SetCallbackUpdate([&](Meteorite& m){CallbackUpdateMeteorite(m);});
+	}
 
 	_statesBeginFunction[_currentStateLogic]();
 	_statesLogic[_currentStateLogic]->OnEnter();
@@ -544,6 +552,9 @@ void GameManager::ConfigureStar(Star& star)
 	star.SetVelocities(velocity, velocity*0.5);
 	star.SetMoveLeft(false);
 	star.ConfigureSprite(_painterManager);
+
+	bool hasTrail = _randomManager.GetValue(0,100) < PERCENT_TO_HAVE_TRAIL;
+	star.SetHasTrail(hasTrail);
 }
 void GameManager::ConfigureMeteoriteSpawn(Meteorite& meteorite)
 {
@@ -568,4 +579,16 @@ void GameManager::ConfigureMeteoriteSpawn(Meteorite& meteorite)
         meteorite.SetVelocities(DEFAULT_BULLET_VEL_Y * velocity,0);
         meteorite.SetMoveLeft(false);
     }
+}
+
+void GameManager::CallbackUpdateStar(Star& star)
+{
+	if(!star.GetHasTrail()){return;}
+	_trailManager.AddTrail(_painterManager, star.GetX(), star.GetY(), 
+	star.GetWidth(), star.GetHeight(), TRAIL_LIVE_STARS, star.GetSprite());
+}
+void GameManager::CallbackUpdateMeteorite(Meteorite& meteorite)
+{
+	_trailManager.AddTrail(_painterManager, meteorite.GetX(), meteorite.GetY(), 
+	meteorite.GetWidth(), meteorite.GetHeight(), TRAIL_LIVE_METEORITE, PainterManager::SPRITE_ID::METEORITE);
 }

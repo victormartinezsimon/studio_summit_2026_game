@@ -49,7 +49,6 @@ private:
 	void InitializeRandomImprovements();
 	void InitializeStatesBegin();
 	void InitializeStates();
-	void ConfigureStar(Star& star);
 
 private:
 	void GetMinMaxXPosiblePosition(float &minX, float &maxX) const;
@@ -77,6 +76,9 @@ private:
 
 private:	        
 	void ConfigureMeteoriteSpawn(Meteorite& meteorite);
+	void ConfigureStar(Star& star);
+	void CallbackUpdateStar(Star& start);
+	void CallbackUpdateMeteorite(Meteorite& meteorite);
 
 private:
 

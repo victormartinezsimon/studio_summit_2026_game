@@ -56,9 +56,20 @@ public:
 		_spriteController.Configure(painter, GetSprite() );
 	}
 
+	void SetHasTrail(bool value)
+	{
+		_hasTrail = value;
+	}
+
+	bool GetHasTrail() const
+	{
+		return _hasTrail;
+	}
+
 private:
 	float _velocityX = 0;
 	float _velocityY = 0;
 	bool _moveLeft;
 	Type _typeStar;
+	bool _hasTrail = false;
 };

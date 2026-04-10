@@ -22,11 +22,19 @@ constexpr int NUM_FRAMES_TO_READ_INPUT = 1;
 #else   
 constexpr int NUM_FRAMES_TO_READ_INPUT = 4;
 #endif
-constexpr unsigned int MAX_PAINTED_OBJECTS = 250;
+constexpr unsigned int MAX_PAINTED_OBJECTS = 500;
 
 constexpr unsigned char TEAM_PLAYER = 1;
 constexpr unsigned char TEAM_ENEMY = 2;
 constexpr unsigned char TEAM_NEUTRAL = 0;
 
-constexpr bool SHOW_TRAIL = true;
+constexpr bool SHOW_TRAIL_BULLETS = true;
+constexpr float TRAIL_LIVE_BULLETS = 0.3;
+
+constexpr bool SHOW_TRAIL_METEORITE = false;
+constexpr float TRAIL_LIVE_METEORITE = 0.3;
+
+constexpr bool SHOW_TRAIL_STARS = true;
+constexpr float TRAIL_LIVE_STARS = 0.3;
+
 constexpr bool SHOW_FINAL_COUNTDOWN = true;

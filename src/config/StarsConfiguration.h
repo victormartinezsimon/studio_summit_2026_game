@@ -10,3 +10,4 @@ constexpr float MIN_HEIGHT_STAR = -1;
 constexpr float MAX_HEIGHT_STAR = 1;
 constexpr float MIN_VELOCITY_STAR = 80;
 constexpr float MAX_VELOCITY_STAR = 150;
+constexpr int PERCENT_TO_HAVE_TRAIL = 30;
