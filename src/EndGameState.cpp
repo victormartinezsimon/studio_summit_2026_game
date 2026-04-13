@@ -47,6 +47,10 @@ void EndGameState::PaintUI()
 void EndGameState::OnEnter()
 {
 	_timeAcumState = 0;
+	_player->SetPositionY(POSITION_Y_PLAYER);
+	_player->ConfigureSprite(_painterManager);
+	_player->SetPlayerTeam(TEAM_PLAYER);
+	_player->SetHasShield(false);
 }
 void EndGameState::OnExit()
 {

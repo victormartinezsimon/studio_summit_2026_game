@@ -80,4 +80,5 @@ SpriteSheetController* TrailManager::GetSpriteSheetSmall(int id)
 	{
 		return &t->spriteSheetSmall;
 	}
+	return nullptr;
 }
