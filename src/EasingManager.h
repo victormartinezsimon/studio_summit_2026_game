@@ -21,6 +21,8 @@ public:
 	void KillEase(int id);
 	void KillAll();
 
+	void SetDelay(int id, float delay);
+
 	void SetReferenceIDToEase(int easeID, int referenceID);
 
 private:

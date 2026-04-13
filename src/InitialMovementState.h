@@ -22,6 +22,6 @@ class InitialMovementState: public State
         void OnExit()override;
 
     private:
-        STATES _nextState;
         Pool<Plane, PLANES_POOL_SIZE>* _enemiesPool;
+        int _enemiesMoving = 0;
 };

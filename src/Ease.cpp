@@ -5,6 +5,20 @@
 
 bool Ease::Update(const float deltaTime)
 {
+    _realAcumTime += deltaTime;
+
+    if(_realAcumTime < _delayStart)
+    {
+         if(_tickCallback)
+        {
+            float x, y;
+            GetValues( x, y);
+            _tickCallback(x, y, *this, _acumTime / _duration);
+        }
+
+        return false;
+    }    
+
     _acumTime += deltaTime;
 
     float x, y;
@@ -20,7 +34,6 @@ bool Ease::Update(const float deltaTime)
         if(_tickCallback)
         {
             _tickCallback(x, y, *this, _acumTime / _duration);
-            GetValues( x, y);
         }
     }
     
@@ -38,6 +51,7 @@ void Ease::BuildEase(float duration, float startX, float startY,
                             std::function<void(float currentX, float currentY, Ease& ease, float percent)> tickCallback)
 {
     _acumTime = 0;
+    _realAcumTime = 0;
     _duration = duration;
     _endCallback = endCallback;
     _startX = startX;
@@ -98,6 +112,11 @@ void Ease::CallEndCallback(bool value)
     {
         _endCallback(value, GetReferenceID());
     }
+}
+
+void Ease::SetDelay(float value)
+{
+    _delayStart = value;
 }
 
 

@@ -118,10 +118,11 @@ void ImprovementSelectionState::OnEnter()
 
 	_player->SetPositionY(POSITION_Y_PLAYER);
 	_player->ConfigureSprite(_painterManager);
+	_player->SetTimeInmortal(0);
 	_doingFadeOut = false;
 	_percentEase = 1.0f;
 
-	_enemySelector.Configure(_painterManager, PainterManager::SPRITE_ID::ENEMY, 2,2, PLANE_FRAME_RATE);
+	_enemySelector.Configure(_painterManager, PainterManager::SPRITE_ID::ENEMY);
 }
 void ImprovementSelectionState::OnExit()
 {

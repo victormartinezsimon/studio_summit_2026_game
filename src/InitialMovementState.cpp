@@ -16,7 +16,11 @@ State(player, painter, numberManager,
 
 State::STATES InitialMovementState::Update(const float deltaTime, float _currentFrameInputValueNormalized)
 {
-	return _nextState;
+	if(_enemiesMoving == 0)
+	{
+		return STATES::BATTLE;
+	}
+	return STATES::INITIAL_MOVEMENT;
 }
 void InitialMovementState::Paint()
 {
@@ -28,8 +32,6 @@ void InitialMovementState::PaintUI(){}
 
 void InitialMovementState::OnEnter()
 {
-	_nextState = STATES::INITIAL_MOVEMENT;
-
 	_player->SetPositionY(POSITION_Y_PLAYER);
 	_player->SetPlayerTeam(TEAM_PLAYER);
 	_player->ConfigureSprite(_painterManager);
@@ -45,6 +47,8 @@ void InitialMovementState::OnEnter()
 	}
 
 	int randomStart = _randomManager->GetNextIntValue();
+	float delay = 0;
+	_enemiesMoving = totalEnemies;
 
 	_enemiesPool->for_each_active(
 		[&](Plane &p)
@@ -73,14 +77,16 @@ void InitialMovementState::OnEnter()
 				}
 			}
 
-			_easingManager->AddEase(INTIAL_ANIMATION_DURATION, startX, startY,
+			int id = _easingManager->AddEase(INTIAL_ANIMATION_DURATION, startX, startY,
 				p.GetX(), p.GetY(), Ease::EASE_TYPES::INOUTCUBE, 
 				[this] (bool normalEnded, int noUsed)
 				{
-					_nextState = STATES::BATTLE;
+					--_enemiesMoving;
 				}, 
 				[&p](float x, float y, Ease& ease, float percent)	{ p.SetPosition(x, y); }
 			);
+			_easingManager->SetDelay(id, delay);
+			delay += INCREASE_DELAY_START;
 		}
 	);
 }

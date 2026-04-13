@@ -65,3 +65,8 @@ void EasingManager::SetReferenceIDToEase(int easeID, int referenceID)
 {
     _poolEases.call_for_element(easeID, [&](Ease& ease){ease.SetReferenceID(referenceID);});
 }
+
+void EasingManager::SetDelay(int id, float delay)
+{
+    _poolEases.call_for_element(id,[&](Ease& ease){ease.SetDelay(delay);});
+}

@@ -47,6 +47,7 @@ public:
 
 	void GetValues(float& x, float& y)const;
 	void CallEndCallback(bool value);
+	void SetDelay(float value);
 
 public:
 	void KillEase();
@@ -61,6 +62,7 @@ private:
 
 private:
 	float _acumTime = 0;
+	float _realAcumTime = 0;
 	EASE_TYPES _type = EASE_TYPES::LINEAL;
 	float _duration = 0;
 	float _startX = 0;
@@ -71,4 +73,5 @@ private:
 	std::function<void(float currentX, float currentY, Ease& ease, float percent)> _tickCallback = nullptr;
 	int _id = 0;
 	int _referenceID = 0;
+	float _delayStart = 0;
 };
