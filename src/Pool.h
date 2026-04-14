@@ -55,6 +55,10 @@ public:
 
 	void Release(int index)
 	{
+		if(index == -1)
+		{
+			return;
+		}
 		_used[index] = false;
 		--_currentUse;
 

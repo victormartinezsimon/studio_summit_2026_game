@@ -44,6 +44,10 @@ void SpriteSheetController::Configure(	const PainterManager* painter,  PainterMa
 
 void SpriteSheetController::Configure( const PainterManager* painter, const SpriteSheetController* other)
 {
+	if(other == nullptr)
+	{	
+		return;
+	}
 	Configure(painter,other->_sprite, other->_cols, other->_rows, other->_frameDuration, other->_loop);
 }
 
