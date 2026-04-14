@@ -118,7 +118,7 @@ void ImprovementSelectionState::OnEnter()
 
 	_player->SetPositionY(POSITION_Y_PLAYER);
 	_player->ConfigureSprite(_painterManager);
-	_player->SetTimeInmortal(0);
+
 	_doingFadeOut = false;
 	_percentEase = 1.0f;
 

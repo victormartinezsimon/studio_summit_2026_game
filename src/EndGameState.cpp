@@ -50,7 +50,6 @@ void EndGameState::OnEnter()
 	_player->SetPositionY(POSITION_Y_PLAYER);
 	_player->ConfigureSprite(_painterManager);
 	_player->SetPlayerTeam(TEAM_PLAYER);
-	_player->SetHasShield(false);
 }
 void EndGameState::OnExit()
 {
@@ -64,5 +63,4 @@ void EndGameState::Configure(float score)
 	_player->SetPositionY(POSITION_Y_PLAYER);
 	_player->ConfigureSprite(_painterManager);
 	_player->SetPlayerTeam(TEAM_PLAYER);
-	_player->SetHasShield(false);
 }

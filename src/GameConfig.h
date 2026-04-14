@@ -22,7 +22,7 @@ constexpr int NUM_FRAMES_TO_READ_INPUT = 1;
 #else   
 constexpr int NUM_FRAMES_TO_READ_INPUT = 4;
 #endif
-constexpr unsigned int MAX_PAINTED_OBJECTS = 500;
+constexpr unsigned int MAX_PAINTED_OBJECTS = 700;
 
 constexpr unsigned char TEAM_PLAYER = 1;
 constexpr unsigned char TEAM_ENEMY = 2;

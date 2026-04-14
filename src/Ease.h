@@ -38,6 +38,10 @@ public:
 	}
 
 public:
+	void SetPositionX(float x){}
+	void SetPositionY(float y){}
+
+public:
 	bool Update(const float deltaTime);
 	void BuildEase(float duration, float startX, float startY, 
 		float endX, float endY, EASE_TYPES type);

@@ -19,7 +19,6 @@ MainMenuState::MainMenuState(Plane *player, PainterManager *painter,
 State::STATES MainMenuState::Update(const float deltaTime, float _currentFrameInputValueNormalized)
 {
 	_buttonAManager->Update(deltaTime, _currentFrameInputValueNormalized);
-	_player->Update(deltaTime);
 
 	return _nextState;
 }
@@ -97,8 +96,8 @@ void MainMenuState::OnEnter()
 	_nextState = STATES::MENU;
 	_player->SetPositionY(POSITION_Y_PLAYER);
 	_player->SetPlayerTeam(TEAM_PLAYER);
-	_player->SetHasShield(false);
 	_player->ConfigureSprite(_painterManager);
+	_player->SetAlpha(1);
 	_startingGame = false;
 	_alphaMenu = 1.0f;
 }

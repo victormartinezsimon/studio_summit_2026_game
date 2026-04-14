@@ -38,12 +38,11 @@ void InitialMovementState::OnEnter()
 
 	int totalEnemies = _enemiesPool->TotalInUse();
 
-	float startX = -1;
-	float startY = -1;
+	bool useHalfScreen = false;
+
 	if(totalEnemies <= MAX_ENEMIES_PER_ROW )
 	{
-		startX = SCREEN_WIDTH / 2;
-		startY =  SCREEN_HEIGHT / 2;
+		useHalfScreen = true;
 	}
 
 	int randomStart = _randomManager->GetNextIntValue();
@@ -56,10 +55,13 @@ void InitialMovementState::OnEnter()
 		{
 			p.SetPlayerTeam(TEAM_ENEMY);
 			p.ConfigureSprite(_painterManager);
+			p.SetAlpha(0);
 
-			if(startX == -1 && startY == -1)
+			float startX = SCREEN_WIDTH / 2;
+			float startY = SCREEN_HEIGHT / 2;
+
+			if(!useHalfScreen)
 			{
-				int zone = (randomStart + p.GetID()) % 3;
 				switch(zone)
 				{
 					default:
@@ -78,17 +80,21 @@ void InitialMovementState::OnEnter()
 				}
 			}
 
-			int id = _easingManager->AddEase(INTIAL_ANIMATION_DURATION, startX, startY,
+			int id = _easingManager->AddEase(2/*INTIAL_ANIMATION_DURATION*/, startX, startY,
 				p.GetX(), p.GetY(), Ease::EASE_TYPES::INOUTCUBE, 
 				[this] (bool normalEnded, int noUsed)
 				{
 					--_enemiesMoving;
 				}, 
-				[&p](float x, float y, Ease& ease, float percent)	{ p.SetPosition(x, y); }
+				[&p](float x, float y, Ease& ease, float percent)	{ 
+					//p.SetPosition(x, y); 
+					p.SetAlpha(percent);
+				}
 			);
 			_easingManager->SetDelay(id, delay);
 			delay += INCREASE_DELAY_START;
-			zone = (zone +1) % 3;
+			
+			zone = (zone +1 ) % 3;
 		}
 	);
 }

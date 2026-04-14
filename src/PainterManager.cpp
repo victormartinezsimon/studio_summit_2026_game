@@ -150,28 +150,28 @@ void PainterManager::AddToPaint(SPRITE_ID id, float x, float y, float alpha)
 
 void PainterManager::AddToPaint(SPRITE_ID id, float x, float y, float alpha, unsigned int width, unsigned int height, int spriteCoordX, int spriteCoordY)
 {
-	if(_currentIndexToPaint < MAX_PAINTED_OBJECTS)
-	{
-		_toPaint[_currentIndexToPaint].id = id;
-		_toPaint[_currentIndexToPaint].width = width;
-		_toPaint[_currentIndexToPaint].height = height;
-		_toPaint[_currentIndexToPaint].x = x - width/2;
-		_toPaint[_currentIndexToPaint].y = y - height/2;
-		_toPaint[_currentIndexToPaint].mask = GetMaskID(alpha);
-		_toPaint[_currentIndexToPaint].spriteCoordX = spriteCoordX;
-		_toPaint[_currentIndexToPaint].spriteCoordY = spriteCoordY;
-		++_currentIndexToPaint;
-	}
+	if(_currentIndexToPaint >= MAX_PAINTED_OBJECTS){return;}
+	if(x == -1000){return;}
+	if(y == -1000){return;}
+	if(alpha < 0.05f){return;}
+
+	_toPaint[_currentIndexToPaint].id = id;
+	_toPaint[_currentIndexToPaint].width = width;
+	_toPaint[_currentIndexToPaint].height = height;
+	_toPaint[_currentIndexToPaint].x = x - width/2;
+	_toPaint[_currentIndexToPaint].y = y - height/2;
+	_toPaint[_currentIndexToPaint].mask = GetMaskID(alpha);
+	_toPaint[_currentIndexToPaint].spriteCoordX = spriteCoordX;
+	_toPaint[_currentIndexToPaint].spriteCoordY = spriteCoordY;
+	++_currentIndexToPaint;
 }
 
 int PainterManager::GetMaskID(float alpha)
 {
-	//TODO: review this logic
 	int level = (int)(alpha * 10.0f + 0.5f);
 	if (level < 1) level = 1;
 	if (level > 10) level = 10;
 	return level * 10;
-	//TODO: end review
 }
 
 

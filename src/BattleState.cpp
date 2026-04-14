@@ -93,6 +93,8 @@ void BattleState::OnExit()
     _enemiesPool->ReturnAll();
     _explosionPool.ReturnAll();
     _player->SetTimeInmortal(0);
+	_player->SetAlpha(1);
+	_player->SetHasShield(false);//remove because I dont want shield in other screens
 }
 
 void BattleState::UpdateExplosions(float deltaTime)

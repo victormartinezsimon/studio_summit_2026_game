@@ -73,7 +73,11 @@ public:
 		_used.fill(false);
 		_currentUse = 0;
 		_lastInUse = -1;
-
+		for(T elem: _poolElements)
+		{
+			elem.SetPositionX(-1000);
+			elem.SetPositionY(-1000);
+		}
 	}
 
 	void for_each_active(std::function<void(T&)> func)
