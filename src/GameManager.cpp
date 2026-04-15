@@ -425,6 +425,8 @@ void GameManager::AnimateNumberScore(int value, bool up)
 			SpriteSheetController* sprite = obj.GetSpriteController();
 			sprite->Configure(_painterManager, PainterManager::SPRITE_ID::NUMBERS, 5, 2, -1);
 			sprite->SetFixedFrame(spriteID);
+
+			obj.SetPosition(currentX, currentY);
 		});
 		
 		int idEase = _easingManager.AddEase(DURATION_EASING_SCORE, currentX, currentY, currentX, endY, Ease::EASE_TYPES::LINEAL, 

@@ -10,7 +10,7 @@ void EasingManager::Update(const float deltaTime)
         if(finished)
         {
             _poolEases.Release(ease);
-            ease.CallEndCallback(true);
+            ease.CallEndCallback(false);
         }
     });
 

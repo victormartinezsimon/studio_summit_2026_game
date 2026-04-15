@@ -91,6 +91,7 @@ void InitialMovementState::OnEnter()
 					p.SetAlpha(percent);
 				}
 			);
+			p.SetPosition(startX, startY);
 			_easingManager->SetDelay(id, delay);
 			delay += INCREASE_DELAY_START;
 			

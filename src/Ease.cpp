@@ -7,13 +7,11 @@ bool Ease::Update(const float deltaTime)
 {
     _realAcumTime += deltaTime;
 
-    if(_realAcumTime < _delayStart)
+    if(_realAcumTime < _delayStart )
     {
          if(_tickCallback)
         {
-            float x, y;
-            GetValues( x, y);
-            _tickCallback(x, y, *this, _acumTime / _duration);
+            _tickCallback(_startX, _startY, *this, 0);
         }
 
         return false;
@@ -26,6 +24,7 @@ bool Ease::Update(const float deltaTime)
 
     if (_acumTime > _duration)
     {
+        _tickCallback(_endX, _endY, *this, 1);
         KillEase();
         return true;
     }
