@@ -80,14 +80,14 @@ void InitialMovementState::OnEnter()
 				}
 			}
 
-			int id = _easingManager->AddEase(2/*INTIAL_ANIMATION_DURATION*/, startX, startY,
+			int id = _easingManager->AddEase(INTIAL_ANIMATION_DURATION, startX, startY,
 				p.GetX(), p.GetY(), Ease::EASE_TYPES::INOUTCUBE, 
 				[this] (bool normalEnded, int noUsed)
 				{
 					--_enemiesMoving;
 				}, 
 				[&p](float x, float y, Ease& ease, float percent)	{ 
-					//p.SetPosition(x, y); 
+					p.SetPosition(x, y); 
 					p.SetAlpha(percent);
 				}
 			);
