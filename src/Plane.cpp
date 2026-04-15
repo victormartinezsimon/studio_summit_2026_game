@@ -127,6 +127,8 @@ void Plane::TryPaintTrail(PainterManager* painter)
 {
 	if(_trailManager == nullptr){return;}
 	
+	if(_lastX == 0 && _lastY == 0){return;}//exceptional case that happens during initialization
+
 	float distance = CalculateDistanceSquared(_X, _Y, _lastX, _lastY);
 	float velocity = distance / _lastDeltaTime;
 
