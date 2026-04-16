@@ -71,7 +71,7 @@ private:
 	{
 		obj.Update(deltaTime);
 
-		if(OutOfScreen(obj))
+		if(obj.OutOfScreen())
 		{
 			_objects.Release(obj);
 		}
@@ -80,23 +80,6 @@ private:
 		{
 			_updateCallback(obj);
 		}
-	}
-
-	bool OutOfScreen(const T& obj)
-	{
-		auto x = obj.GetX();
-        if(x + obj.GetWidth() < 0 && obj.GetMoveLeft())
-        {   
-            return true;
-        }
-
-		
-        if(x - obj.GetWidth() > SCREEN_WIDTH && !obj.GetMoveLeft())
-        {   
-            return true;
-        }
-
-		return false;
 	}
 
 private:

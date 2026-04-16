@@ -23,6 +23,7 @@ class Firework
 	public:
 		void Update(const float deltaTime);
 		void Paint(PainterManager* painter)const;
+		bool OutOfScreen() const;
 
 	private:
 		void DoExplosion();

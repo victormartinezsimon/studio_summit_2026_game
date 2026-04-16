@@ -66,6 +66,22 @@ public:
 		return _hasTrail;
 	}
 
+	bool OutOfScreen() const
+	{
+		auto x = GetX();
+        if(x + GetWidth() < 0 && GetMoveLeft())
+        {   
+            return true;
+        }
+		
+        if(x - GetWidth() > SCREEN_WIDTH && !GetMoveLeft())
+        {   
+            return true;
+        }
+
+		return false;
+	}
+
 private:
 	float _velocityX = 0;
 	float _velocityY = 0;

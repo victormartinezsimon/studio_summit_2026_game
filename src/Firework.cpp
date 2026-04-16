@@ -82,3 +82,14 @@ void Firework::DoExplosion()
 		_minFireworks[i]._velY = f_cos * INITIAL_VELOCITY;
 	}
 }
+
+bool Firework::OutOfScreen() const
+{
+	for(auto&& mini : _minFireworks)
+	{
+		if(mini._x >= 0 && mini._x <= SCREEN_WIDTH){return false;}
+		if(mini._y >= 0 && mini._y <= SCREEN_HEIGHT){return false;}
+	}
+
+	return true;
+}
