@@ -48,7 +48,7 @@ void Firework::Paint(PainterManager* painter)const
 		for(auto&& mini : _minFireworks)
 		{
 			float percent =  (_timeSinceExplosion / FIREWORK_TIME_EXPLOSION_LIVE);
-			float alpha = 1 - percent;
+			float alpha = 1.0 - percent;
 			painter->AddToPaint(PainterManager::SPRITE_ID::FAR_STAR, mini._x, mini._y, alpha);
 
 			if(percent > FIREWORK_MIN_PERCENT_FOR_EXPLOSION_TRAIL)
