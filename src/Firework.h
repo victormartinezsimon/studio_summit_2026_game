@@ -1,11 +1,13 @@
 #pragma once
 #include <array>
+#include "WorldObject.h"
 
 class PainterManager;
 class TrailManager;
 
 
-class Firework
+
+class Firework: public WorldObject
 {
 	private:
 		struct MiniFirework
@@ -29,8 +31,6 @@ class Firework
 		void DoExplosion();
 
 	private:
-		float _x = 0;
-		float _y = 0;
 		float _minY = 0;
 		bool _inExplosion = false;
 		TrailManager* _trailManager;

@@ -19,7 +19,7 @@
 GameManager::GameManager(InputManager *input, PainterManager *painterManager)
 	: _inputManager(input),
 	  _painterManager(painterManager), _currentLevel(0), 
-	  _currentStateLogic(State::STATES::MENU),_currentScore(0), _numberManager(_painterManager),
+	  _currentStateLogic(State::STATES::HIGH_SCORES),_currentScore(0), _numberManager(_painterManager),
 	  _spawnerStars(TIME_SPAWN_STAR, painterManager),
 	  _spawnerMeteorites(TIME_SPAWN_METEORITE, painterManager)
 {
@@ -74,7 +74,7 @@ void GameManager::InitializeStates()
 		&_currentScore, &_currentTimePlaying, &_spawnerMeteorites, &_trailManager);
 	
 	_statesLogic[State::STATES::HIGH_SCORES] = new HighScoreState(&_player, _painterManager, &_numberManager,
-		&_easingManager, &_randomManager, &_buttonAManager);
+		&_easingManager, &_randomManager, &_buttonAManager, &_trailManager);
 
 	_statesLogic[State::STATES::END_GAME] = new EndGameState(&_player, _painterManager, &_numberManager,
 		&_easingManager, &_randomManager, &_buttonAManager);

@@ -3,17 +3,11 @@
 #include "TrailManager.h"
 #include <cmath>
 
-constexpr float velocityY = -40;
-constexpr float DURATION_TRAIL_MOVING = 2;
-constexpr float GRAVITY = 10;
-constexpr float DURATION_TRAIL_EXPLODED = 1;
-constexpr float INITIAL_VELOCITY = 30;
-
 void Firework::Configure(TrailManager* trailManager, float startX, float startY, float minY)
 {
 	_trailManager = trailManager;
-	_x = startX;
-	_y = startY;
+	_X = startX;
+	_Y = startY;
 	_minY = minY;
 	_inExplosion = false;
 }
@@ -22,8 +16,8 @@ void Firework::Update(const float deltaTime)
 {
 	if(!_inExplosion)
 	{
-		_y += deltaTime * velocityY;
-		if(_y < _minY)
+		_Y += deltaTime * FIREWORK_ASCEND_VELOCITY;
+		if(_Y < _minY)
 		{
 			DoExplosion();
 		}
@@ -34,7 +28,7 @@ void Firework::Update(const float deltaTime)
 		{
 			mini._x += mini._velX * deltaTime;
 			mini._y += mini._velY * deltaTime;
-			mini._velY += GRAVITY * deltaTime;
+			mini._velY += FIREWORK_GRAVITY * deltaTime;
 		}
 	}
 }
@@ -42,11 +36,11 @@ void Firework::Paint(PainterManager* painter)const
 {
 	if(!_inExplosion)
 	{
-		painter->AddToPaint(PainterManager::SPRITE_ID::NEAR_STAR, _x, _y);
+		painter->AddToPaint(PainterManager::SPRITE_ID::NEAR_STAR, _X, _Y);
 		unsigned int w, h;
 		painter->GetSpriteSize(PainterManager::SPRITE_ID::NEAR_STAR, w, h);
-		_trailManager->AddTrail(painter, _x, _y, w, h, 
-			DURATION_TRAIL_MOVING, PainterManager::SPRITE_ID::NEAR_STAR);
+		_trailManager->AddTrail(painter, _X, _Y, w, h, 
+			FIREWORK_DURATION_TRAIL_MOVING, PainterManager::SPRITE_ID::NEAR_STAR);
 	}
 	else
 	{
@@ -56,7 +50,7 @@ void Firework::Paint(PainterManager* painter)const
 			unsigned int w, h;
 			painter->GetSpriteSize(PainterManager::SPRITE_ID::FAR_STAR, w, h);
 			_trailManager->AddTrail(painter,  mini._x, mini._y, w, h, 
-				DURATION_TRAIL_EXPLODED, PainterManager::SPRITE_ID::FAR_STAR);
+				FIREWORK_DURATION_TRAIL_EXPLOSION, PainterManager::SPRITE_ID::FAR_STAR);
 		}
 	}
 }
@@ -76,20 +70,20 @@ void Firework::DoExplosion()
 		float f_cos = std::cos(rad);
 		currentAngle += increaseAngle;
 
-		_minFireworks[i]._x = _x;
-		_minFireworks[i]._y = _y;
-		_minFireworks[i]._velX = f_sen * INITIAL_VELOCITY;
-		_minFireworks[i]._velY = f_cos * INITIAL_VELOCITY;
+		_minFireworks[i]._x = _X;
+		_minFireworks[i]._y = _Y;
+		_minFireworks[i]._velX = f_sen * FIREWORK_INITIAL_VELOCITY;
+		_minFireworks[i]._velY = f_cos * FIREWORK_INITIAL_VELOCITY;
 	}
 }
 
 bool Firework::OutOfScreen() const
 {
+	if(!_inExplosion){return false;}
+
 	for(auto&& mini : _minFireworks)
 	{
-		if(mini._x >= 0 && mini._x <= SCREEN_WIDTH){return false;}
 		if(mini._y >= 0 && mini._y <= SCREEN_HEIGHT){return false;}
 	}
-
 	return true;
 }

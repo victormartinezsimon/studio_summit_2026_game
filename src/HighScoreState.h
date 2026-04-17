@@ -1,11 +1,15 @@
 #pragma once
 #include "State.h"
 #include "SpriteSheetController.h"
+#include "TrailManager.h"
+#include "Firework.h"
+#include "Spawner.h"
 #include <array>
 #include <string>
 
 class ButtonA;
 class NumberManager;
+class TrailManager;
 
 class HighScoreState : public State
 {
@@ -20,7 +24,8 @@ private:
 public:
     HighScoreState(Plane *player, PainterManager *painter,
                  NumberManager *numberManager,
-                 EasingManager *easingManager, RandomManager *randomManager, ButtonA *buttonAManager);
+                 EasingManager *easingManager, RandomManager *randomManager, 
+                 ButtonA *buttonAManager, TrailManager* trailManager);
 
 public:
     STATES Update(const float deltaTime, float _currentFrameInputValueNormalized) override;
@@ -37,14 +42,19 @@ private:
     void CalculateIndexPlayerScore();
     void CallbackButtonA(int option);
     void ConfigureReturnToMenu();
+    void ConfigureFirework(Firework& firework);
+    
 private:
     STATES _nextState;
     float _playerScore;
     SpriteSheetController _letters;
     NumberManager *_numbers;
+    TrailManager* _trailManager;
 
     std::array<Score, 4> _bestscores;
     int _playerIndexScore;
     float _timeAcumBlink = 0;
     int _indexLetterBlink = 0;
+
+    Spawner<Firework, FIREWORK_TOTAL_AMOUNT> _spawnerFirework;
 };

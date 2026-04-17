@@ -5,6 +5,8 @@
 #include "ButtonA.h"
 #include "NumberManager.h"
 #include "EasingManager.h"
+#include "TrailManager.h"
+#include "RandomManager.h"
 #include <cmath>
 
 constexpr float TIME_BLINK_LETTER = 0.5f;
@@ -13,9 +15,11 @@ constexpr float LETTER_SEPARATION = 5;
 
 HighScoreState::HighScoreState(Plane *player, PainterManager *painter, 
         NumberManager* numberManager,
-        EasingManager* easingManager, RandomManager* randomManager, ButtonA* buttonAManager) : 
+        EasingManager* easingManager, RandomManager* randomManager, 
+		ButtonA* buttonAManager, TrailManager* trailManager) : 
 		State(player, painter, numberManager,  
-			easingManager, randomManager, buttonAManager)
+			easingManager, randomManager, buttonAManager), _trailManager(trailManager),
+	  _spawnerFirework(FIREWORK_TIME_SPAWN, painter)
 {
 
 	_bestscores[0].name = "AAA"; _bestscores[0].points = 1000;
@@ -25,6 +29,8 @@ HighScoreState::HighScoreState(Plane *player, PainterManager *painter,
 
 
 	_letters.Configure(painter, PainterManager::SPRITE_ID::LETTERS, 13, 2, -1);
+
+	_spawnerFirework.SetCallbackConfiguration([this](Firework& firework){ConfigureFirework(firework);});
 }
 
 State::STATES HighScoreState::Update(const float deltaTime, float _currentFrameInputValueNormalized)
@@ -35,6 +41,9 @@ State::STATES HighScoreState::Update(const float deltaTime, float _currentFrameI
 	{
 		_timeAcumBlink = 0;
 	}
+
+	_spawnerFirework.Update(deltaTime);
+
 	return _nextState;
 }
 void HighScoreState::Paint()
@@ -96,8 +105,9 @@ void HighScoreState::PaintUI()
 		_painterManager->AddToPaint(PainterManager::SPRITE_ID::RETURN_MENU,
 									HIGH_SCORE_COORDS::RETURN_MENU_X, 
 									HIGH_SCORE_COORDS::RETURN_MENU_Y);
-		
 	}
+
+	_spawnerFirework.Paint(_painterManager);
 	
 }
 void HighScoreState::OnEnter()
@@ -109,6 +119,8 @@ void HighScoreState::OnEnter()
 	_player->SetPositionY(POSITION_Y_PLAYER);
 	_player->ConfigureSprite(_painterManager);
 	_player->SetPlayerTeam(TEAM_PLAYER);
+
+	
 }
 void HighScoreState::OnExit()
 {
@@ -229,4 +241,11 @@ void HighScoreState::ConfigureReturnToMenu()
 				_nextState = STATES::MENU;
 			}
 		);
+}
+
+void HighScoreState::ConfigureFirework(Firework& firework)
+{
+	int randomX = _randomManager->GetValue(FIREWORK_MIN_APPEAR_X, FIREWORK_MAX_APPEAR_X);
+	int maxHeight = _randomManager->GetValue(FIREWORK_MIN_HEIGHT, FIREWORK_MAX_HEIGHT);
+	firework.Configure(_trailManager, randomX, SCREEN_HEIGHT, maxHeight);
 }
