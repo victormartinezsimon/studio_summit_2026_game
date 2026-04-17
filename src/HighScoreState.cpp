@@ -252,7 +252,16 @@ void HighScoreState::ConfigureReturnToMenu()
 
 void HighScoreState::ConfigureFirework(Firework& firework)
 {
-	int randomX = _randomManager->GetValue(FIREWORK_MIN_APPEAR_X, FIREWORK_MAX_APPEAR_X);
+	bool inLeft = _randomManager->GetValue(0, 100) < 50;
+	int randomX = 0;
+	if(inLeft)
+	{
+		randomX = _randomManager->GetValue(0, FIREWORK_MIN_APPEAR_X);
+	}
+	else
+	{
+		randomX = _randomManager->GetValue( FIREWORK_MAX_APPEAR_X, SCREEN_WIDTH);
+	}
 	int maxHeight = _randomManager->GetValue(FIREWORK_MIN_HEIGHT, FIREWORK_MAX_HEIGHT);
 	firework.Configure(_trailManager, randomX, SCREEN_HEIGHT, maxHeight);
 }
