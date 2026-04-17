@@ -89,5 +89,5 @@ bool Firework::OutOfScreen() const
 {
 	if(!_inExplosion){return false;}
 
-	return _timeSinceExplosion < FIREWORK_TIME_EXPLOSION_LIVE;
+	return _timeSinceExplosion >= FIREWORK_TIME_EXPLOSION_LIVE;
 }
