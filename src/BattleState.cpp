@@ -204,10 +204,20 @@ bool BattleState::ManagePlaneCollisions(Plane &plane)
             if(someCollision){return;}
             if(explosion.GetPlayerTeam() == plane.GetPlayerTeam()){return;}
             bool explosionCollision = ManageExplosionPlaneCollision(explosion, plane);
+            bool hasShield = plane.GetHasShield();
+
             if(explosionCollision)
             {
-                someCollision = true;
-            } });
+                if(hasShield)
+                {
+                    plane.SetHasShield(false);
+                }
+                else
+                {
+                    someCollision = true;
+                }
+            } }
+        );
 
     return someCollision;
 }
