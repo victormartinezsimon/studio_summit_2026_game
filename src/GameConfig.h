@@ -18,7 +18,7 @@
 #include "config/HighScoreConfiguration.h"
 #include "config/TrailConfiguration.h"
 
-constexpr int MAX_SECS_PLAYING = 120;
+constexpr int MAX_SECS_PLAYING = 100;
 
 #ifdef DEBUG
 constexpr int NUM_FRAMES_TO_READ_INPUT = 1;
