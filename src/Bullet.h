@@ -20,9 +20,13 @@ public:
 	void SetHasExplostion(bool value);
 	bool GetHasExplostion() const;
 
+	void SetBulletIsBig(bool value);
+	bool GetBulletIsBig() const;
+
 private:
 	float _velocityX = 0;
 	float _velocityY = 0;
 	bool _hasPenetration = false;
 	bool _hasExplosion = false;
+	bool _isBig = false;
 };

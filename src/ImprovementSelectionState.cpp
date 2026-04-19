@@ -137,7 +137,7 @@ void ImprovementSelectionState::InitializeImprovementsUI()
 	_improvementsUI[ImprovementID::GIVE_EXPLOSION] = PainterManager::SPRITE_ID::GIVE_EXPLOSION;
 	_improvementsUI[ImprovementID::GIVE_SHIELD] = PainterManager::SPRITE_ID::GIVE_SHIELD;
 	_improvementsUI[ImprovementID::FAST_SHOTS] = PainterManager::SPRITE_ID::FAST_SHOTS;
-	_improvementsUI[ImprovementID::SLOW_SHOTS] = PainterManager::SPRITE_ID::SLOW_SHOTS;
+	_improvementsUI[ImprovementID::BULLET_BIG] = PainterManager::SPRITE_ID::BIG_BULLETS;
 }
 
 void ImprovementSelectionState::Configure(ImprovementID leftSelection, ImprovementID rightSelection)

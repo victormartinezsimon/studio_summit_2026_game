@@ -10,7 +10,7 @@ enum class ImprovementID
 	GIVE_EXPLOSION,
 	GIVE_SHIELD,
 	FAST_SHOTS,
-	SLOW_SHOTS
+	BULLET_BIG
 };
 
 constexpr float INCREASE_FIRE_RATE = 0.8f;

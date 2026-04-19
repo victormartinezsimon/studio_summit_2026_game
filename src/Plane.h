@@ -33,6 +33,10 @@ public:
 	bool GetHasShield() const;
 
 public:
+	void SetBulletIsBig(bool value);
+	bool GetBulletIsBig() const;
+
+public:
 	void SetTimeInmortal(float value);
 	float GetTimeInmortal() const;
 
@@ -51,6 +55,7 @@ private:
 	float _currentAcumTime = 0;
 	bool _hasShield = false;
 	int _bulletsPerShot = 1;
+	bool _bulletIsBig = false;
 	float _timeInmortal = 0;
 	int _randomMovementID = -1;
 	TrailManager* _trailManager = nullptr;

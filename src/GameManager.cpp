@@ -89,6 +89,7 @@ void GameManager::InitializeConstantValues()
 	playerData.bulletHasExplosion = DEFAULT_BULLET_HAS_EXPLOSION;
 	playerData.hasShield = DEFAULT_HAS_SHIELD;
 	playerData.bulletsPerShot = DEFAULT_BULLETS_PER_SHOT;
+	playerData.bulletIsBig = DEFAULT_BULLET_IS_BIG;
 
 	enemyData.velocityBulletX = DEFAULT_BULLET_VEL_X;
 	enemyData.velocityBulletY = DEFAULT_BULLET_VEL_Y;
@@ -98,6 +99,7 @@ void GameManager::InitializeConstantValues()
 	enemyData.bulletHasExplosion = DEFAULT_BULLET_HAS_EXPLOSION;
 	enemyData.hasShield = DEFAULT_HAS_SHIELD;
 	enemyData.bulletsPerShot = DEFAULT_BULLETS_PER_SHOT;
+	enemyData.bulletIsBig = DEFAULT_BULLET_IS_BIG;
 
 	_totalImprovementSelected = 0;
 	InitializeRandomImprovements();
@@ -118,8 +120,8 @@ void GameManager::InitializeImprovementsFunctions()
 	{ data.hasShield = true; };
 	_improvementFunctions[ImprovementID::FAST_SHOTS] = [](modifiable_data &data)
 	{ data.velocityBulletX *= FAST_SHOT_MULTIPLICATION, data.velocityBulletY *= FAST_SHOT_MULTIPLICATION; };
-	_improvementFunctions[ImprovementID::SLOW_SHOTS] = [](modifiable_data &data)
-	{ data.velocityBulletX *= SLOW_SHOT_MULTIPLICATION, data.velocityBulletY *= SLOW_SHOT_MULTIPLICATION; };
+	_improvementFunctions[ImprovementID::BULLET_BIG] = [](modifiable_data &data)
+	{ data.bulletIsBig = true; };
 }
 void GameManager::InitializeRandomImprovements()
 {
@@ -319,6 +321,7 @@ void GameManager::ConfigurePlane(Plane &p, const float posX, const float posY,
 	p.SetBulletsPerShot(data.bulletsPerShot);
 	p.SetFireRate(data.fireRate);
 	p.SetHasShield(data.hasShield);
+	p.SetBulletIsBig(data.bulletIsBig);
 	p.SetAlpha(1);
 
 	if(isPlayer)
@@ -357,7 +360,7 @@ void GameManager::SpawnBullet(int sourceIndex, const Plane &p, bool forPlayer, c
 
 			_bulletsPool.call_for_element(id, [&](Bullet &bullet)
 										{
-				
+				bullet.SetBulletIsBig(p.GetBulletIsBig());
 				bullet.ConfigureSprite(_painterManager);
 
 				float positionX = p.GetX();

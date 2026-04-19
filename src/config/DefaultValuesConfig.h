@@ -12,3 +12,4 @@ constexpr bool DEFAULT_BULLET_HAS_PENETRATION = false;
 constexpr bool DEFAULT_BULLET_HAS_EXPLOSION = false;
 constexpr bool DEFAULT_HAS_SHIELD = false;
 constexpr int DEFAULT_BULLETS_PER_SHOT = 1;
+constexpr bool DEFAULT_BULLET_IS_BIG = false;

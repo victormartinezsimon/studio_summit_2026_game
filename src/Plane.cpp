@@ -39,6 +39,15 @@ int Plane::GetBulletsPerShot() const
 	return _bulletsPerShot;
 }
 
+void Plane::SetBulletIsBig(bool value)
+{
+	_bulletIsBig = value;
+}
+bool Plane::GetBulletIsBig() const
+{
+	return _bulletIsBig;
+}
+
 void Plane::Update(const float deltaTime)
 {
 	_currentAcumTime += deltaTime;

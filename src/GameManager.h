@@ -33,6 +33,7 @@ private:
 		bool bulletHasExplosion;
 		bool hasShield;
 		int bulletsPerShot;
+		bool bulletIsBig;
 	};
 
 public:

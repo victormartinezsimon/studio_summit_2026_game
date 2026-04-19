@@ -46,5 +46,21 @@ bool Bullet::GetHasExplostion() const
 
 void Bullet::ConfigureSprite(PainterManager* painter)
 {
-	_spriteController.Configure(painter, PainterManager::SPRITE_ID::BULLET );
+	if(_isBig)
+	{
+		_spriteController.Configure(painter, PainterManager::SPRITE_ID::BULLET_BIG );
+	}
+	else
+	{
+		_spriteController.Configure(painter, PainterManager::SPRITE_ID::BULLET );
+	}
+}
+
+void Bullet::SetBulletIsBig(bool value)
+{
+	_isBig = value;
+}
+bool Bullet::GetBulletIsBig() const
+{
+	return _isBig;
 }
