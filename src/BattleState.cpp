@@ -141,11 +141,20 @@ void BattleState::UpdateBullets(float deltaTime)
                                     bool isDestroyed = UpdateBullet(deltaTime, bullet);
                                     if(!isDestroyed && SHOW_TRAIL_BULLETS)
                                     {
+                                        PainterManager::SPRITE_ID normal = PainterManager::SPRITE_ID::BULLET;
+                                        PainterManager::SPRITE_ID small = PainterManager::SPRITE_ID::BULLET_SMALL;
+                                        
+                                        if(bullet.GetBulletIsBig())
+                                        {
+                                            normal = PainterManager::SPRITE_ID::BULLET_BIG;
+                                            small = PainterManager::SPRITE_ID::BULLET;
+                                        }
+
                                         _trailManager->AddTrail(_painterManager, bullet.GetX(), bullet.GetY(), 
                                         bullet.GetWidth(), bullet.GetHeight(),
                                         TRAIL_LIVE_BULLETS, 
-                                        PainterManager::SPRITE_ID::BULLET,
-                                        PainterManager::SPRITE_ID::BULLET_SMALL);
+                                        normal,
+                                        small);
                                     }
                                   });
 }
