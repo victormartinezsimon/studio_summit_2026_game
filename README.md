@@ -10,7 +10,7 @@
 
 ## 📖 Description
 
-*The Battle of Rogue* is a retro-style vertical space shooter designed for the **Studio Summit 2026 programming competition**. The game runs on the Sandpiper hardware platform — a custom ARM Cortex-A9 board with NEON SIMD extensions — rendering at a native resolution of **320×240** using 8-bit indexed color.
+*The Battle of Rogue* is a retro-style vertical space shooter designed for the **Activision Studio Summit 2026 programming competition**. The game runs on the Sandpiper hardware platform — a custom ARM Cortex-A9 board with NEON SIMD extensions — rendering at a native resolution of **320×240** using 8-bit indexed color.
 
 Players pilot a spacecraft, battling waves of enemies across multiple levels. Between levels, players choose upgrades for themselves **and** for the enemy, creating a unique risk/reward dynamic. The game features sprite-sheet animations, particle trails, firework effects, easing-based animations, high-score persistence with name entry, and background music powered by the libxmp tracker module player.
 
